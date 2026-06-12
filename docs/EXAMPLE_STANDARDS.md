@@ -5,6 +5,9 @@ exceptions. An example that fails one checklist item is not mergeable.
 These standards are derived from the operaton-starter use-case templates and
 its BMAD quality gates ("100% compile, pass tests, start successfully").
 
+All numbered sections are binding. The checklist in §10 is a working summary,
+not a substitute — passing the checklist does not waive any section.
+
 ## 1. Scope
 
 - One example demonstrates **one** primary Operaton concept (named in the
@@ -40,30 +43,42 @@ examples/NN-short-name/
 - Maven coordinates: groupId `io.github.kthoms.operaton.examples`,
   artifactId = directory name without ordinal (`getting-started`),
   version `0.1.0-SNAPSHOT`.
+- Ordinals are permanent: never renumber existing examples; a new example
+  takes the next free ordinal even if it breaks thematic grouping.
 
 ## 3. Dual build — Maven AND Gradle
 
 - `./mvnw verify` and `./gradlew build` MUST both succeed from a clean
   checkout with only JDK 21 and Docker installed.
-- Both builds compile the same `src/` tree and run the same tests.
+- Both builds compile the same `src/` tree and run the same tests. Gradle's
+  `test` task discovers `*IT` classes via the JUnit Platform regardless of
+  name; Maven runs them ONLY through failsafe — therefore `pom.xml` MUST
+  declare `maven-failsafe-plugin` with the `integration-test` and `verify`
+  goals. A green `./mvnw verify` that executed zero ITs is a broken build:
+  reviewers check failsafe's `Tests run:` count is > 0.
 - Versions (Java, Spring Boot, Operaton) MUST be identical in `pom.xml` and
-  `build.gradle.kts`, and MUST match the table in the root README.
+  `build.gradle.kts`, and MUST match the table in the root README — the single source of truth for pinned versions.
 - Dependency management via BOMs only: `spring-boot-dependencies` /
   `SpringBootPlugin.BOM_COORDINATES` plus `org.operaton.bpm:operaton-bom`.
   Never pin a version that a BOM already manages.
 
 ## 4. BPMN / DMN models
 
-- Namespace: `xmlns:operaton="http://operaton.org/schema/1.0/bpmn"` — never
-  the `camunda` namespace, in attributes or namespace declarations.
+- Executable semantics (`delegateExpression`, `candidateGroups`, form
+  attributes, history TTL, …) use
+  `xmlns:operaton="http://operaton.org/schema/1.0/bpmn"` — never the
+  `camunda` namespace. Non-executable tool metadata (an `exporter`
+  attribute, a modeler metadata namespace) is tolerated but must be removed
+  when it references Camunda.
 - Every process: `operaton:historyTimeToLive` set (default `P30D`),
   `isExecutable="true"`, process `id` in kebab-case matching the file name
   (`order-approval.bpmn` → id `order-approval`).
 - Every element has a meaningful `name` (verb-object for tasks: "Calculate
   order total"). Sequence flows out of gateways are named with their
   condition ("total ≥ 1000", "otherwise").
-- Exclusive gateways: every non-default outgoing flow has a
-  `conditionExpression`; exactly one default flow is marked.
+- Diverging exclusive gateways: every non-default outgoing flow has a
+  `conditionExpression`; exactly one default flow is marked. (Converging
+  gateways carry no conditions and no default.)
 - Models include full BPMN DI (`bpmndi:BPMNDiagram`) so they render in the
   Operaton Cockpit and bpmn.io — a model without diagram interchange is
   not "well modeled".
@@ -71,6 +86,9 @@ examples/NN-short-name/
 - Service tasks use `operaton:delegateExpression="${beanName}"` referencing a
   Spring bean (not `operaton:class`), unless the example demonstrates
   otherwise.
+- DMN: decision `id` in kebab-case matching the file name; the hit policy is
+  a deliberate choice explained in the README; decision requirements graphs
+  with more than one decision include DMN DI.
 
 ## 5. Testing — Testcontainers, end-to-end
 
@@ -101,6 +119,10 @@ examples/NN-short-name/
   in the README.
 - `docker compose up -d` followed by `./mvnw spring-boot:run` MUST work with
   zero manual configuration.
+- Examples assume they run one at a time: PostgreSQL is always published on
+  host port 5432 and the app on 8080; stop other examples' stacks
+  (`docker compose down`) before starting a new one. Additional ports are
+  documented in the README.
 
 ## 7. Application conventions
 
@@ -121,8 +143,10 @@ Every example README contains, in this order:
 1. **Title + one-sentence statement** of the demonstrated concept.
 2. **What you will learn** — 3-5 bullets.
 3. **Process model** — Mermaid `flowchart` mirroring the BPMN (and a Mermaid
-   `sequenceDiagram` when systems interact). The Mermaid diagram must match
-   the BPMN model element-for-element.
+   `sequenceDiagram` when systems interact). Every flow node (event, task,
+   gateway) and every named sequence flow in the BPMN appears in the Mermaid
+   diagram; constructs Mermaid cannot render (lanes, boundary-event
+   attachment) are approximated and noted in prose.
 4. **Prerequisites** — JDK 21, Docker; exact versions.
 5. **Run it** — `docker compose up -d`, then both
    `./mvnw spring-boot:run` and `./gradlew bootRun`; URLs and credentials
@@ -146,7 +170,7 @@ Every example README contains, in this order:
 ## 10. Review checklist (copy into every example PR)
 
 ```
-- [ ] ./mvnw verify passes from clean checkout
+- [ ] ./mvnw verify passes from clean checkout (failsafe ran > 0 ITs)
 - [ ] ./gradlew build passes from clean checkout
 - [ ] docker compose up -d && ./mvnw spring-boot:run works, Cockpit reachable
 - [ ] BPMN/DMN use operaton namespace, have DI, names, historyTimeToLive
@@ -154,5 +178,6 @@ Every example README contains, in this order:
 - [ ] Happy path + alternative path tested end-to-end
 - [ ] README has all 8 sections; Mermaid matches BPMN element-for-element
 - [ ] Versions match pom.xml == build.gradle.kts == root README table
+- [ ] §7 app conventions: demo/demo admin user, named seed users, application.yaml
 - [ ] No dead code, no unused dependencies, no TODO/stub delegates
 ```
