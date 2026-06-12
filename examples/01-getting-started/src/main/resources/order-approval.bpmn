@@ -33,7 +33,7 @@
       <bpmn:outgoing>Flow_ToDecisionGateway</bpmn:outgoing>
     </bpmn:userTask>
 
-    <bpmn:exclusiveGateway id="Gateway_Approved" name="Approved?">
+    <bpmn:exclusiveGateway id="Gateway_Approved" name="Approved?" default="Flow_Rejected">
       <bpmn:incoming>Flow_ToDecisionGateway</bpmn:incoming>
       <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
       <bpmn:outgoing>Flow_Rejected</bpmn:outgoing>
@@ -67,10 +67,7 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${approved}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_Rejected" name="no"
-                       sourceRef="Gateway_Approved" targetRef="EndEvent_OrderRejected">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${not approved}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
+                       sourceRef="Gateway_Approved" targetRef="EndEvent_OrderRejected"/>
   </bpmn:process>
 
   <bpmndi:BPMNDiagram id="BPMNDiagram_OrderApproval">

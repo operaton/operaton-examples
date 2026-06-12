@@ -25,6 +25,7 @@ dependencies {
     implementation(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
 
     implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-webapp")
+    implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-rest")
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
