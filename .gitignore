@@ -1,0 +1,21 @@
+# Build output
+target/
+build/
+out/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+
+# Gradle/Maven local state
+.gradle/
+
+# Local env overrides
+.env
