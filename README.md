@@ -15,7 +15,7 @@ example means testing its processes against real integrations.
 | Docker | any recent version (required for tests and local run) |
 
 Pinned stack (all examples): Spring Boot **4.0.6**, Operaton **2.1.0**,
-Maven Wrapper **3.9.12**, Gradle Wrapper **9.2**, PostgreSQL **16**.
+Maven Wrapper **3.9.12**, Gradle Wrapper **9.2.0**, PostgreSQL **16**.
 
 ## Using an example
 
