@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_OrderApproval"
+                  targetNamespace="http://operaton.org/examples">
+
+  <bpmn:process id="order-approval" name="Order Approval" isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_OrderReceived" name="Order received">
+      <bpmn:outgoing>Flow_ToCalculate</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="ServiceTask_CalculateTotal" name="Calculate order total"
+                      operaton:delegateExpression="${calculateOrderTotalDelegate}">
+      <bpmn:incoming>Flow_ToCalculate</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToApprovalGateway</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:exclusiveGateway id="Gateway_ApprovalRequired" name="Approval required?"
+                           default="Flow_AutoApprove">
+      <bpmn:incoming>Flow_ToApprovalGateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_NeedsApproval</bpmn:outgoing>
+      <bpmn:outgoing>Flow_AutoApprove</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:userTask id="UserTask_ApproveOrder" name="Approve order"
+                   operaton:candidateGroups="approvers">
+      <bpmn:incoming>Flow_NeedsApproval</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToDecisionGateway</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:exclusiveGateway id="Gateway_Approved" name="Approved?">
+      <bpmn:incoming>Flow_ToDecisionGateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Rejected</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:endEvent id="EndEvent_OrderApproved" name="Order approved">
+      <bpmn:incoming>Flow_AutoApprove</bpmn:incoming>
+      <bpmn:incoming>Flow_Approved</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_OrderRejected" name="Order rejected">
+      <bpmn:incoming>Flow_Rejected</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_ToCalculate" sourceRef="StartEvent_OrderReceived"
+                       targetRef="ServiceTask_CalculateTotal"/>
+    <bpmn:sequenceFlow id="Flow_ToApprovalGateway" sourceRef="ServiceTask_CalculateTotal"
+                       targetRef="Gateway_ApprovalRequired"/>
+    <bpmn:sequenceFlow id="Flow_NeedsApproval" name="total ≥ 1000"
+                       sourceRef="Gateway_ApprovalRequired" targetRef="UserTask_ApproveOrder">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${orderTotal &gt;= 1000}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_AutoApprove" name="otherwise"
+                       sourceRef="Gateway_ApprovalRequired" targetRef="EndEvent_OrderApproved"/>
+    <bpmn:sequenceFlow id="Flow_ToDecisionGateway" sourceRef="UserTask_ApproveOrder"
+                       targetRef="Gateway_Approved"/>
+    <bpmn:sequenceFlow id="Flow_Approved" name="yes"
+                       sourceRef="Gateway_Approved" targetRef="EndEvent_OrderApproved">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${approved}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Rejected" name="no"
+                       sourceRef="Gateway_Approved" targetRef="EndEvent_OrderRejected">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${not approved}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_OrderApproval">
+    <bpmndi:BPMNPlane id="BPMNPlane_OrderApproval" bpmnElement="order-approval">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_OrderReceived">
+        <dc:Bounds x="152" y="202" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Calculate" bpmnElement="ServiceTask_CalculateTotal">
+        <dc:Bounds x="240" y="180" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GwApprovalRequired" bpmnElement="Gateway_ApprovalRequired" isMarkerVisible="true">
+        <dc:Bounds x="395" y="195" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Approve" bpmnElement="UserTask_ApproveOrder">
+        <dc:Bounds x="500" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GwApproved" bpmnElement="Gateway_Approved" isMarkerVisible="true">
+        <dc:Bounds x="655" y="95" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndApproved" bpmnElement="EndEvent_OrderApproved">
+        <dc:Bounds x="762" y="202" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndRejected" bpmnElement="EndEvent_OrderRejected">
+        <dc:Bounds x="762" y="62" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_ToCalculate" bpmnElement="Flow_ToCalculate">
+        <di:waypoint x="188" y="220"/><di:waypoint x="240" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToApprovalGateway" bpmnElement="Flow_ToApprovalGateway">
+        <di:waypoint x="340" y="220"/><di:waypoint x="395" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_NeedsApproval" bpmnElement="Flow_NeedsApproval">
+        <di:waypoint x="420" y="195"/><di:waypoint x="420" y="120"/><di:waypoint x="500" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_AutoApprove" bpmnElement="Flow_AutoApprove">
+        <di:waypoint x="445" y="220"/><di:waypoint x="762" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToDecisionGateway" bpmnElement="Flow_ToDecisionGateway">
+        <di:waypoint x="600" y="120"/><di:waypoint x="655" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Approved" bpmnElement="Flow_Approved">
+        <di:waypoint x="680" y="145"/><di:waypoint x="680" y="220"/><di:waypoint x="762" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Rejected" bpmnElement="Flow_Rejected">
+        <di:waypoint x="680" y="95"/><di:waypoint x="680" y="80"/><di:waypoint x="762" y="80"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
