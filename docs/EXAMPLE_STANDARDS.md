@@ -30,17 +30,17 @@ examples/NN-short-name/
 ├── docker-compose.yml                     # only the services this example needs
 ├── README.md
 └── src/
-    ├── main/java/io/github/kthoms/operaton/examples/<name>/
+    ├── main/java/org/operaton/examples/<name>/
     ├── main/resources/                    # *.bpmn, *.dmn, application.yaml
-    └── test/java/io/github/kthoms/operaton/examples/<name>/
+    └── test/java/org/operaton/examples/<name>/
 ```
 
 - Directory name: `NN-kebab-case` where `NN` is a two-digit ordinal defining
   recommended reading order.
-- Java package: `io.github.kthoms.operaton.examples.<name>` where `<name>` is
+- Java package: `org.operaton.examples.<name>` where `<name>` is
   the directory name without the ordinal, with hyphens removed
   (`01-getting-started` → `gettingstarted`).
-- Maven coordinates: groupId `io.github.kthoms.operaton.examples`,
+- Maven coordinates: groupId `org.operaton.examples`,
   artifactId = directory name without ordinal (`getting-started`),
   version `0.1.0-SNAPSHOT`.
 - Ordinals are permanent: never renumber existing examples; a new example

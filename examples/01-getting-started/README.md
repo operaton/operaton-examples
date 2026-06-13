@@ -63,7 +63,7 @@ Open http://localhost:8080 — Cockpit and Tasklist, login `demo` / `demo`.
 
 - [order-approval.bpmn](src/main/resources/order-approval.bpmn) is
   auto-deployed from the classpath at startup.
-- [CalculateOrderTotalDelegate](src/main/java/io/github/kthoms/operaton/examples/gettingstarted/CalculateOrderTotalDelegate.java)
+- [CalculateOrderTotalDelegate](src/main/java/org/operaton/examples/gettingstarted/CalculateOrderTotalDelegate.java)
   is a Spring `@Component`; the service task references it by bean name via
   `operaton:delegateExpression="${calculateOrderTotalDelegate}"`.
 - The first gateway's outgoing flow `total ≥ 1000` carries
@@ -77,6 +77,6 @@ Open http://localhost:8080 — Cockpit and Tasklist, login `demo` / `demo`.
 ./mvnw verify        # or: ./gradlew build
 ```
 
-[OrderApprovalProcessIT](src/test/java/io/github/kthoms/operaton/examples/gettingstarted/OrderApprovalProcessIT.java)
+[OrderApprovalProcessIT](src/test/java/org/operaton/examples/gettingstarted/OrderApprovalProcessIT.java)
 boots the application against a Testcontainers PostgreSQL and drives all three
 paths end-to-end: auto-approval, manual approval, and rejection.

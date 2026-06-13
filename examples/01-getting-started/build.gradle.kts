@@ -5,7 +5,7 @@ plugins {
     id("org.springframework.boot") version "4.0.6"
 }
 
-group = "io.github.kthoms.operaton.examples"
+group = "org.operaton.examples"
 version = "0.1.0-SNAPSHOT"
 
 java {
