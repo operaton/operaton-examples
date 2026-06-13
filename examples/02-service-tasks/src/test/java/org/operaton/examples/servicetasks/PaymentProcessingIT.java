@@ -76,7 +76,7 @@ class PaymentProcessingIT {
                     .processInstanceId(instance.getId()).singleResult(),
                 j -> j != null);
 
-        // The BPMN configures R3 → initial retries must be 3
+        // The BPMN configures R4/PT5S; after the first auto-execution retries=3
         assertThat(job.getRetries()).isEqualTo(3);
 
         // Manually execute the job — ChargePaymentDelegate throws RuntimeException

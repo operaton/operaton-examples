@@ -10,7 +10,11 @@ public class EnrichPaymentDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) {
-        double amount = (Double) execution.getVariable("amount");
+        Object amountVar = execution.getVariable("amount");
+        if (amountVar == null) {
+            throw new BpmnError("INVALID_AMOUNT", "Payment amount is required");
+        }
+        double amount = (Double) amountVar;
         if (amount <= 0) {
             throw new BpmnError("INVALID_AMOUNT", "Payment amount must be positive");
         }
