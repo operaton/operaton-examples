@@ -21,7 +21,7 @@ Maven Wrapper **3.9.12**, Gradle Wrapper **9.2.0**, PostgreSQL **16**.
 
 ```bash
 cd examples/01-getting-started
-docker compose up -d        # start PostgreSQL (and example-specific services)
+docker compose up -d --wait # start PostgreSQL (and example-specific services)
 ./mvnw spring-boot:run      # or: ./gradlew bootRun
 # Cockpit/Tasklist: http://localhost:8080  (demo/demo)
 ./mvnw verify               # or: ./gradlew build — runs Testcontainers ITs
