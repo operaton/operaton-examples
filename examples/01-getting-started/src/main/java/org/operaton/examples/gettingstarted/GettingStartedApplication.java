@@ -1,4 +1,4 @@
-package io.github.kthoms.operaton.examples.gettingstarted;
+package org.operaton.examples.gettingstarted;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

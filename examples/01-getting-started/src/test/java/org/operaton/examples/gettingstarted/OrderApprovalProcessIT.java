@@ -1,4 +1,4 @@
-package io.github.kthoms.operaton.examples.gettingstarted;
+package org.operaton.examples.gettingstarted;
 
 import org.junit.jupiter.api.Test;
 import org.operaton.bpm.engine.HistoryService;

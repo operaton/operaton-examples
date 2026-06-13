@@ -1,4 +1,4 @@
-package io.github.kthoms.operaton.examples.gettingstarted;
+package org.operaton.examples.gettingstarted;
 
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.JavaDelegate;
