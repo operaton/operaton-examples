@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_BookTravel"
+                  targetNamespace="http://operaton.org/examples/book-travel">
+
+  <bpmn:error id="Error_PaymentFailed" name="PAYMENT_FAILED" errorCode="PAYMENT_FAILED"/>
+
+  <bpmn:process id="book-travel"
+                name="Book Travel"
+                isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_1" name="Trip requested">
+      <bpmn:outgoing>Flow_Start_Hotel</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="Task_BookHotel" name="Book hotel"
+                      operaton:delegateExpression="${bookHotelDelegate}">
+      <bpmn:incoming>Flow_Start_Hotel</bpmn:incoming>
+      <bpmn:outgoing>Flow_Hotel_Flight</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:boundaryEvent id="Boundary_CompensateHotel"
+                        attachedToRef="Task_BookHotel"
+                        cancelActivity="false">
+      <bpmn:compensateEventDefinition id="CompDef_Hotel" waitForCompletion="true"/>
+    </bpmn:boundaryEvent>
+
+    <bpmn:serviceTask id="Task_CancelHotel" name="Cancel hotel"
+                      isForCompensation="true"
+                      operaton:delegateExpression="${cancelHotelDelegate}"/>
+
+    <bpmn:serviceTask id="Task_BookFlight" name="Book flight"
+                      operaton:delegateExpression="${bookFlightDelegate}">
+      <bpmn:incoming>Flow_Hotel_Flight</bpmn:incoming>
+      <bpmn:outgoing>Flow_Flight_Payment</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:boundaryEvent id="Boundary_CompensateFlight"
+                        attachedToRef="Task_BookFlight"
+                        cancelActivity="false">
+      <bpmn:compensateEventDefinition id="CompDef_Flight" waitForCompletion="true"/>
+    </bpmn:boundaryEvent>
+
+    <bpmn:serviceTask id="Task_CancelFlight" name="Cancel flight"
+                      isForCompensation="true"
+                      operaton:delegateExpression="${cancelFlightDelegate}"/>
+
+    <bpmn:serviceTask id="Task_ProcessPayment" name="Process payment"
+                      operaton:delegateExpression="${processPaymentDelegate}">
+      <bpmn:incoming>Flow_Flight_Payment</bpmn:incoming>
+      <bpmn:outgoing>Flow_Payment_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:boundaryEvent id="Boundary_PaymentError"
+                        attachedToRef="Task_ProcessPayment">
+      <bpmn:outgoing>Flow_Error_Compensate</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorDef_1" errorRef="Error_PaymentFailed"/>
+    </bpmn:boundaryEvent>
+
+    <bpmn:endEvent id="EndEvent_Confirmed" name="Booking confirmed">
+      <bpmn:incoming>Flow_Payment_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:intermediateThrowEvent id="Event_TriggerCompensation" name="Trigger compensation">
+      <bpmn:incoming>Flow_Error_Compensate</bpmn:incoming>
+      <bpmn:outgoing>Flow_Compensate_End</bpmn:outgoing>
+      <bpmn:compensateEventDefinition id="CompDef_Trigger" waitForCompletion="true"/>
+    </bpmn:intermediateThrowEvent>
+
+    <bpmn:endEvent id="EndEvent_Cancelled" name="Booking cancelled">
+      <bpmn:incoming>Flow_Compensate_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Start_Hotel" sourceRef="StartEvent_1" targetRef="Task_BookHotel"/>
+    <bpmn:sequenceFlow id="Flow_Hotel_Flight" sourceRef="Task_BookHotel" targetRef="Task_BookFlight"/>
+    <bpmn:sequenceFlow id="Flow_Flight_Payment" sourceRef="Task_BookFlight" targetRef="Task_ProcessPayment"/>
+    <bpmn:sequenceFlow id="Flow_Payment_End" sourceRef="Task_ProcessPayment" targetRef="EndEvent_Confirmed"/>
+    <bpmn:sequenceFlow id="Flow_Error_Compensate" sourceRef="Boundary_PaymentError" targetRef="Event_TriggerCompensation"/>
+    <bpmn:sequenceFlow id="Flow_Compensate_End" sourceRef="Event_TriggerCompensation" targetRef="EndEvent_Cancelled"/>
+
+    <bpmn:association id="Assoc_Hotel" sourceRef="Boundary_CompensateHotel" targetRef="Task_CancelHotel" associationDirection="One"/>
+    <bpmn:association id="Assoc_Flight" sourceRef="Boundary_CompensateFlight" targetRef="Task_CancelFlight" associationDirection="One"/>
+
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="book-travel">
+
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="222" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="131" y="265" width="78" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_BookHotel" bpmnElement="Task_BookHotel">
+        <dc:Bounds x="250" y="200" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_CancelHotel" bpmnElement="Task_CancelHotel">
+        <dc:Bounds x="250" y="360" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_BoundaryHotel" bpmnElement="Boundary_CompensateHotel">
+        <dc:Bounds x="282" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_BookFlight" bpmnElement="Task_BookFlight">
+        <dc:Bounds x="420" y="200" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_CancelFlight" bpmnElement="Task_CancelFlight">
+        <dc:Bounds x="420" y="360" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_BoundaryFlight" bpmnElement="Boundary_CompensateFlight">
+        <dc:Bounds x="452" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Payment" bpmnElement="Task_ProcessPayment">
+        <dc:Bounds x="590" y="200" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_PaymentError" bpmnElement="Boundary_PaymentError">
+        <dc:Bounds x="622" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Confirmed" bpmnElement="EndEvent_Confirmed">
+        <dc:Bounds x="762" y="222" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="739" y="265" width="82" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Compensate" bpmnElement="Event_TriggerCompensation">
+        <dc:Bounds x="622" y="382" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="597" y="425" width="86" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Cancelled" bpmnElement="EndEvent_Cancelled">
+        <dc:Bounds x="762" y="382" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="739" y="425" width="82" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_Start_Hotel" bpmnElement="Flow_Start_Hotel">
+        <di:waypoint x="188" y="240"/>
+        <di:waypoint x="250" y="240"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Hotel_Flight" bpmnElement="Flow_Hotel_Flight">
+        <di:waypoint x="350" y="240"/>
+        <di:waypoint x="420" y="240"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flight_Payment" bpmnElement="Flow_Flight_Payment">
+        <di:waypoint x="520" y="240"/>
+        <di:waypoint x="590" y="240"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Payment_End" bpmnElement="Flow_Payment_End">
+        <di:waypoint x="690" y="240"/>
+        <di:waypoint x="762" y="240"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Error_Compensate" bpmnElement="Flow_Error_Compensate">
+        <di:waypoint x="640" y="298"/>
+        <di:waypoint x="640" y="382"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Compensate_End" bpmnElement="Flow_Compensate_End">
+        <di:waypoint x="658" y="400"/>
+        <di:waypoint x="762" y="400"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Assoc_Hotel" bpmnElement="Assoc_Hotel">
+        <di:waypoint x="300" y="298"/>
+        <di:waypoint x="300" y="360"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Assoc_Flight" bpmnElement="Assoc_Flight">
+        <di:waypoint x="470" y="298"/>
+        <di:waypoint x="470" y="360"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
