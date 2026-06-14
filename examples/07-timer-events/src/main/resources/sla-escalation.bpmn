@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_SlaEscalation"
+                  targetNamespace="http://operaton.org/examples/sla-escalation">
+
+  <bpmn:process id="sla-escalation"
+                name="SLA Escalation"
+                isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_RequestReceived" name="Request received">
+      <bpmn:outgoing>Flow_Start_To_Handle</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:userTask id="UserTask_HandleRequest" name="Handle request"
+                   operaton:candidateGroups="support">
+      <bpmn:incoming>Flow_Start_To_Handle</bpmn:incoming>
+      <bpmn:outgoing>Flow_Handle_To_Resolved</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:boundaryEvent id="BoundaryEvent_SlaTimer"
+                        name="SLA 1 hour"
+                        attachedToRef="UserTask_HandleRequest">
+      <bpmn:outgoing>Flow_Timer_To_Escalated</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerDef_Sla">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+
+    <bpmn:endEvent id="EndEvent_Resolved" name="Request resolved">
+      <bpmn:incoming>Flow_Handle_To_Resolved</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_Escalated" name="Request escalated">
+      <bpmn:incoming>Flow_Timer_To_Escalated</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Start_To_Handle"
+                       sourceRef="StartEvent_RequestReceived"
+                       targetRef="UserTask_HandleRequest"/>
+
+    <bpmn:sequenceFlow id="Flow_Handle_To_Resolved"
+                       sourceRef="UserTask_HandleRequest"
+                       targetRef="EndEvent_Resolved"/>
+
+    <bpmn:sequenceFlow id="Flow_Timer_To_Escalated"
+                       sourceRef="BoundaryEvent_SlaTimer"
+                       targetRef="EndEvent_Escalated"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="sla-escalation">
+
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_RequestReceived">
+        <dc:Bounds x="152" y="162" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="128" y="205" width="84" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_HandleRequest" bpmnElement="UserTask_HandleRequest">
+        <dc:Bounds x="250" y="140" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_SlaTimer" bpmnElement="BoundaryEvent_SlaTimer">
+        <dc:Bounds x="282" y="202" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="262" y="245" width="76" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Resolved" bpmnElement="EndEvent_Resolved">
+        <dc:Bounds x="412" y="162" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="386" y="205" width="88" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Escalated" bpmnElement="EndEvent_Escalated">
+        <dc:Bounds x="412" y="302" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="386" y="345" width="88" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_Start_Handle" bpmnElement="Flow_Start_To_Handle">
+        <di:waypoint x="188" y="180"/>
+        <di:waypoint x="250" y="180"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Handle_Resolved" bpmnElement="Flow_Handle_To_Resolved">
+        <di:waypoint x="350" y="180"/>
+        <di:waypoint x="412" y="180"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Timer_Escalated" bpmnElement="Flow_Timer_To_Escalated">
+        <di:waypoint x="300" y="238"/>
+        <di:waypoint x="300" y="320"/>
+        <di:waypoint x="412" y="320"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
