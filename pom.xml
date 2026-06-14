@@ -18,6 +18,8 @@
     <module>examples/05-dmn-decision</module>
     <module>examples/06-message-events</module>
     <module>examples/07-timer-events</module>
+    <module>examples/13-call-activity</module>
+    <module>examples/14-signal-events</module>
   </modules>
 
 </project>
