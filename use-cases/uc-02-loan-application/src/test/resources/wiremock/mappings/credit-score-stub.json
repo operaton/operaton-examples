@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/credit-score.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"score\": 750}"
+  }
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:operaton="http://operaton.org/schema/1.0/dmn"
+             id="risk-assessment-definitions"
+             name="Risk Assessment"
+             namespace="http://operaton.org/examples">
+
+  <decision id="risk-assessment" name="Risk Assessment" operaton:historyTimeToLive="30">
+    <decisionTable id="decisionTable_1" hitPolicy="FIRST">
+      <input id="input_creditScore" label="Credit Score">
+        <inputExpression id="inputExpression_creditScore" typeRef="integer">
+          <text>creditScore</text>
+        </inputExpression>
+      </input>
+      <input id="input_loanAmount" label="Loan Amount">
+        <inputExpression id="inputExpression_loanAmount" typeRef="integer">
+          <text>loanAmount</text>
+        </inputExpression>
+      </input>
+      <output id="output_riskLevel" label="Risk Level" name="riskLevel" typeRef="string"/>
+
+      <!-- Rule 1: High credit score, any loan amount → low risk -->
+      <rule id="rule_low">
+        <inputEntry id="inputEntry_low_credit"><text>&gt;= 700</text></inputEntry>
+        <inputEntry id="inputEntry_low_loan"><text>&lt;= 500000</text></inputEntry>
+        <outputEntry id="outputEntry_low"><text>"low"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 2: Medium credit score → medium risk -->
+      <rule id="rule_medium">
+        <inputEntry id="inputEntry_medium_credit"><text>[600..699]</text></inputEntry>
+        <inputEntry id="inputEntry_medium_loan"><text>&lt;= 500000</text></inputEntry>
+        <outputEntry id="outputEntry_medium"><text>"medium"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 3: Low credit score → high risk -->
+      <rule id="rule_high">
+        <inputEntry id="inputEntry_high_credit"><text>&lt; 600</text></inputEntry>
+        <inputEntry id="inputEntry_high_loan"><text></text></inputEntry>
+        <outputEntry id="outputEntry_high"><text>"high"</text></outputEntry>
+      </rule>
+
+    </decisionTable>
+  </decision>
+
+</definitions>

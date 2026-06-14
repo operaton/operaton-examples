@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: incident-management
+  datasource:
+    url: jdbc:postgresql://localhost:5432/operaton
+    username: operaton
+    password: operaton
+operaton:
+  bpm:
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    filter:
+      create: All tasks
+
+# Timer escalation duration (override with PT5S for fast tests)
+timer:
+  escalation:
+    duration: PT1H
+
+# WireMock service URLs (override for tests)
+ticket:
+  service:
+    url: http://localhost:8089
+notification:
+  service:
+    url: http://localhost:8089
