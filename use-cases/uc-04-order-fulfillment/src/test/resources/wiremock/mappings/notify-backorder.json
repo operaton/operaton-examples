@@ -1,0 +1,11 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/notifications/backorder"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "body": "{\"status\": \"sent\"}"
+  }
+}
