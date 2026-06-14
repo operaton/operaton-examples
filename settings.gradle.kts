@@ -7,7 +7,9 @@ include(
   "examples:04-user-task-forms",
   "examples:05-dmn-decision",
   "examples:06-message-events",
-  "examples:07-timer-events"
+  "examples:07-timer-events",
+  "examples:16-inclusive-gateway",
+  "examples:17-async-continuation"
 )
 
 project(":examples:01-getting-started").projectDir = file("examples/01-getting-started")
@@ -17,3 +19,5 @@ project(":examples:04-user-task-forms").projectDir = file("examples/04-user-task
 project(":examples:05-dmn-decision").projectDir = file("examples/05-dmn-decision")
 project(":examples:06-message-events").projectDir = file("examples/06-message-events")
 project(":examples:07-timer-events").projectDir = file("examples/07-timer-events")
+project(":examples:16-inclusive-gateway").projectDir = file("examples/16-inclusive-gateway")
+project(":examples:17-async-continuation").projectDir = file("examples/17-async-continuation")

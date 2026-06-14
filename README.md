@@ -38,7 +38,8 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | 05 | [dmn-decision](examples/05-dmn-decision) | DMN decision tables, DRD, decision evaluation, loan-application process | ✅ |
 | 06 | [message-events](examples/06-message-events) | Message start event, intermediate message catch, business-key correlation, MismatchingMessageCorrelationException | ✅ |
 | 07 | [timer-events](examples/07-timer-events) | Timer boundary event (SLA escalation), job executor API, testing timers without wall-clock waits | ✅ |
-| 08–18 | _see roadmap_ | compensation, REST integration, mail, Kafka, Keycloak, multi-tenancy, … | 🚧 |
+| 16 | [inclusive-gateway](examples/16-inclusive-gateway) | Inclusive (OR) gateway — multiple concurrent paths, joining wait for all active tokens | ✅ |
+| 08–15, 17–18 | _see roadmap_ | compensation, REST integration, mail, Kafka, Keycloak, multi-tenancy, … | 🚧 |
 
 The full roadmap with per-example scope lives in
 [docs/superpowers/plans/2026-06-12-operaton-examples-repository.md](docs/superpowers/plans/2026-06-12-operaton-examples-repository.md).
