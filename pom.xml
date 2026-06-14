@@ -12,6 +12,11 @@
 
   <modules>
     <module>examples/01-getting-started</module>
+    <module>examples/02-service-tasks</module>
+    <module>examples/03-external-task-worker</module>
+    <module>examples/04-user-task-forms</module>
+    <module>examples/05-dmn-decision</module>
+    <module>examples/06-message-events</module>
     <module>examples/07-timer-events</module>
   </modules>
 
