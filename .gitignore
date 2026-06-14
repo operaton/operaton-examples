@@ -21,3 +21,6 @@ out/
 .env
 
 docs/superpowers/plans
+
+# Git worktrees
+.worktrees/
