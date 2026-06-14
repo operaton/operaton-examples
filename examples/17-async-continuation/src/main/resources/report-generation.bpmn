@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_ReportGeneration"
+                  targetNamespace="http://operaton.org/examples/report-generation">
+
+  <bpmn:process id="report-generation"
+                name="Report Generation"
+                isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_ReportRequested" name="Report requested">
+      <bpmn:outgoing>Flow_Start_Fetch</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- asyncBefore creates a transaction boundary: engine persists state and
+         hands execution to the job executor before entering this task. -->
+    <bpmn:serviceTask id="Task_FetchData" name="Fetch data"
+                      operaton:asyncBefore="true"
+                      operaton:delegateExpression="${fetchDataDelegate}">
+      <bpmn:incoming>Flow_Start_Fetch</bpmn:incoming>
+      <bpmn:outgoing>Flow_Fetch_Process</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- failedJobRetryTimeCycle configures up to 3 attempts with zero wait between retries. -->
+    <bpmn:serviceTask id="Task_ProcessData" name="Process data"
+                      operaton:asyncBefore="true"
+                      operaton:delegateExpression="${processDataDelegate}">
+      <bpmn:extensionElements>
+        <operaton:failedJobRetryTimeCycle>R3/PT0S</operaton:failedJobRetryTimeCycle>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Fetch_Process</bpmn:incoming>
+      <bpmn:outgoing>Flow_Process_Store</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="Task_StoreReport" name="Store report"
+                      operaton:asyncBefore="true"
+                      operaton:delegateExpression="${storeReportDelegate}">
+      <bpmn:incoming>Flow_Process_Store</bpmn:incoming>
+      <bpmn:outgoing>Flow_Store_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_ReportReady" name="Report ready">
+      <bpmn:incoming>Flow_Store_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Start_Fetch"
+                       sourceRef="StartEvent_ReportRequested"
+                       targetRef="Task_FetchData"/>
+    <bpmn:sequenceFlow id="Flow_Fetch_Process"
+                       sourceRef="Task_FetchData"
+                       targetRef="Task_ProcessData"/>
+    <bpmn:sequenceFlow id="Flow_Process_Store"
+                       sourceRef="Task_ProcessData"
+                       targetRef="Task_StoreReport"/>
+    <bpmn:sequenceFlow id="Flow_Store_End"
+                       sourceRef="Task_StoreReport"
+                       targetRef="EndEvent_ReportReady"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ReportGeneration">
+    <bpmndi:BPMNPlane id="BPMNPlane_ReportGeneration" bpmnElement="report-generation">
+
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_ReportRequested">
+        <dc:Bounds x="152" y="162" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="125" y="205" width="90" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_FetchData" bpmnElement="Task_FetchData">
+        <dc:Bounds x="250" y="140" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_ProcessData" bpmnElement="Task_ProcessData">
+        <dc:Bounds x="410" y="140" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_StoreReport" bpmnElement="Task_StoreReport">
+        <dc:Bounds x="570" y="140" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_End" bpmnElement="EndEvent_ReportReady">
+        <dc:Bounds x="732" y="162" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="710" y="205" width="80" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_Start_Fetch" bpmnElement="Flow_Start_Fetch">
+        <di:waypoint x="188" y="180"/>
+        <di:waypoint x="250" y="180"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Fetch_Process" bpmnElement="Flow_Fetch_Process">
+        <di:waypoint x="350" y="180"/>
+        <di:waypoint x="410" y="180"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Process_Store" bpmnElement="Flow_Process_Store">
+        <di:waypoint x="510" y="180"/>
+        <di:waypoint x="570" y="180"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Store_End" bpmnElement="Flow_Store_End">
+        <di:waypoint x="670" y="180"/>
+        <di:waypoint x="732" y="180"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
