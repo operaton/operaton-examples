@@ -25,6 +25,7 @@ dependencies {
     implementation(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
 
     implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-webapp")
+    implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-rest")
     implementation("org.operaton.bpm:operaton-external-task-client")
     runtimeOnly("org.postgresql:postgresql")
 

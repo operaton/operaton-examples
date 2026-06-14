@@ -12,6 +12,7 @@ public class InventoryCheckHandler implements ExternalTaskHandler {
 
     @Override
     public void execute(ExternalTask externalTask, ExternalTaskService externalTaskService) {
+        // Boolean.TRUE.equals is null-safe: absent variable treated as false
         if (Boolean.TRUE.equals(externalTask.getVariable("simulateOutOfStock"))) {
             // BpmnError routes to the OUT_OF_STOCK boundary event — a business decision, not a retry
             externalTaskService.handleBpmnError(externalTask, "OUT_OF_STOCK",

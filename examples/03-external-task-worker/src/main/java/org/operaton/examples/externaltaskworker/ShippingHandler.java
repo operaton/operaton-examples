@@ -12,6 +12,7 @@ public class ShippingHandler implements ExternalTaskHandler {
 
     @Override
     public void execute(ExternalTask externalTask, ExternalTaskService externalTaskService) {
+        // A real implementation would call a carrier API here; simplified for the example
         externalTaskService.complete(externalTask,
             Map.of("trackingId", "TRK-" + externalTask.getId()));
     }
