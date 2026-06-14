@@ -19,3 +19,5 @@ out/
 
 # Local env overrides
 .env
+
+docs/superpowers/plans
