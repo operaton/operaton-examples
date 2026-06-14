@@ -1,0 +1,37 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "GET",
+        "urlPattern": "/inventory/PROD-001"
+      },
+      "response": {
+        "status": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": "{\"productId\": \"PROD-001\", \"available\": true, \"stock\": 42}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPattern": "/inventory/PROD-EMPTY"
+      },
+      "response": {
+        "status": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": "{\"productId\": \"PROD-EMPTY\", \"available\": false, \"stock\": 0}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPattern": "/inventory/PROD-UNKNOWN"
+      },
+      "response": {
+        "status": 404,
+        "headers": {"Content-Type": "application/json"},
+        "body": "{\"error\": \"Product not found\"}"
+      }
+    }
+  ]
+}
