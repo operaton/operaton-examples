@@ -32,7 +32,8 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | # | Example | Demonstrates | Status |
 |---|---|---|---|
 | 01 | [getting-started](examples/01-getting-started) | Embedded engine, service task delegate, user task, exclusive gateway | ✅ |
-| 02–18 | _see roadmap_ | external tasks, DMN, messages, timers, compensation, Kafka, Keycloak, mail, multi-tenancy, migration, … | 🚧 |
+| 05 | [dmn-decision](examples/05-dmn-decision) | DMN decision table, DRG (linked decisions), business rule task, hit policies UNIQUE and FIRST | ✅ |
+| 02–04, 06–18 | _see roadmap_ | external tasks, user-task forms, messages, timers, compensation, REST integration, mail, Kafka, Keycloak, multi-tenancy, … | 🚧 |
 
 The full roadmap with per-example scope lives in
 [docs/superpowers/plans/2026-06-12-operaton-examples-repository.md](docs/superpowers/plans/2026-06-12-operaton-examples-repository.md).
