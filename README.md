@@ -32,7 +32,9 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | # | Example | Demonstrates | Status |
 |---|---|---|---|
 | 01 | [getting-started](examples/01-getting-started) | Embedded engine, service task delegate, user task, exclusive gateway | ✅ |
-| 02–18 | _see roadmap_ | external tasks, DMN, messages, timers, compensation, Kafka, Keycloak, mail, multi-tenancy, migration, … | 🚧 |
+| 02 | [service-tasks](examples/02-service-tasks) | Sync vs. async service tasks, BpmnError boundary events, job retry configuration | ✅ |
+| 03 | [external-task-worker](examples/03-external-task-worker) | External task pattern: long-polling worker, topic subscription, BpmnError boundary routing, transient failure with retry | ✅ |
+| 04–18 | _see roadmap_ | user-task forms, DMN, messages, timers, compensation, Kafka, Keycloak, mail, multi-tenancy, migration, … | 🚧 |
 
 The full roadmap with per-example scope lives in
 [docs/superpowers/plans/2026-06-12-operaton-examples-repository.md](docs/superpowers/plans/2026-06-12-operaton-examples-repository.md).
