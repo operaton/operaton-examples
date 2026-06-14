@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_ValidateOrder"
+                  targetNamespace="http://operaton.org/examples">
+
+  <bpmn:process id="validate-order" name="Validate Order" isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_Validate" name="Start validation">
+      <bpmn:outgoing>Flow_Start_ValidateTask</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="Task_ValidateOrder" name="Check order ID format"
+                      operaton:delegateExpression="${validateOrderDelegate}">
+      <bpmn:incoming>Flow_Start_ValidateTask</bpmn:incoming>
+      <bpmn:outgoing>Flow_ValidateTask_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_ValidationDone" name="Validation done">
+      <bpmn:incoming>Flow_ValidateTask_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Start_ValidateTask"
+                       sourceRef="StartEvent_Validate"
+                       targetRef="Task_ValidateOrder"/>
+    <bpmn:sequenceFlow id="Flow_ValidateTask_End"
+                       sourceRef="Task_ValidateOrder"
+                       targetRef="EndEvent_ValidationDone"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ValidateOrder">
+    <bpmndi:BPMNPlane id="BPMNPlane_ValidateOrder" bpmnElement="validate-order">
+      <bpmndi:BPMNShape id="Shape_StartValidate" bpmnElement="StartEvent_Validate">
+        <dc:Bounds x="152" y="222" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_TaskValidate" bpmnElement="Task_ValidateOrder">
+        <dc:Bounds x="240" y="200" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndValidate" bpmnElement="EndEvent_ValidationDone">
+        <dc:Bounds x="392" y="222" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Start_ValidateTask" bpmnElement="Flow_Start_ValidateTask">
+        <di:waypoint x="188" y="240"/><di:waypoint x="240" y="240"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ValidateTask_End" bpmnElement="Flow_ValidateTask_End">
+        <di:waypoint x="340" y="240"/><di:waypoint x="392" y="240"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
