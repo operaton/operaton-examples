@@ -35,7 +35,8 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | 02 | [service-tasks](examples/02-service-tasks) | Java delegate, expression delegate, external task worker, delegate expression patterns | ✅ |
 | 03 | [external-task-worker](examples/03-external-task-worker) | External task worker pattern, topic subscription, variable passing | ✅ |
 | 04 | [user-task-forms](examples/04-user-task-forms) | Embedded form definitions, typed form fields (string/date/boolean/enum), candidate groups, FormService | ✅ |
-| 05–18 | _see roadmap_ | DMN, messages, timers, compensation, Kafka, Keycloak, mail, multi-tenancy, migration, … | 🚧 |
+| 05 | [dmn-decision](examples/05-dmn-decision) | DMN decision table, DRG (linked decisions), business rule task, hit policies UNIQUE and FIRST | ✅ |
+| 06–18 | _see roadmap_ | DMN, messages, timers, compensation, Kafka, Keycloak, mail, multi-tenancy, migration, … | 🚧 |
 
 The full roadmap with per-example scope lives in
 [docs/superpowers/plans/2026-06-12-operaton-examples-repository.md](docs/superpowers/plans/2026-06-12-operaton-examples-repository.md).
