@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: external-task-worker
+  datasource:
+    url: jdbc:postgresql://localhost:5432/operaton
+    username: operaton
+    password: operaton
+
+operaton:
+  bpm:
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    filter:
+      create: All tasks
+  worker:
+    base-url: http://localhost:8080/engine-rest
+    enabled: true
