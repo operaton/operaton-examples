@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_DocumentProcessing"
+                  targetNamespace="http://operaton.org/examples/document-processing">
+
+  <bpmn:error id="Error_DocumentError" name="DOCUMENT_ERROR" errorCode="DOCUMENT_ERROR"/>
+  <bpmn:signal id="Signal_AuditRequired" name="AuditRequired"/>
+
+  <bpmn:process id="document-processing"
+                name="Document Processing"
+                isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <!-- ===== Main flow ===== -->
+
+    <bpmn:startEvent id="StartEvent_DocumentArrived" name="Document arrived">
+      <bpmn:outgoing>Flow_Start_To_Parse</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="Task_ParseDocument" name="Parse document"
+                      operaton:delegateExpression="${parseDocumentDelegate}">
+      <bpmn:incoming>Flow_Start_To_Parse</bpmn:incoming>
+      <bpmn:outgoing>Flow_Parse_To_Enrich</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="Task_EnrichDocument" name="Enrich document"
+                      operaton:delegateExpression="${enrichDocumentDelegate}">
+      <bpmn:incoming>Flow_Parse_To_Enrich</bpmn:incoming>
+      <bpmn:outgoing>Flow_Enrich_To_Store</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:userTask id="Task_StoreDocument" name="Store document"
+                   operaton:candidateGroups="editors">
+      <bpmn:incoming>Flow_Enrich_To_Store</bpmn:incoming>
+      <bpmn:outgoing>Flow_Store_To_End</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:endEvent id="EndEvent_Stored" name="Document stored">
+      <bpmn:incoming>Flow_Store_To_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Start_To_Parse"
+                       sourceRef="StartEvent_DocumentArrived"
+                       targetRef="Task_ParseDocument"/>
+
+    <bpmn:sequenceFlow id="Flow_Parse_To_Enrich"
+                       sourceRef="Task_ParseDocument"
+                       targetRef="Task_EnrichDocument"/>
+
+    <bpmn:sequenceFlow id="Flow_Enrich_To_Store"
+                       sourceRef="Task_EnrichDocument"
+                       targetRef="Task_StoreDocument"/>
+
+    <bpmn:sequenceFlow id="Flow_Store_To_End"
+                       sourceRef="Task_StoreDocument"
+                       targetRef="EndEvent_Stored"/>
+
+    <!-- ===== Non-interrupting event subprocess: Audit Log ===== -->
+
+    <bpmn:subProcess id="EventSubProcess_Audit" name="Audit Log"
+                     triggeredByEvent="true">
+
+      <bpmn:startEvent id="Start_AuditSignal" name="Signal: AuditRequired"
+                       isInterrupting="false">
+        <bpmn:outgoing>Flow_AuditStart_To_Record</bpmn:outgoing>
+        <bpmn:signalEventDefinition id="SignalDef_AuditRequired"
+                                    signalRef="Signal_AuditRequired"/>
+      </bpmn:startEvent>
+
+      <bpmn:serviceTask id="Task_RecordAudit" name="Record audit entry"
+                        operaton:delegateExpression="${recordAuditDelegate}">
+        <bpmn:incoming>Flow_AuditStart_To_Record</bpmn:incoming>
+        <bpmn:outgoing>Flow_Record_To_AuditEnd</bpmn:outgoing>
+      </bpmn:serviceTask>
+
+      <bpmn:endEvent id="End_AuditDone" name="Audit recorded">
+        <bpmn:incoming>Flow_Record_To_AuditEnd</bpmn:incoming>
+      </bpmn:endEvent>
+
+      <bpmn:sequenceFlow id="Flow_AuditStart_To_Record"
+                         sourceRef="Start_AuditSignal"
+                         targetRef="Task_RecordAudit"/>
+
+      <bpmn:sequenceFlow id="Flow_Record_To_AuditEnd"
+                         sourceRef="Task_RecordAudit"
+                         targetRef="End_AuditDone"/>
+    </bpmn:subProcess>
+
+    <!-- ===== Interrupting event subprocess: Error Handler ===== -->
+
+    <bpmn:subProcess id="EventSubProcess_Error" name="Error Handler"
+                     triggeredByEvent="true">
+
+      <bpmn:startEvent id="Start_DocError" name="Error: DOCUMENT_ERROR"
+                       isInterrupting="true">
+        <bpmn:outgoing>Flow_ErrorStart_To_Handle</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorDef_DocumentError"
+                                   errorRef="Error_DocumentError"/>
+      </bpmn:startEvent>
+
+      <bpmn:serviceTask id="Task_HandleError" name="Handle error"
+                        operaton:delegateExpression="${handleDocumentErrorDelegate}">
+        <bpmn:incoming>Flow_ErrorStart_To_Handle</bpmn:incoming>
+        <bpmn:outgoing>Flow_Handle_To_ErrorEnd</bpmn:outgoing>
+      </bpmn:serviceTask>
+
+      <bpmn:endEvent id="End_ErrorHandled" name="Error handled">
+        <bpmn:incoming>Flow_Handle_To_ErrorEnd</bpmn:incoming>
+      </bpmn:endEvent>
+
+      <bpmn:sequenceFlow id="Flow_ErrorStart_To_Handle"
+                         sourceRef="Start_DocError"
+                         targetRef="Task_HandleError"/>
+
+      <bpmn:sequenceFlow id="Flow_Handle_To_ErrorEnd"
+                         sourceRef="Task_HandleError"
+                         targetRef="End_ErrorHandled"/>
+    </bpmn:subProcess>
+
+  </bpmn:process>
+
+  <!-- ===== Diagram Interchange ===== -->
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="document-processing">
+
+      <!-- Main flow shapes -->
+      <bpmndi:BPMNShape id="Shape_StartEvent" bpmnElement="StartEvent_DocumentArrived">
+        <dc:Bounds x="152" y="232" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="126" y="275" width="88" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_ParseDocument" bpmnElement="Task_ParseDocument">
+        <dc:Bounds x="240" y="210" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_EnrichDocument" bpmnElement="Task_EnrichDocument">
+        <dc:Bounds x="392" y="210" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_StoreDocument" bpmnElement="Task_StoreDocument">
+        <dc:Bounds x="544" y="210" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_EndEvent_Stored" bpmnElement="EndEvent_Stored">
+        <dc:Bounds x="696" y="232" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="670" y="275" width="88" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Main flow edges -->
+      <bpmndi:BPMNEdge id="Edge_Start_Parse" bpmnElement="Flow_Start_To_Parse">
+        <di:waypoint x="188" y="250"/>
+        <di:waypoint x="240" y="250"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Parse_Enrich" bpmnElement="Flow_Parse_To_Enrich">
+        <di:waypoint x="340" y="250"/>
+        <di:waypoint x="392" y="250"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Enrich_Store" bpmnElement="Flow_Enrich_To_Store">
+        <di:waypoint x="492" y="250"/>
+        <di:waypoint x="544" y="250"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Store_End" bpmnElement="Flow_Store_To_End">
+        <di:waypoint x="644" y="250"/>
+        <di:waypoint x="696" y="250"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- Non-interrupting event subprocess: Audit Log -->
+      <bpmndi:BPMNShape id="Shape_EventSubProcess_Audit" bpmnElement="EventSubProcess_Audit"
+                        isExpanded="true">
+        <dc:Bounds x="152" y="360" width="420" height="140"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Start_AuditSignal" bpmnElement="Start_AuditSignal">
+        <dc:Bounds x="202" y="412" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="179" y="455" width="82" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_RecordAudit" bpmnElement="Task_RecordAudit">
+        <dc:Bounds x="300" y="390" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_End_AuditDone" bpmnElement="End_AuditDone">
+        <dc:Bounds x="462" y="412" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="440" y="455" width="80" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_AuditStart_Record" bpmnElement="Flow_AuditStart_To_Record">
+        <di:waypoint x="238" y="430"/>
+        <di:waypoint x="300" y="430"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Record_AuditEnd" bpmnElement="Flow_Record_To_AuditEnd">
+        <di:waypoint x="400" y="430"/>
+        <di:waypoint x="462" y="430"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- Interrupting event subprocess: Error Handler -->
+      <bpmndi:BPMNShape id="Shape_EventSubProcess_Error" bpmnElement="EventSubProcess_Error"
+                        isExpanded="true">
+        <dc:Bounds x="152" y="540" width="420" height="140"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Start_DocError" bpmnElement="Start_DocError">
+        <dc:Bounds x="202" y="592" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="176" y="635" width="88" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_HandleError" bpmnElement="Task_HandleError">
+        <dc:Bounds x="300" y="570" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_End_ErrorHandled" bpmnElement="End_ErrorHandled">
+        <dc:Bounds x="462" y="592" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="440" y="635" width="80" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_ErrorStart_Handle" bpmnElement="Flow_ErrorStart_To_Handle">
+        <di:waypoint x="238" y="610"/>
+        <di:waypoint x="300" y="610"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Handle_ErrorEnd" bpmnElement="Flow_Handle_To_ErrorEnd">
+        <di:waypoint x="400" y="610"/>
+        <di:waypoint x="462" y="610"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</bpmn:definitions>
