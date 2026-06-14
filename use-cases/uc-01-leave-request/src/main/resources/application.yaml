@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: leave-request
+  datasource:
+    url: jdbc:postgresql://localhost:5432/uc-01-leave-request
+    username: operaton
+    password: operaton
+  sql:
+    init:
+      mode: always
+  mail:
+    host: localhost
+    port: 1025
+    protocol: smtp
+    test-connection: false
+    properties:
+      mail:
+        smtp:
+          from: noreply@example.com
+operaton:
+  bpm:
+    auto-deployment-enabled: true
+    application:
+      context-path: /
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    filter:
+      create: All tasks

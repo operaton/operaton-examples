@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:collaboration id="Collaboration_LeaveRequest">
+    <bpmn:participant id="Pool_LeaveRequest" name="Leave Request Approval" processRef="leave-request"/>
+  </bpmn:collaboration>
+
+  <bpmn:process id="leave-request" name="Leave Request Approval" isExecutable="true"
+                operaton:historyTimeToLive="P90D"
+                operaton:candidateStarterGroups="employees,operaton-admin">
+
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Employees" name="employees">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_EmployeeNotified</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Managers" name="managers">
+        <bpmn:flowNodeRef>Task_ManagerReview</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_HR" name="hr">
+        <bpmn:flowNodeRef>Task_HRRecord</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_System" name="System">
+        <bpmn:flowNodeRef>Task_ValidateRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Validation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Decision</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_EscalationReminder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_FinalizeApproval</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SendRejectionEmail</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Approved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_EscalationSent</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="StartEvent_1" name="Leave Requested" operaton:initiator="requester">
+      <bpmn:extensionElements>
+        <operaton:formData>
+          <operaton:formField id="startDate" label="Start date" type="date"/>
+          <operaton:formField id="durationDays" label="Duration (days)" type="long"/>
+        </operaton:formData>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_start_to_validation</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="Task_ValidateRequest" name="Validate Leave Request"
+                      operaton:delegateExpression="${leaveRequestValidationDelegate}">
+      <bpmn:incoming>Flow_start_to_validation</bpmn:incoming>
+      <bpmn:outgoing>Flow_validation_to_gateway</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:exclusiveGateway id="Gateway_Validation" name="Request valid?">
+      <bpmn:incoming>Flow_validation_to_gateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_valid_request</bpmn:outgoing>
+      <bpmn:outgoing>Flow_invalid_request</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:userTask id="Task_ManagerReview" name="Review Request"
+                   operaton:candidateGroups="managers"
+                   operaton:formKey="embedded:app:forms/manager-review-form.html">
+      <bpmn:extensionElements>
+        <operaton:formData>
+          <operaton:formField id="requester" label="Requester" type="string">
+            <operaton:properties><operaton:property id="readonly" value="true"/></operaton:properties>
+          </operaton:formField>
+          <operaton:formField id="startDate" label="Start Date" type="string">
+            <operaton:properties><operaton:property id="readonly" value="true"/></operaton:properties>
+          </operaton:formField>
+          <operaton:formField id="endDate" label="End Date" type="string">
+            <operaton:properties><operaton:property id="readonly" value="true"/></operaton:properties>
+          </operaton:formField>
+          <operaton:formField id="durationDays" label="Days Requested" type="long">
+            <operaton:properties><operaton:property id="readonly" value="true"/></operaton:properties>
+          </operaton:formField>
+          <operaton:formField id="remainingVacationDays" label="Remaining Vacation Days" type="long">
+            <operaton:properties><operaton:property id="readonly" value="true"/></operaton:properties>
+          </operaton:formField>
+          <operaton:formField id="approved" label="Approved?" type="boolean"/>
+        </operaton:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_valid_request</bpmn:incoming>
+      <bpmn:outgoing>Flow_manager_to_gw</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- Non-interrupting timer boundary: escalation reminder if manager does not respond -->
+    <bpmn:boundaryEvent id="TimerBoundary_ManagerReview" name="Review Timeout"
+                        attachedToRef="Task_ManagerReview" cancelActivity="false">
+      <bpmn:outgoing>Flow_timer_to_reminder</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerDef_1">
+        <bpmn:timeDuration xsi:type="tFormalExpression">${managerReviewTimeout != null ? managerReviewTimeout : "PT72H"}</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+
+    <bpmn:serviceTask id="Task_EscalationReminder" name="Send Escalation Reminder"
+                      operaton:delegateExpression="${escalationReminderDelegate}">
+      <bpmn:incoming>Flow_timer_to_reminder</bpmn:incoming>
+      <bpmn:outgoing>Flow_reminder_to_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_EscalationSent" name="Reminder Sent">
+      <bpmn:incoming>Flow_reminder_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:exclusiveGateway id="Gateway_Decision" name="Approved?" default="Flow_rejected">
+      <bpmn:incoming>Flow_manager_to_gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_rejected</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:userTask id="Task_HRRecord" name="Record Approved Leave"
+                   operaton:candidateGroups="hr"
+                   operaton:formKey="embedded:app:forms/hr-record-form.html">
+      <bpmn:extensionElements>
+        <operaton:formData>
+          <operaton:formField id="requester" label="Requester" type="string">
+            <operaton:properties><operaton:property id="readonly" value="true"/></operaton:properties>
+          </operaton:formField>
+          <operaton:formField id="startDate" label="Start Date" type="string">
+            <operaton:properties><operaton:property id="readonly" value="true"/></operaton:properties>
+          </operaton:formField>
+          <operaton:formField id="endDate" label="End Date" type="string">
+            <operaton:properties><operaton:property id="readonly" value="true"/></operaton:properties>
+          </operaton:formField>
+          <operaton:formField id="durationDays" label="Days Requested" type="long">
+            <operaton:properties><operaton:property id="readonly" value="true"/></operaton:properties>
+          </operaton:formField>
+          <operaton:formField id="remainingVacationDays" label="Remaining Vacation Days" type="long">
+            <operaton:properties><operaton:property id="readonly" value="true"/></operaton:properties>
+          </operaton:formField>
+        </operaton:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_hr_to_finalize</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:serviceTask id="Task_FinalizeApproval" name="Finalize Approved Leave"
+                      operaton:delegateExpression="${finalizeLeaveApprovalDelegate}">
+      <bpmn:incoming>Flow_hr_to_finalize</bpmn:incoming>
+      <bpmn:outgoing>Flow_finalize_to_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:sendTask id="Task_SendRejectionEmail" name="Send Rejection Email"
+                   operaton:delegateExpression="${leaveRejectionEmailDelegate}">
+      <bpmn:incoming>Flow_invalid_request</bpmn:incoming>
+      <bpmn:incoming>Flow_rejected</bpmn:incoming>
+      <bpmn:outgoing>Flow_rejection_to_end</bpmn:outgoing>
+    </bpmn:sendTask>
+
+    <bpmn:endEvent id="EndEvent_Approved" name="Leave Approved">
+      <bpmn:incoming>Flow_finalize_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:userTask id="Task_EmployeeNotified" name="Employee Notified of Rejection"
+                   operaton:candidateGroups="employees">
+      <bpmn:incoming>Flow_rejection_to_notify</bpmn:incoming>
+      <bpmn:outgoing>Flow_notify_to_end</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:endEvent id="EndEvent_Rejected" name="Leave Rejected">
+      <bpmn:incoming>Flow_notify_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_start_to_validation" sourceRef="StartEvent_1" targetRef="Task_ValidateRequest"/>
+    <bpmn:sequenceFlow id="Flow_validation_to_gateway" sourceRef="Task_ValidateRequest" targetRef="Gateway_Validation"/>
+    <bpmn:sequenceFlow id="Flow_valid_request" name="valid" sourceRef="Gateway_Validation" targetRef="Task_ManagerReview">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${validationPassed == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_invalid_request" name="invalid" sourceRef="Gateway_Validation" targetRef="Task_SendRejectionEmail">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${validationPassed == false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_manager_to_gw" sourceRef="Task_ManagerReview" targetRef="Gateway_Decision"/>
+    <bpmn:sequenceFlow id="Flow_approved" name="approved" sourceRef="Gateway_Decision" targetRef="Task_HRRecord">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${approved == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_rejected" name="rejected" sourceRef="Gateway_Decision" targetRef="Task_SendRejectionEmail">
+      <bpmn:extensionElements>
+        <operaton:executionListener event="take" expression="${execution.setVariable('leaveStatus', 'REJECTED')}"/>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_hr_to_finalize" sourceRef="Task_HRRecord" targetRef="Task_FinalizeApproval"/>
+    <bpmn:sequenceFlow id="Flow_finalize_to_end" sourceRef="Task_FinalizeApproval" targetRef="EndEvent_Approved"/>
+    <bpmn:sequenceFlow id="Flow_rejection_to_notify" sourceRef="Task_SendRejectionEmail" targetRef="Task_EmployeeNotified"/>
+    <bpmn:sequenceFlow id="Flow_notify_to_end" sourceRef="Task_EmployeeNotified" targetRef="EndEvent_Rejected"/>
+    <bpmn:sequenceFlow id="Flow_timer_to_reminder" sourceRef="TimerBoundary_ManagerReview" targetRef="Task_EscalationReminder"/>
+    <bpmn:sequenceFlow id="Flow_reminder_to_end" sourceRef="Task_EscalationReminder" targetRef="EndEvent_EscalationSent"/>
+
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_LeaveRequest">
+      <bpmndi:BPMNShape id="Pool_LeaveRequest_di" bpmnElement="Pool_LeaveRequest" isHorizontal="true">
+        <dc:Bounds x="170" y="70" width="1310" height="680" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_System_di" bpmnElement="Lane_System" isHorizontal="true">
+        <dc:Bounds x="200" y="410" width="1280" height="340" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_HR_di" bpmnElement="Lane_HR" isHorizontal="true">
+        <dc:Bounds x="200" y="290" width="1280" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Managers_di" bpmnElement="Lane_Managers" isHorizontal="true">
+        <dc:Bounds x="200" y="170" width="1280" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Employees_di" bpmnElement="Lane_Employees" isHorizontal="true">
+        <dc:Bounds x="200" y="70" width="1280" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Rejected_di" bpmnElement="EndEvent_Rejected">
+        <dc:Bounds x="1190" y="572" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170" y="615" width="77" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Approved_di" bpmnElement="EndEvent_Approved">
+        <dc:Bounds x="1292" y="472" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1270" y="515" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SendRejectionEmail_di" bpmnElement="Task_SendRejectionEmail">
+        <dc:Bounds x="970" y="550" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_FinalizeApproval_di" bpmnElement="Task_FinalizeApproval">
+        <dc:Bounds x="1090" y="450" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_HRRecord_di" bpmnElement="Task_HRRecord">
+        <dc:Bounds x="910" y="310" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Decision_di" bpmnElement="Gateway_Decision" isMarkerVisible="true">
+        <dc:Bounds x="805" y="465" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="804" y="522" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_EscalationSent_di" bpmnElement="EndEvent_EscalationSent">
+        <dc:Bounds x="832" y="572" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="813" y="615" width="74" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_EscalationReminder_di" bpmnElement="Task_EscalationReminder">
+        <dc:Bounds x="630" y="550" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ManagerReview_di" bpmnElement="Task_ManagerReview">
+        <dc:Bounds x="600" y="190" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Validation_di" bpmnElement="Gateway_Validation" isMarkerVisible="true">
+        <dc:Bounds x="515" y="465" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="575" y="483" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ValidateRequest_di" bpmnElement="Task_ValidateRequest">
+        <dc:Bounds x="320" y="450" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="262" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="296" y="145" width="87" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TimerBoundary_ManagerReview_di" bpmnElement="TimerBoundary_ManagerReview">
+        <dc:Bounds x="664" y="252" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="643" y="295" width="79" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_EmployeeNotified_di" bpmnElement="Task_EmployeeNotified">
+        <dc:Bounds x="1110" y="82" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_rejection_to_notify_di" bpmnElement="Flow_rejection_to_notify">
+        <di:waypoint x="1040" y="550" />
+        <di:waypoint x="1040" y="122" />
+        <di:waypoint x="1110" y="122" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_notify_to_end_di" bpmnElement="Flow_notify_to_end">
+        <di:waypoint x="1250" y="122" />
+        <di:waypoint x="1350" y="122" />
+        <di:waypoint x="1350" y="590" />
+        <di:waypoint x="1226" y="590" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_finalize_to_end_di" bpmnElement="Flow_finalize_to_end">
+        <di:waypoint x="1230" y="490" />
+        <di:waypoint x="1292" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_rejected_di" bpmnElement="Flow_rejected">
+        <di:waypoint x="855" y="490" />
+        <di:waypoint x="1040" y="490" />
+        <di:waypoint x="1040" y="550" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="925" y="470" width="40" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_invalid_request_di" bpmnElement="Flow_invalid_request">
+        <di:waypoint x="540" y="515" />
+        <di:waypoint x="540" y="680" />
+        <di:waypoint x="1040" y="680" />
+        <di:waypoint x="1040" y="630" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="552" y="589" width="32" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_hr_to_finalize_di" bpmnElement="Flow_hr_to_finalize">
+        <di:waypoint x="1050" y="350" />
+        <di:waypoint x="1160" y="350" />
+        <di:waypoint x="1160" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_approved_di" bpmnElement="Flow_approved">
+        <di:waypoint x="830" y="465" />
+        <di:waypoint x="830" y="350" />
+        <di:waypoint x="910" y="350" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="837" y="443" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_manager_to_gw_di" bpmnElement="Flow_manager_to_gw">
+        <di:waypoint x="740" y="230" />
+        <di:waypoint x="780" y="230" />
+        <di:waypoint x="780" y="490" />
+        <di:waypoint x="805" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_reminder_to_end_di" bpmnElement="Flow_reminder_to_end">
+        <di:waypoint x="770" y="590" />
+        <di:waypoint x="832" y="590" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_timer_to_reminder_di" bpmnElement="Flow_timer_to_reminder">
+        <di:waypoint x="682" y="288" />
+        <di:waypoint x="682" y="550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_valid_request_di" bpmnElement="Flow_valid_request">
+        <di:waypoint x="540" y="465" />
+        <di:waypoint x="540" y="230" />
+        <di:waypoint x="600" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="554" y="343" width="23" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_validation_to_gateway_di" bpmnElement="Flow_validation_to_gateway">
+        <di:waypoint x="460" y="490" />
+        <di:waypoint x="515" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_start_to_validation_di" bpmnElement="Flow_start_to_validation">
+        <di:waypoint x="280" y="138" />
+        <di:waypoint x="280" y="490" />
+        <di:waypoint x="320" y="490" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</bpmn:definitions>
