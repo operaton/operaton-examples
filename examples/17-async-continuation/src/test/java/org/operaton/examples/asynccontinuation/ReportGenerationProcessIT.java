@@ -32,18 +32,17 @@ class ReportGenerationProcessIT {
     @Autowired ManagementService managementService;
 
     @Test
-    void asyncTasksRequireJobExecutionToProgress() {
+    void asyncTasksRequireManualJobExecutionToProgress() {
         ProcessInstance instance = runtimeService.startProcessInstanceByKey(
             "report-generation", Map.of("failTwice", false));
 
-        // Process is paused — 3 async tasks means 1 job pending at first task
+        // One job pending at Task_FetchData
         assertThat(managementService.createJobQuery()
             .processInstanceId(instance.getId()).count()).isEqualTo(1);
 
-        // Drive all three jobs manually
+        // Drive all jobs to completion
         executeAllJobs(instance.getId());
 
-        // All done
         assertCompleted(instance, "EndEvent_ReportReady");
         assertVariable(instance.getId(), "dataFetched", true);
         assertVariable(instance.getId(), "dataProcessed", true);
@@ -55,33 +54,32 @@ class ReportGenerationProcessIT {
         ProcessInstance instance = runtimeService.startProcessInstanceByKey(
             "report-generation", Map.of("failTwice", true));
 
-        // Execute Task_FetchData job (succeeds)
+        // Execute Task_FetchData (succeeds)
         Job fetchJob = managementService.createJobQuery()
             .processInstanceId(instance.getId()).singleResult();
         managementService.executeJob(fetchJob.getId());
 
-        // Now at Task_ProcessData — will fail twice before succeeding
-        // First attempt — fails, retries=2 remaining
-        Job processJob1 = managementService.createJobQuery()
+        // Task_ProcessData job — will fail twice (retries=3 configured)
+        Job processJob = managementService.createJobQuery()
             .processInstanceId(instance.getId()).singleResult();
-        assertThat(processJob1.getRetries()).isEqualTo(3);
+        assertThat(processJob.getRetries()).isEqualTo(3);
 
-        // Execute and expect failure — job gets retries decremented
-        try { managementService.executeJob(processJob1.getId()); } catch (Exception ignored) {}
+        // Attempt 1 — fails, retries decrement
+        try { managementService.executeJob(processJob.getId()); } catch (Exception ignored) {}
         Job afterFail1 = managementService.createJobQuery()
             .processInstanceId(instance.getId()).singleResult();
         assertThat(afterFail1.getRetries()).isEqualTo(2);
 
-        // Second attempt — fails again
+        // Attempt 2 — fails again
         try { managementService.executeJob(afterFail1.getId()); } catch (Exception ignored) {}
         Job afterFail2 = managementService.createJobQuery()
             .processInstanceId(instance.getId()).singleResult();
         assertThat(afterFail2.getRetries()).isEqualTo(1);
 
-        // Third attempt — succeeds
+        // Attempt 3 — succeeds
         managementService.executeJob(afterFail2.getId());
 
-        // Now execute remaining Task_StoreReport job
+        // Execute Task_StoreReport
         Job storeJob = managementService.createJobQuery()
             .processInstanceId(instance.getId()).singleResult();
         managementService.executeJob(storeJob.getId());
@@ -90,17 +88,20 @@ class ReportGenerationProcessIT {
     }
 
     @Test
-    void jobsAreVisibleBeforeExecution() {
+    void processIsActiveButNotYetCompletedWhileJobsPending() {
         ProcessInstance instance = runtimeService.startProcessInstanceByKey(
             "report-generation", Map.of("failTwice", false));
 
-        // One job pending (at Task_FetchData)
-        assertThat(managementService.createJobQuery()
-            .processInstanceId(instance.getId()).count()).isEqualTo(1);
-
-        // Process instance still "active" (not yet completed)
+        // Active instance exists
         assertThat(runtimeService.createProcessInstanceQuery()
             .processInstanceId(instance.getId()).count()).isEqualTo(1);
+        // One job pending
+        assertThat(managementService.createJobQuery()
+            .processInstanceId(instance.getId()).count()).isEqualTo(1);
+        // Not in history as completed yet
+        HistoricProcessInstance h = historyService.createHistoricProcessInstanceQuery()
+            .processInstanceId(instance.getId()).singleResult();
+        assertThat(h.getEndTime()).isNull();
     }
 
     private void executeAllJobs(String processInstanceId) {
