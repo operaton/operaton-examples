@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: operaton
+      POSTGRES_USER: operaton
+      POSTGRES_PASSWORD: operaton
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U operaton"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  wildfly:
+    image: operaton/wildfly:2.1.1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/operaton
+      DB_USERNAME: operaton
+      DB_PASSWORD: operaton
+      DB_DRIVER: org.postgresql.Driver
+    volumes:
+      - ./target/distribution-wildfly-0.1.0-SNAPSHOT.war:/operaton/standalone/deployments/document-approval.war
+    ports:
+      - "8080:8080"

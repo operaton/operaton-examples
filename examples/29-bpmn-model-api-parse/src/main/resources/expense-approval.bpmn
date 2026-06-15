@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_ExpenseApproval"
+                  targetNamespace="http://operaton.org/examples">
+
+  <bpmn:process id="expense-approval" name="Expense Approval" isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_ExpenseSubmitted" name="Expense submitted">
+      <bpmn:outgoing>Flow_ToValidate</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="ServiceTask_ValidateExpense" name="Validate expense"
+                      operaton:delegateExpression="${approveExpenseDelegate}">
+      <bpmn:incoming>Flow_ToValidate</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToGateway</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:exclusiveGateway id="Gateway_AmountApproved" name="Amount approved?"
+                           default="Flow_TooHigh">
+      <bpmn:incoming>Flow_ToGateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_TooHigh</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:userTask id="UserTask_ManagerReview" name="Manager review"
+                   operaton:candidateGroups="managers">
+      <bpmn:incoming>Flow_Approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToApprovedEnd</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:endEvent id="EndEvent_ExpenseApproved" name="Expense approved">
+      <bpmn:incoming>Flow_ToApprovedEnd</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_ExpenseRejected" name="Expense rejected">
+      <bpmn:incoming>Flow_TooHigh</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_ToValidate" sourceRef="StartEvent_ExpenseSubmitted"
+                       targetRef="ServiceTask_ValidateExpense"/>
+    <bpmn:sequenceFlow id="Flow_ToGateway" sourceRef="ServiceTask_ValidateExpense"
+                       targetRef="Gateway_AmountApproved"/>
+    <bpmn:sequenceFlow id="Flow_Approved" name="Approved"
+                       sourceRef="Gateway_AmountApproved" targetRef="UserTask_ManagerReview">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${amount &lt;= 5000}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_TooHigh" name="Too high"
+                       sourceRef="Gateway_AmountApproved" targetRef="EndEvent_ExpenseRejected"/>
+    <bpmn:sequenceFlow id="Flow_ToApprovedEnd" sourceRef="UserTask_ManagerReview"
+                       targetRef="EndEvent_ExpenseApproved"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ExpenseApproval">
+    <bpmndi:BPMNPlane id="BPMNPlane_ExpenseApproval" bpmnElement="expense-approval">
+      <bpmndi:BPMNShape id="Shape_StartExpenseSubmitted" bpmnElement="StartEvent_ExpenseSubmitted">
+        <dc:Bounds x="152" y="202" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="130" y="245" width="80" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ValidateExpense" bpmnElement="ServiceTask_ValidateExpense">
+        <dc:Bounds x="240" y="180" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GwAmountApproved" bpmnElement="Gateway_AmountApproved" isMarkerVisible="true">
+        <dc:Bounds x="395" y="195" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="375" y="165" width="90" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ManagerReview" bpmnElement="UserTask_ManagerReview">
+        <dc:Bounds x="500" y="180" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndApproved" bpmnElement="EndEvent_ExpenseApproved">
+        <dc:Bounds x="662" y="202" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="640" y="245" width="80" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndRejected" bpmnElement="EndEvent_ExpenseRejected">
+        <dc:Bounds x="412" y="312" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="390" y="355" width="80" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_ToValidate" bpmnElement="Flow_ToValidate">
+        <di:waypoint x="188" y="220"/>
+        <di:waypoint x="240" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToGateway" bpmnElement="Flow_ToGateway">
+        <di:waypoint x="340" y="220"/>
+        <di:waypoint x="395" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Approved" bpmnElement="Flow_Approved">
+        <di:waypoint x="445" y="220"/>
+        <di:waypoint x="500" y="220"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="456" y="202" width="48" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_TooHigh" bpmnElement="Flow_TooHigh">
+        <di:waypoint x="420" y="245"/>
+        <di:waypoint x="420" y="312"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="428" y="270" width="44" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToApprovedEnd" bpmnElement="Flow_ToApprovedEnd">
+        <di:waypoint x="600" y="220"/>
+        <di:waypoint x="662" y="220"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

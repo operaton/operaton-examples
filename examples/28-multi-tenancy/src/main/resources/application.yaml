@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: multi-tenancy
+  datasource:
+    url: jdbc:postgresql://localhost:5432/operaton
+    username: operaton
+    password: operaton
+    driver-class-name: org.postgresql.Driver
+
+operaton:
+  bpm:
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    history-level: full
+    auto-deployment-enabled: false
+    filter:
+      create: All tasks

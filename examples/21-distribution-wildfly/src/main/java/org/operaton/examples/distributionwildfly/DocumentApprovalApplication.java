@@ -1,10 +1,10 @@
 package org.operaton.examples.distributionwildfly;
 
-import jakarta.servlet.annotation.WebListener;
 import org.operaton.bpm.application.ProcessApplication;
-import org.operaton.bpm.application.impl.ServletProcessApplication;
+import org.operaton.bpm.application.impl.JakartaServletProcessApplication;
 
-@WebListener
+// JakartaServletProcessApplicationDeployer (SCI in the engine module) registers this automatically;
+// @WebListener is not needed and @ProcessApplication name is used as the deployment name.
 @ProcessApplication("document-approval-app")
-public class DocumentApprovalApplication extends ServletProcessApplication {
+public class DocumentApprovalApplication extends JakartaServletProcessApplication {
 }

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_LoanApplicationV2"
+                  targetNamespace="http://operaton.org/examples">
+
+  <bpmn:process id="loan-application" name="Loan Application" isExecutable="true"
+                operaton:historyTimeToLive="P30D"
+                operaton:versionTag="v2">
+
+    <bpmn:startEvent id="StartEvent" name="Application submitted">
+      <bpmn:outgoing>Flow_ToCreditCheck</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="Task_CreditCheck" name="Check credit score"
+                      operaton:delegateExpression="${checkCreditDelegate}">
+      <bpmn:incoming>Flow_ToCreditCheck</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToFraudCheck</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="Task_FraudCheck" name="Fraud check"
+                      operaton:delegateExpression="${fraudCheckDelegate}">
+      <bpmn:incoming>Flow_ToFraudCheck</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToUnderwriterReview</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:userTask id="Task_UnderwriterReview" name="Underwriter review"
+                   operaton:candidateGroups="underwriters">
+      <bpmn:incoming>Flow_ToUnderwriterReview</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToEnd</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:endEvent id="EndEvent_Decision" name="Decision made">
+      <bpmn:incoming>Flow_ToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_ToCreditCheck" sourceRef="StartEvent" targetRef="Task_CreditCheck"/>
+    <bpmn:sequenceFlow id="Flow_ToFraudCheck" sourceRef="Task_CreditCheck" targetRef="Task_FraudCheck"/>
+    <bpmn:sequenceFlow id="Flow_ToUnderwriterReview" sourceRef="Task_FraudCheck" targetRef="Task_UnderwriterReview"/>
+    <bpmn:sequenceFlow id="Flow_ToEnd" sourceRef="Task_UnderwriterReview" targetRef="EndEvent_Decision"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_LoanApplicationV2">
+    <bpmndi:BPMNPlane id="BPMNPlane_LoanApplicationV2" bpmnElement="loan-application">
+      <bpmndi:BPMNShape id="Shape_StartEvent" bpmnElement="StartEvent">
+        <dc:Bounds x="152" y="202" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="128" y="245" width="86" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_CreditCheck" bpmnElement="Task_CreditCheck">
+        <dc:Bounds x="250" y="180" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_FraudCheck" bpmnElement="Task_FraudCheck">
+        <dc:Bounds x="410" y="180" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_UnderwriterReview" bpmnElement="Task_UnderwriterReview">
+        <dc:Bounds x="570" y="180" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndEvent" bpmnElement="EndEvent_Decision">
+        <dc:Bounds x="732" y="202" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="713" y="245" width="75" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_ToCreditCheck" bpmnElement="Flow_ToCreditCheck">
+        <di:waypoint x="188" y="220"/><di:waypoint x="250" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToFraudCheck" bpmnElement="Flow_ToFraudCheck">
+        <di:waypoint x="350" y="220"/><di:waypoint x="410" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToUnderwriterReview" bpmnElement="Flow_ToUnderwriterReview">
+        <di:waypoint x="510" y="220"/><di:waypoint x="570" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToEnd" bpmnElement="Flow_ToEnd">
+        <di:waypoint x="670" y="220"/><di:waypoint x="732" y="220"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

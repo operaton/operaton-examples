@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: job-retry-profile
+  datasource:
+    url: jdbc:postgresql://localhost:5432/operaton
+    username: operaton
+    password: operaton
+
+operaton:
+  bpm:
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    filter:
+      create: All tasks
+    job-executor-activate: false

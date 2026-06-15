@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_LoanApplication"
+                  targetNamespace="http://operaton.org/examples">
+
+  <bpmn:process id="loan-application" name="Loan Application" isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received">
+      <bpmn:outgoing>Flow_ToValidate</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="ServiceTask_ValidateApplication" name="Validate application"
+                      operaton:delegateExpression="${validateApplicationDelegate}">
+      <bpmn:incoming>Flow_ToValidate</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToPrepareOffer</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="ServiceTask_PrepareOffer" name="Prepare offer"
+                      operaton:delegateExpression="${prepareOfferDelegate}">
+      <bpmn:incoming>Flow_ToPrepareOffer</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToEnd</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_OfferReady" name="Offer ready">
+      <bpmn:incoming>Flow_ToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_ToValidate" sourceRef="StartEvent_ApplicationReceived"
+                       targetRef="ServiceTask_ValidateApplication"/>
+    <bpmn:sequenceFlow id="Flow_ToPrepareOffer" sourceRef="ServiceTask_ValidateApplication"
+                       targetRef="ServiceTask_PrepareOffer"/>
+    <bpmn:sequenceFlow id="Flow_ToEnd" sourceRef="ServiceTask_PrepareOffer"
+                       targetRef="EndEvent_OfferReady"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_LoanApplication">
+    <bpmndi:BPMNPlane id="BPMNPlane_LoanApplication" bpmnElement="loan-application">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_ApplicationReceived">
+        <dc:Bounds x="152" y="202" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ValidateApplication" bpmnElement="ServiceTask_ValidateApplication">
+        <dc:Bounds x="240" y="180" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PrepareOffer" bpmnElement="ServiceTask_PrepareOffer">
+        <dc:Bounds x="392" y="180" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End" bpmnElement="EndEvent_OfferReady">
+        <dc:Bounds x="554" y="202" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_ToValidate" bpmnElement="Flow_ToValidate">
+        <di:waypoint x="188" y="220"/><di:waypoint x="240" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToPrepareOffer" bpmnElement="Flow_ToPrepareOffer">
+        <di:waypoint x="340" y="220"/><di:waypoint x="392" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToEnd" bpmnElement="Flow_ToEnd">
+        <di:waypoint x="492" y="220"/><di:waypoint x="554" y="220"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

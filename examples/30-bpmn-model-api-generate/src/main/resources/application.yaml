@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: bpmn-model-api-generate
+  datasource:
+    url: jdbc:postgresql://localhost:5432/operaton
+    username: operaton
+    password: operaton
+
+operaton:
+  bpm:
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    filter:
+      create: All tasks
+    auto-deployment-enabled: false

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_SupplyChainApproval"
+                  targetNamespace="http://operaton.org/examples">
+
+  <bpmn:process id="supply-chain-approval" name="Supply Chain Approval" isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_OrderReceived" name="Order received">
+      <bpmn:outgoing>Flow_ToCheckInventory</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="ServiceTask_CheckInventory" name="Check inventory"
+                      operaton:delegateExpression="${reviewTaskDelegate}">
+      <bpmn:incoming>Flow_ToCheckInventory</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToApproveOrder</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:userTask id="UserTask_ApproveOrder" name="Approve order"
+                   operaton:candidateGroups="procurement">
+      <bpmn:incoming>Flow_ToApproveOrder</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToOrderApproved</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:endEvent id="EndEvent_OrderApproved" name="Order approved">
+      <bpmn:incoming>Flow_ToOrderApproved</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_ToCheckInventory" sourceRef="StartEvent_OrderReceived"
+                       targetRef="ServiceTask_CheckInventory"/>
+    <bpmn:sequenceFlow id="Flow_ToApproveOrder" sourceRef="ServiceTask_CheckInventory"
+                       targetRef="UserTask_ApproveOrder"/>
+    <bpmn:sequenceFlow id="Flow_ToOrderApproved" sourceRef="UserTask_ApproveOrder"
+                       targetRef="EndEvent_OrderApproved"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SupplyChainApproval">
+    <bpmndi:BPMNPlane id="BPMNPlane_SupplyChainApproval" bpmnElement="supply-chain-approval">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_OrderReceived">
+        <dc:Bounds x="152" y="202" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_CheckInventory" bpmnElement="ServiceTask_CheckInventory">
+        <dc:Bounds x="240" y="180" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ApproveOrder" bpmnElement="UserTask_ApproveOrder">
+        <dc:Bounds x="400" y="180" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End" bpmnElement="EndEvent_OrderApproved">
+        <dc:Bounds x="562" y="202" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_ToCheckInventory" bpmnElement="Flow_ToCheckInventory">
+        <di:waypoint x="188" y="220"/><di:waypoint x="240" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToApproveOrder" bpmnElement="Flow_ToApproveOrder">
+        <di:waypoint x="340" y="220"/><di:waypoint x="400" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_ToOrderApproved" bpmnElement="Flow_ToOrderApproved">
+        <di:waypoint x="500" y="220"/><di:waypoint x="562" y="220"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

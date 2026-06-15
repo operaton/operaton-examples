@@ -35,6 +35,18 @@
     <!--
     <module>examples/22-operations-flowset-control</module>
     -->
+    <module>examples/23-engine-plugin</module>
+    <module>examples/24-job-retry-profile</module>
+    <module>examples/25-command-interceptor</module>
+    <module>examples/26-process-migration</module>
+    <module>examples/27-spin-json</module>
+    <module>examples/28-multi-tenancy</module>
+    <module>examples/29-bpmn-model-api-parse</module>
+    <module>examples/30-bpmn-model-api-generate</module>
+    <!--
+    <module>examples/31-standalone-dmn</module>
+    -->
+    <module>examples/32-unit-testing</module>
     <module>use-cases/uc-01-leave-request</module>
     <module>use-cases/uc-02-loan-application</module>
     <module>use-cases/uc-03-incident-management</module>

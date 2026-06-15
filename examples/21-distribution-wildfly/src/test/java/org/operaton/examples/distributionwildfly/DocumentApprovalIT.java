@@ -45,7 +45,9 @@ class DocumentApprovalIT {
             "/operaton/standalone/deployments/document-approval.war"
         )
         .withExposedPorts(8080)
-        .waitingFor(Wait.forHttp("/engine-rest/engine")
+        // Wait until WildFly has deployed our WAR and the BPMN process is available.
+        // The deployment scanner runs every 5s so "/engine-rest/engine" resolves too early.
+        .waitingFor(Wait.forHttp("/engine-rest/process-definition/key/document-approval")
             .withStartupTimeout(Duration.ofSeconds(300)));
 
     @BeforeAll

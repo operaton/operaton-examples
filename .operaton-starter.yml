@@ -655,6 +655,45 @@ examples:
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/17-async-continuation/README.md"
     lastUpdated: "2026-06-15"
 
+  - id: job-retry-profile
+    title: "Job Retry Profile"
+    icon: "🔁"
+    path: examples/24-job-retry-profile
+    shortDescription: >
+      Configure custom job retry behavior with operaton:failedJobRetryTimeCycle on async
+      service tasks and observe retry-count decrement on transient failures.
+    longDescription: |
+      Demonstrates how to configure and observe the Operaton job retry mechanism on an
+      async service task.
+
+      - **`asyncBefore="true"`** — the service task executes as a job, enabling retry
+      - **`failedJobRetryTimeCycle="R3/PT0S"`** — ISO 8601 expression: 3 retries, 0-second delay
+      - **Manual job execution** — `ManagementService.executeJob()` drives jobs in tests
+        without a running job executor
+      - **Retry-count decrement** — observe `job.getRetries()` drop from 3 → 2 → 1 on failure
+      - **`job-executor-activate: false`** — keeps the job executor off so tests control timing
+
+      Perfect starting point for understanding how Operaton handles transient service failures.
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: beginner
+    tags:
+      - { label: "Job Retry", category: concept }
+      - { label: "Async", category: concept }
+      - { label: "Service Task", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [async-before, service-task, failed-job-retry-time-cycle]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/24-job-retry-profile/README.md"
+    screenshots:
+      - examples/24-job-retry-profile/src/main/resources/payment-processing.png
+    lastUpdated: "2026-06-15"
+
   # ── Use Cases ──────────────────────────────────────────────────────────────
 
   - id: leave-request
@@ -1048,4 +1087,129 @@ examples:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/22-operations-flowset-control/README.md"
+    lastUpdated: "2026-06-15"
+
+  - id: process-migration
+    title: "Process Migration"
+    icon: "🔄"
+    path: examples/26-process-migration
+    shortDescription: >
+      Migrate running process instances from v1 to v2 using MigrationPlan and mapEqualActivities()
+      — no in-flight state is lost, instances resume on the new definition.
+    longDescription: |
+      Shows how to evolve a process definition in production without restarting or losing running instances.
+
+      - **`MigrationPlan`** — created via `RuntimeService.createMigrationPlan(sourceId, targetId)`
+        specifying source and target process definition IDs
+      - **`mapEqualActivities()`** — automatically maps activities whose IDs are identical in both
+        versions; activities added in v2 (e.g. a new fraud-check step) are simply skipped for migrated instances
+      - **`newMigration(plan).processInstanceIds(...).execute()`** — synchronously moves instances
+        to the new definition while preserving their token position and all process variables
+      - **Version 2 adds a step** — `Task_FraudCheck` is inserted between credit scoring and
+        underwriter review; new instances run it; migrated instances skip it and land at the user task
+      - **`auto-deployment-enabled: false`** — both BPMN files are deployed explicitly in the test
+        in the correct sequence, matching real production deployment workflows
+      - **Two test scenarios** — migration of a live v1 instance, and direct v2 start verifying
+        the new fraud-check step executes
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: advanced
+    tags:
+      - { label: "Process Migration", category: concept }
+      - { label: "MigrationPlan", category: concept }
+      - { label: "Versioning", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [service-task, user-task, process-migration]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/26-process-migration/README.md"
+    screenshots:
+      - examples/26-process-migration/src/main/resources/loan-application-v1.png
+      - examples/26-process-migration/src/main/resources/loan-application-v2.png
+    lastUpdated: "2026-06-15"
+
+  - id: engine-plugin
+    title: "Process Engine Plugin"
+    icon: "🔩"
+    path: examples/23-engine-plugin
+    shortDescription: >
+      Custom AbstractProcessEnginePlugin that registers a BpmnParseListener to inject a
+      TaskListener on every user task — the primary engine extension point for auditing and metrics.
+    longDescription: |
+      Shows how to extend the Operaton engine with a custom plugin without modifying engine source.
+
+      - **`AbstractProcessEnginePlugin`** — Spring bean auto-detected by the starter; `preInit()`
+        runs before the engine is built and registers custom parse listeners
+      - **`BpmnParseListener`** — `parseUserTask()` is called once per user task during BPMN
+        deployment; attaches a `TaskListener` to the `complete` event on every user task
+      - **`TaskListener`** — fires at runtime when a user task is completed; records task ID,
+        name, and assignee in a thread-safe `AuditLog` component
+      - **No BPMN changes required** — the plugin injects listeners across all processes
+        transparently, making it ideal for cross-cutting concerns (audit, metrics, security)
+      - **Integration test** — verifies that the audit log is populated on user task completion
+        and remains empty on paths that skip user tasks
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: advanced
+    tags:
+      - { label: "Engine Plugin", category: concept }
+      - { label: "BpmnParseListener", category: concept }
+      - { label: "TaskListener", category: concept }
+      - { label: "Auditing", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [service-task, user-task, exclusive-gateway, engine-plugin]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/23-engine-plugin/README.md"
+    screenshots:
+      - examples/23-engine-plugin/src/main/resources/purchase-request.png
+    lastUpdated: "2026-06-15"
+
+  - id: unit-testing
+    title: "Unit Testing with JUnit 5"
+    icon: "🧪"
+    path: examples/32-unit-testing
+    shortDescription: >
+      Fast, isolated process unit tests using ProcessEngineExtension with in-memory H2,
+      complemented by full integration tests on Testcontainers/PostgreSQL.
+    longDescription: |
+      Demonstrates two complementary testing strategies for Operaton processes.
+
+      - **ProcessEngineExtension** — JUnit 5 extension that creates a standalone in-memory
+        engine; no Spring, no Docker; tests run in milliseconds
+      - **`@Deployment`** — annotation that auto-deploys the BPMN before each test method
+        and undeploys after, keeping tests isolated
+      - **`operaton:class`** — direct class reference allows delegates to be instantiated
+        via reflection in unit tests without an application context
+      - **Integration test** — `@SpringBootTest` + Testcontainers PostgreSQL verifies the
+        same process behaviour on the production database stack
+      - **Comparison** — side-by-side view of when to use unit tests vs integration tests
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: intermediate
+    tags:
+      - { label: "Unit Testing", category: concept }
+      - { label: "ProcessEngineExtension", category: concept }
+      - { label: "JUnit 5", category: concept }
+      - { label: "Service Task", category: concept }
+      - { label: "User Task", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [service-task, user-task, exclusive-gateway]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/32-unit-testing/README.md"
+    screenshots:
+      - examples/32-unit-testing/src/main/resources/expense-approval.png
     lastUpdated: "2026-06-15"
