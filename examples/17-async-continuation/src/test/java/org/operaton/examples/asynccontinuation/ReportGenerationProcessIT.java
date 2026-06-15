@@ -18,7 +18,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(properties = "operaton.bpm.job-execution.enabled=false")
+@SpringBootTest(properties = "operaton.bpm.job-execution.enabled=false", classes = AsyncContinuationApplication.class)
 @Testcontainers
 class ReportGenerationProcessIT {
 

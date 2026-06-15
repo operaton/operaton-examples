@@ -6,13 +6,9 @@ import org.operaton.bpm.engine.RuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.kafka.KafkaContainer;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -25,26 +21,13 @@ import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
 @Testcontainers
-@ContextConfiguration(initializers = OrderProcessingIT.KafkaInitializer.class)
+@EmbeddedKafka(partitions = 1, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
 class OrderProcessingIT {
 
     @Container
     @ServiceConnection
     @SuppressWarnings("rawtypes")
     static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine");
-
-    @Container
-    static KafkaContainer kafka = new KafkaContainer("apache/kafka:3.7.0");
-
-    static class KafkaInitializer
-            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext ctx) {
-            TestPropertyValues.of(
-                "spring.kafka.bootstrap-servers=" + kafka.getBootstrapServers()
-            ).applyTo(ctx.getEnvironment());
-        }
-    }
 
     @Autowired RuntimeService runtimeService;
     @Autowired HistoryService historyService;
@@ -57,10 +40,8 @@ class OrderProcessingIT {
     void orderMessageStartsProcessAndPublishesResult() throws Exception {
         String orderId = "ORDER-TC-001";
 
-        // Publish order to Kafka
         kafkaTemplate.send(ordersTopic, orderId, orderId).get(5, TimeUnit.SECONDS);
 
-        // Wait for process to be started and completed by the listener
         await()
             .atMost(Duration.ofSeconds(30))
             .untilAsserted(() -> {
@@ -71,7 +52,6 @@ class OrderProcessingIT {
                 assertThat(completed).isEqualTo(1);
             });
 
-        // Verify the process instance was created with correct variables
         var historicInstance = historyService.createHistoricProcessInstanceQuery()
             .processInstanceBusinessKey(orderId)
             .singleResult();
