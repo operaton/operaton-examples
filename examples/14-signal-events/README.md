@@ -14,22 +14,11 @@ This example demonstrates **signal events in Operaton**: a signal intermediate t
 
 ### stock-watcher — waits for stock replenishment
 
-```mermaid
-flowchart LR
-    S([Order placed]) --> R[Register back-order]
-    R --> C((Stock available\nsignal catch))
-    C --> F[Fulfill order]
-    F --> E([Order fulfilled])
-```
+![Stock Watcher Process](src/main/resources/stock-watcher.png)
 
 ### inventory-manager — broadcasts when stock arrives
 
-```mermaid
-flowchart LR
-    S([Restock event]) --> U[Update inventory]
-    U --> T((Stock available\nsignal throw))
-    T --> E([Restock complete])
-```
+![Inventory Manager Process](src/main/resources/inventory-manager.png)
 
 ### Broadcast interaction
 

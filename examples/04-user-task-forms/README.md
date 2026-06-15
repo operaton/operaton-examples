@@ -15,17 +15,7 @@ the engine validates on submission.
 
 ## Process model
 
-`src/main/resources/leave-request.bpmn` — open in the [bpmn.io demo](https://demo.bpmn.io)
-or Operaton Cockpit.
-
-```mermaid
-flowchart LR
-    Start([Request initiated]) --> Submit[/Submit leave request\ngroup: employees/]
-    Submit --> Review[/Review leave request\ngroup: managers/]
-    Review --> GW{Leave approved?}
-    GW -- approved --> Approved([Leave approved])
-    GW -- "rejected (default)" --> Rejected([Leave rejected])
-```
+![Leave Request Process](src/main/resources/leave-request.png)
 
 ## Prerequisites
 

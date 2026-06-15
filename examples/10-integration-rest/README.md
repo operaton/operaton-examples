@@ -12,15 +12,7 @@ This example demonstrates how a JavaDelegate calls an external REST API and hand
 
 ## Process model
 
-```mermaid
-flowchart LR
-    Start([Order placed]) --> Check[Check inventory\nREST call]
-    Check -- 200 available=true --> Confirmed([Order confirmed])
-    Check -- 200 available=false --> OutOfStock([Out of stock])
-    Check -- 4xx BPMN error --> Error([Inventory error])
-```
-
-> Note: The boundary error event attachment (4xx path) is approximated in the flowchart above; in the BPMN model it is a boundary event on the `Check inventory` service task.
+![Product Availability Process](src/main/resources/product-availability.png)
 
 ## Prerequisites
 

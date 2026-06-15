@@ -45,18 +45,7 @@ If the DMN decision returns `high`, the process skips the user task completely a
 
 ## Process Model
 
-```mermaid
-flowchart LR
-    StartEvent_1([Loan Application Received]) --> Task_CreditScore[Check Credit Score]
-    Task_CreditScore --> Task_RiskAssessment[Assess Risk DMN]
-    Task_RiskAssessment --> Gateway_Risk{Risk Level?}
-    Gateway_Risk -- low --> Task_AutoApprove[Auto-Approve Notify]
-    Gateway_Risk -- medium --> Task_UnderwriterReview[Underwriter Review]
-    Gateway_Risk -- high --> Task_AutoReject[Send Rejection Email]
-    Task_AutoApprove --> EndEvent_Approved([Loan Approved])
-    Task_UnderwriterReview --> EndEvent_UnderwriterPending([Pending Underwriter Decision])
-    Task_AutoReject --> EndEvent_Rejected([Loan Rejected])
-```
+![Loan Application Process](src/main/resources/loan-application.png)
 
 ## Risk Rules Reference
 

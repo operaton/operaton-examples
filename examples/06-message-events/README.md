@@ -16,13 +16,7 @@ named message and later resumes when a second message arrives, with correlation 
 
 `src/main/resources/order-shipment.bpmn`
 
-```mermaid
-flowchart LR
-    Start(["📨 Order placed\nmessage start"])
-    --> Process["Process order\nservice task"]
-    --> Wait(["⏳ Shipment ready\nmessage catch"])
-    --> End(["📦 Order delivered"])
-```
+![Order Shipment Process](src/main/resources/order-shipment.png)
 
 Message correlation sequence:
 

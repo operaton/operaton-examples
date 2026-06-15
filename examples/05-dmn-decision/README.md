@@ -19,14 +19,7 @@ sent for review, or declined.
 
 `src/main/resources/loan-application.bpmn` + `src/main/resources/credit-decision.dmn`
 
-```mermaid
-flowchart LR
-    Start([Application received]) --> BRT[Evaluate credit\nbusiness rule task]
-    BRT -->|DMN: credit-decision| GW{Decision outcome?}
-    GW -- approved --> Approved([Loan approved])
-    GW -- review --> Review([Sent for review])
-    GW -- "declined (default)" --> Declined([Loan declined])
-```
+![Loan Application Process](src/main/resources/loan-application.png)
 
 DMN Decision Requirements Graph:
 

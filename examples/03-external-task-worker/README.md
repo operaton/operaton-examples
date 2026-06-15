@@ -15,18 +15,7 @@ and completing (or failing) them in its own thread and transaction.
 
 ## Process model
 
-`src/main/resources/order-fulfillment.bpmn` — open in the [bpmn.io demo](https://demo.bpmn.io)
-or Operaton Cockpit.
-
-The boundary event attachment cannot be rendered in Mermaid; it is shown as a parallel branch.
-
-```mermaid
-flowchart LR
-    Start([Order placed]) --> Check[Check inventory\nexternal · topic: inventory-check]
-    Check -- "OUT_OF_STOCK" --> Backordered([Order backordered])
-    Check -- success --> Ship[Arrange shipping\nexternal · topic: arrange-shipping]
-    Ship --> Fulfilled([Order fulfilled])
-```
+![Order Fulfillment Process](src/main/resources/order-fulfillment.png)
 
 Worker interaction:
 

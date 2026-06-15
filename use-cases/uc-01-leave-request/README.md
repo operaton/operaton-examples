@@ -12,22 +12,7 @@ A self-contained Operaton example for a realistic **leave request approval workf
 
 ## Process Model
 
-```mermaid
-flowchart TD
-    Start([Leave Requested]) --> Validate[Validate Leave Request]
-    Validate --> GW_Valid{Request valid?}
-    GW_Valid -- valid --> ManagerReview[Review Request]
-    GW_Valid -- invalid --> SendRejection[Send Rejection Email]
-    ManagerReview --> GW_Decision{Approved?}
-    ManagerReview -. Review Timeout .-> EscalationReminder[Send Escalation Reminder]
-    EscalationReminder --> EndEscalation([Reminder Sent])
-    GW_Decision -- approved --> HRRecord[Record Approved Leave]
-    GW_Decision -- rejected --> SendRejection
-    HRRecord --> FinalizeApproval[Finalize Approved Leave]
-    FinalizeApproval --> EndApproved([Leave Approved])
-    SendRejection --> EmployeeNotified[Employee Notified of Rejection]
-    EmployeeNotified --> EndRejected([Leave Rejected])
-```
+![Leave Request Process](src/main/resources/leave-request.png)
 
 ## Actors
 

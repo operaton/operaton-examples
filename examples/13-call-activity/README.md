@@ -14,30 +14,15 @@ This example demonstrates **process composition via `callActivity`**: a parent p
 
 The parent process orchestrates two child processes. The gateway branches on the `orderValid` variable mapped out of the first child.
 
-```mermaid
-flowchart LR
-    Start([Order received]) --> CallValidate[["Validate order\n(validate-order)"]]
-    CallValidate --> GwValid{Order valid?}
-    GwValid -- valid --> CallNotify[["Notify customer\n(notify-customer)"]]
-    GwValid -- invalid --> EndInvalid([Order invalid])
-    CallNotify --> EndConfirmed([Order confirmed])
-```
+![Order Orchestration Process](src/main/resources/order-orchestration.png)
 
 **validate-order child process:**
 
-```mermaid
-flowchart LR
-    Start([Start validation]) --> TaskValidate[Check order ID format]
-    TaskValidate --> End([Validation done])
-```
+![Validate Order Process](src/main/resources/validate-order.png)
 
 **notify-customer child process:**
 
-```mermaid
-flowchart LR
-    Start([Start notification]) --> TaskNotify[Send customer notification]
-    TaskNotify --> End([Notification sent])
-```
+![Notify Customer Process](src/main/resources/notify-customer.png)
 
 Variable mappings:
 

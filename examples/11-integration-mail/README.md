@@ -12,14 +12,7 @@ This example demonstrates how to send emails from JavaDelegates using Spring Mai
 
 ## Process model
 
-```mermaid
-flowchart LR
-    Start([Application submitted]) --> Confirm[Send confirmation email]
-    Confirm --> Review[/Review application\ncandidateGroups: hr/]
-    Review -- approved --> Decision[Send decision email]
-    Review -- rejected --> Decision
-    Decision --> End([Application processed])
-```
+![Job Application Process](src/main/resources/job-application.png)
 
 ## Prerequisites
 

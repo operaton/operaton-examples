@@ -16,19 +16,7 @@ backed by a Java delegate, a **user task** with a candidate group, and an
 
 ## Process model
 
-`src/main/resources/order-approval.bpmn` — open it in the
-[bpmn.io demo](https://demo.bpmn.io) or Operaton Cockpit to see the diagram.
-
-```mermaid
-flowchart LR
-    Start([Order received]) --> Calc[Calculate order total]
-    Calc --> GW1{Approval required?}
-    GW1 -- "total ≥ 1000" --> Approve[/Approve order<br/>group: approvers/]
-    GW1 -- otherwise --> Approved([Order approved])
-    Approve --> GW2{Approved?}
-    GW2 -- yes --> Approved
-    GW2 -- "no (default)" --> Rejected([Order rejected])
-```
+![Order Approval Process](src/main/resources/order-approval.png)
 
 ## Prerequisites
 

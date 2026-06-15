@@ -14,21 +14,7 @@ Demonstrates **event subprocesses** in Operaton: subprocesses embedded inside a 
 
 Single process: `document-processing`
 
-```mermaid
-flowchart TD
-    Start([Document arrived]) --> Parse[Parse document]
-    Parse --> Enrich[Enrich document]
-    Enrich --> Store[/Store document\neditors/]
-    Store --> Stored([Document stored])
-
-    subgraph NonInt ["Non-interrupting — runs alongside main flow"]
-        AS([Signal: AuditRequired]) --> Audit[Record audit entry] --> AD([Audit recorded])
-    end
-
-    subgraph Int ["Interrupting — cancels main flow on DOCUMENT_ERROR"]
-        ES([Error: DOCUMENT_ERROR]) --> Handle[Handle error] --> EH([Error handled])
-    end
-```
+![Document Processing Process](src/main/resources/document-processing.png)
 
 **Main flow:** `StartEvent_DocumentArrived` → `Task_ParseDocument` (service) → `Task_EnrichDocument` (service) → `Task_StoreDocument` (user task, group `editors`) → `EndEvent_Stored`
 

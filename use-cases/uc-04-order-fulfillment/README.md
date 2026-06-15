@@ -12,20 +12,7 @@ A self-contained Operaton example for **order fulfillment orchestration** across
 
 ## Process Model
 
-```mermaid
-flowchart LR
-    Start([Order Placed]) --> Inventory[Validate Inventory]
-    Inventory --> GW{In Stock?}
-    GW -->|in stock| Payment[Charge Payment]
-    GW -->|out of stock| Backorder[Notify Backorder]
-    Payment -->|success| PackShip[Pack & Ship\nwarehouse]
-    Payment -. PAYMENT_FAILED\nerror .-> EndFailed([Notify Customer of Failure])
-    PackShip --> Notify[Notify Customer]
-    Notify --> EndShipped([Order Shipped])
-    Backorder --> EndBackordered([Order Backordered])
-```
-
-Note: Lanes (sales, warehouse, System) and error-boundary attachment cannot be rendered in Mermaid; see `order-fulfillment.bpmn` for the full diagram interchange.
+![Order Fulfillment Process](src/main/resources/order-fulfillment.png)
 
 ## Scenario
 

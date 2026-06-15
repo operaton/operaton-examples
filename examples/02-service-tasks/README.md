@@ -17,19 +17,7 @@ service tasks: **synchronous** (caller's transaction) and **asynchronous**
 
 ## Process model
 
-`src/main/resources/payment-processing.bpmn` — open it in the
-[bpmn.io demo](https://demo.bpmn.io) or Operaton Cockpit to see the diagram.
-
-The boundary event attachment cannot be rendered in Mermaid; it is shown as a
-separate branch from the charge task.
-
-```mermaid
-flowchart LR
-    Start([Payment received]) --> Enrich[Enrich payment data\nsync]
-    Enrich --> Charge[Charge payment\nasync · 4 retries]
-    Charge -- "PAYMENT_DECLINED" --> Declined([Payment declined])
-    Charge -- success --> Processed([Payment processed])
-```
+![Payment Processing Process](src/main/resources/payment-processing.png)
 
 How the engine and payment gateway interact:
 

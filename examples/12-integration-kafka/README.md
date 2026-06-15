@@ -12,15 +12,7 @@ This example demonstrates how to trigger an Operaton process from a Kafka messag
 
 ## Process model
 
-```mermaid
-flowchart LR
-    Kafka[(orders topic)] -- KafkaListener --> Listener[OrderKafkaListener]
-    Listener --> Start([Order received])
-    Start --> Process[Process order]
-    Process --> Publish[Publish result]
-    Publish --> End([Order completed])
-    Publish -- KafkaTemplate --> Results[(order-results topic)]
-```
+![Order Processing Process](src/main/resources/order-processing.png)
 
 ## Prerequisites
 

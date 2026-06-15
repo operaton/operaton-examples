@@ -18,12 +18,7 @@ the job executor API — no `Thread.sleep` required.
 
 `src/main/resources/sla-escalation.bpmn`
 
-```mermaid
-flowchart LR
-    Start([Request received]) --> Handle[/Handle request\ngroup: support/]
-    Handle -- "completed in time" --> Resolved([Request resolved])
-    Handle -. "SLA timer fires\nPT1H" .-> Escalated([Request escalated])
-```
+![SLA Escalation Process](src/main/resources/sla-escalation.png)
 
 ## Prerequisites
 

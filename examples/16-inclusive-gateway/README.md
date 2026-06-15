@@ -14,17 +14,7 @@ This example demonstrates the **inclusive (OR) gateway** in Operaton: multiple o
 
 An insurance claim is routed to one or both review tracks based on the `claimType` variable. When all active reviews are complete, the claim is settled. If no conditions match, the claim is rejected immediately.
 
-```mermaid
-flowchart LR
-    Start([Claim submitted]) --> Route{Route claim\ninclusive gateway}
-    Route -- "medical or both" --> Medical[/Review medical\nmedicalTeam/]
-    Route -- "property or both" --> Property[/Review property\npropertyTeam/]
-    Route -- default --> Rejected([Claim rejected])
-    Medical --> Join{All reviews done\ninclusive join}
-    Property --> Join
-    Join --> Settle[Settle claim]
-    Settle --> End([Claim settled])
-```
+![Insurance Claim Process](src/main/resources/insurance-claim.png)
 
 Elements in the BPMN (`insurance-claim.bpmn`):
 

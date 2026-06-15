@@ -14,19 +14,7 @@ This example demonstrates BPMN compensation — a saga pattern where a failed st
 
 The `book-travel` process books a hotel and a flight, then processes payment. If payment fails, a BPMN error boundary event catches the error and triggers compensation, which cancels both the hotel and the flight in reverse order.
 
-Note: Boundary event attachment and compensation associations cannot be rendered natively in Mermaid; they are approximated below with dotted arrows.
-
-```mermaid
-flowchart LR
-    Start([Trip requested]) --> Hotel[Book hotel]
-    Hotel --> Flight[Book flight]
-    Flight --> Payment[Process payment]
-    Payment -- "payment OK" --> Confirmed([Booking confirmed])
-    Payment -- "PAYMENT_FAILED error" --> Compensate([Trigger compensation])
-    Compensate --> Cancelled([Booking cancelled])
-    Hotel -. "compensate" .-> CancelHotel[Cancel hotel]
-    Flight -. "compensate" .-> CancelFlight[Cancel flight]
-```
+![Book Travel Process](src/main/resources/book-travel.png)
 
 All BPMN elements:
 

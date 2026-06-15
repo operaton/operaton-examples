@@ -14,15 +14,7 @@ This example demonstrates parallel multi-instance user tasks — running the sam
 
 The `document-review` process starts a parallel review cycle where every reviewer in the `reviewers` list receives their own task simultaneously. Once all tasks are complete, a gateway checks the final value of `approved` and routes to the appropriate end event.
 
-Note: Mermaid cannot render multi-instance markers directly; the parallel execution is indicated in the task label below.
-
-```mermaid
-flowchart LR
-    Start([Review requested]) --> Review["Review document\n(for each reviewer — parallel)"]
-    Review -- "all completed" --> GW{All approved?}
-    GW -- "all approved" --> Approved([Document approved])
-    GW -- "any rejected" --> Rejected([Document rejected])
-```
+![Document Review Process](src/main/resources/document-review.png)
 
 All BPMN elements:
 

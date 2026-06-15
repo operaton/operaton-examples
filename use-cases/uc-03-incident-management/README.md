@@ -12,21 +12,7 @@ A self-contained Operaton example for **incident management with SLA escalation*
 
 ## Process Model
 
-```mermaid
-flowchart LR
-    Start([Incident Reported]) --> Triage[Triage\nfirst-line]
-    Triage -->|completed| GW{Resolved?}
-    Triage -. SLA Timer\ninterrupting .-> SecondLine[Handle Escalation\nsecond-line]
-    Triage -. Escalation Signal\nnon-interrupting .-> SetPriority[Set High Priority]
-    SetPriority --> SecondLine
-    GW -->|resolved| CloseTicket[Close Ticket]
-    GW -->|not resolved| SecondLine
-    CloseTicket --> EndClosed([Ticket Closed])
-    SecondLine --> PostMortem[Post-Mortem Notify]
-    PostMortem --> EndPostMortem([Post-Mortem Done])
-```
-
-Note: Lanes (employees, first-line, second-line, System) and boundary-event attachment cannot be rendered in Mermaid; see `incident-management.bpmn` for the full diagram interchange.
+![Incident Management Process](src/main/resources/incident-management.png)
 
 ## Scenario
 
