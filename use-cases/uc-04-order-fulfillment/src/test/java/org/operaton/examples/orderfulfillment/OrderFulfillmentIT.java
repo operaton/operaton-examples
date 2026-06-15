@@ -13,11 +13,9 @@ import org.operaton.bpm.engine.task.Task;
 import org.operaton.bpm.engine.variable.Variables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
@@ -28,9 +26,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
+        properties = "operaton.bpm.job-execution.enabled=false")
 @Testcontainers
-@ContextConfiguration(initializers = OrderFulfillmentIT.WireMockInitializer.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class OrderFulfillmentIT {
 
@@ -41,24 +39,19 @@ class OrderFulfillmentIT {
 
     @Container
     static WireMockContainer wireMock = new WireMockContainer("wiremock/wiremock:3.5.4")
-            .withMappingFromResource("inventory-in-stock.json")
-            .withMappingFromResource("inventory-out-of-stock.json")
-            .withMappingFromResource("payment-success.json")
-            .withMappingFromResource("notify-customer.json")
-            .withMappingFromResource("notify-backorder.json")
+            .withMappingFromResource("inventory-in-stock", "wiremock/mappings/inventory-in-stock.json")
+            .withMappingFromResource("inventory-out-of-stock", "wiremock/mappings/inventory-out-of-stock.json")
+            .withMappingFromResource("payment-success", "wiremock/mappings/payment-success.json")
+            .withMappingFromResource("notify-customer", "wiremock/mappings/notify-customer.json")
+            .withMappingFromResource("notify-backorder", "wiremock/mappings/notify-backorder.json")
             .waitingFor(Wait.forHttp("/__admin/mappings"));
 
-    static class WireMockInitializer
-            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext ctx) {
-            String baseUrl = "http://" + wireMock.getHost() + ":" + wireMock.getMappedPort(8080);
-            TestPropertyValues.of(
-                    "inventory.service.url=" + baseUrl,
-                    "payment.service.url=" + baseUrl,
-                    "notification.service.url=" + baseUrl
-            ).applyTo(ctx.getEnvironment());
-        }
+    @DynamicPropertySource
+    static void wireMockProperties(DynamicPropertyRegistry registry) {
+        String baseUrl = "http://" + wireMock.getHost() + ":" + wireMock.getMappedPort(8080);
+        registry.add("inventory.service.url", () -> baseUrl);
+        registry.add("payment.service.url", () -> baseUrl);
+        registry.add("notification.service.url", () -> baseUrl);
     }
 
     @Autowired
@@ -90,6 +83,14 @@ class OrderFulfillmentIT {
         ProcessInstance instance = runtimeService.startProcessInstanceByKey(
                 "order-fulfillment",
                 Variables.putValue("orderId", "ORD-001"));
+
+        // Payment task has asyncBefore — execute the job
+        Job job = managementService.createJobQuery()
+                .processInstanceId(instance.getId())
+                .singleResult();
+        if (job != null) {
+            managementService.executeJob(job.getId());
+        }
 
         // Warehouse pack & ship task should be created
         List<Task> tasks = taskService.createTaskQuery()
@@ -190,6 +191,12 @@ class OrderFulfillmentIT {
 
         assertEquals(1, runtimeService.createProcessInstanceQuery().active()
                 .processInstanceId(pi.getId()).count());
+
+        // Execute the payment job to move past the async step
+        Job activeJob = managementService.createJobQuery().processInstanceId(pi.getId()).singleResult();
+        if (activeJob != null) {
+            managementService.executeJob(activeJob.getId());
+        }
 
         // Clean up: complete the warehouse task so the process ends
         Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
