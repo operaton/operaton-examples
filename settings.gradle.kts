@@ -9,6 +9,7 @@ include(
   "examples:06-message-events",
   "examples:07-timer-events",
   "examples:13-call-activity",
+  "examples:15-event-subprocess"
   "examples:16-inclusive-gateway",
   "examples:17-async-continuation"
 )
@@ -21,5 +22,6 @@ project(":examples:05-dmn-decision").projectDir = file("examples/05-dmn-decision
 project(":examples:06-message-events").projectDir = file("examples/06-message-events")
 project(":examples:07-timer-events").projectDir = file("examples/07-timer-events")
 project(":examples:13-call-activity").projectDir = file("examples/13-call-activity")
+project(":examples:15-event-subprocess").projectDir = file("examples/15-event-subprocess")
 project(":examples:16-inclusive-gateway").projectDir = file("examples/16-inclusive-gateway")
 project(":examples:17-async-continuation").projectDir = file("examples/17-async-continuation")
