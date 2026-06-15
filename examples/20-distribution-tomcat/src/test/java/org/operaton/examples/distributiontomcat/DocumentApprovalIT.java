@@ -16,6 +16,7 @@ import java.time.Duration;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 
 @Testcontainers
 class DocumentApprovalIT {
@@ -24,7 +25,7 @@ class DocumentApprovalIT {
     private static final String DB_ALIAS = "postgres";
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine")
         .withNetwork(NETWORK)
         .withNetworkAliases(DB_ALIAS)
         .withDatabaseName("operaton")
@@ -62,16 +63,20 @@ class DocumentApprovalIT {
             .post("/engine-rest/process-definition/key/document-approval/start")
         .then()
             .statusCode(200)
+            .body("ended", equalTo(true))
             .extract().path("id");
 
+        // The history/process-instance endpoint does not include endActivityId in Operaton 2.1.1;
+        // check the end event via history/activity-instance with activityType=noneEndEvent.
         given()
             .queryParam("processInstanceId", instanceId)
-            .queryParam("completed", true)
+            .queryParam("activityType", "noneEndEvent")
         .when()
-            .get("/engine-rest/history/process-instance")
+            .get("/engine-rest/history/activity-instance")
         .then()
             .statusCode(200)
-            .body("[0].endActivityId", equalTo("EndEvent_Approved"));
+            .body("", hasSize(1))
+            .body("[0].activityId", equalTo("EndEvent_Approved"));
     }
 
     @Test
@@ -83,15 +88,17 @@ class DocumentApprovalIT {
             .post("/engine-rest/process-definition/key/document-approval/start")
         .then()
             .statusCode(200)
+            .body("ended", equalTo(true))
             .extract().path("id");
 
         given()
             .queryParam("processInstanceId", instanceId)
-            .queryParam("completed", true)
+            .queryParam("activityType", "noneEndEvent")
         .when()
-            .get("/engine-rest/history/process-instance")
+            .get("/engine-rest/history/activity-instance")
         .then()
             .statusCode(200)
-            .body("[0].endActivityId", equalTo("EndEvent_Review"));
+            .body("", hasSize(1))
+            .body("[0].activityId", equalTo("EndEvent_Review"));
     }
 }

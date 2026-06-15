@@ -19,7 +19,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>21</maven.compiler.release>
+    <!-- WAR code must target JDK 17: the operaton/tomcat distribution image runs OpenJDK 17 -->
+    <maven.compiler.release>17</maven.compiler.release>
     <operaton.version>2.1.1</operaton.version>
     <testcontainers.version>2.0.5</testcontainers.version>
   </properties>
@@ -101,6 +102,20 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <executions>
+          <!-- Test sources run on JDK 21 (host JVM) — keep at 21 -->
+          <execution>
+            <id>default-testCompile</id>
+            <configuration>
+              <release>21</release>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>

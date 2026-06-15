@@ -11,6 +11,11 @@ java {
     }
 }
 
+// WAR bytecode must target JDK 17: the operaton/tomcat distribution image runs OpenJDK 17
+tasks.compileJava {
+    options.release = 17
+}
+
 repositories {
     mavenCentral()
 }
@@ -26,6 +31,7 @@ dependencies {
     testImplementation(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testcontainersVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
