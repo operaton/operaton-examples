@@ -24,6 +24,12 @@ updates:
       testcontainers:
         patterns:
           - "org.testcontainers*"
+      maven-plugins:
+        patterns:
+          - "org.apache.maven.plugins*"
+      misc:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
