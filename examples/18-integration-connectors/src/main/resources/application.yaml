@@ -8,6 +8,8 @@ spring:
 
 operaton:
   bpm:
+    process-engine-plugins:
+      - "org.operaton.connect.plugin.impl.ConnectProcessEnginePlugin"
     admin-user:
       id: demo
       password: demo
