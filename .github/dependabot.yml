@@ -41,3 +41,10 @@ updates:
       testcontainers:
         patterns:
           - "org.testcontainers*"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
