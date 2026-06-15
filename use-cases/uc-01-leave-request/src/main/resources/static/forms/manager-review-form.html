@@ -1,0 +1,29 @@
+<form role="form">
+  <div class="form-group">
+    <label>Requester</label>
+    <input cam-variable-name="requester" cam-variable-type="String" readonly class="form-control">
+  </div>
+  <div class="form-group">
+    <label>Start Date</label>
+    <input cam-variable-name="startDate" cam-variable-type="String" readonly class="form-control">
+  </div>
+  <div class="form-group">
+    <label>End Date</label>
+    <input cam-variable-name="endDate" cam-variable-type="String" readonly class="form-control">
+  </div>
+  <div class="form-group">
+    <label>Days Requested</label>
+    <input cam-variable-name="durationDays" cam-variable-type="Long" readonly class="form-control">
+  </div>
+  <div class="form-group">
+    <label>Remaining Vacation Days</label>
+    <input cam-variable-name="remainingVacationDays" cam-variable-type="Long" readonly class="form-control">
+  </div>
+  <div class="form-group">
+    <label>Decision</label>
+    <select cam-variable-name="approved" cam-variable-type="Boolean" class="form-control">
+      <option value="true">Approve</option>
+      <option value="false">Reject</option>
+    </select>
+  </div>
+</form>
