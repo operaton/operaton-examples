@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             targetNamespace="http://www.operaton.org/examples"
+             exporter="operaton modeler"
+             exporterVersion="1.0">
+
+  <collaboration id="Collaboration_LoanApplication">
+    <participant id="Pool_LoanApplication" name="Loan Application" processRef="loan-application"/>
+  </collaboration>
+
+  <process id="loan-application" name="Loan Application" isExecutable="true"
+           operaton:historyTimeToLive="P30D"
+           operaton:candidateStarterGroups="employees,operaton-admin">
+
+    <laneSet id="LaneSet_1">
+      <lane id="Lane_Employees" name="employees">
+        <flowNodeRef>StartEvent_1</flowNodeRef>
+      </lane>
+      <lane id="Lane_Underwriters" name="underwriters">
+        <flowNodeRef>Task_UnderwriterReview</flowNodeRef>
+      </lane>
+      <lane id="Lane_System" name="System">
+        <flowNodeRef>Task_CreditScore</flowNodeRef>
+        <flowNodeRef>Task_RiskAssessment</flowNodeRef>
+        <flowNodeRef>Gateway_Risk</flowNodeRef>
+        <flowNodeRef>Task_AutoApprove</flowNodeRef>
+        <flowNodeRef>Task_AutoReject</flowNodeRef>
+        <flowNodeRef>EndEvent_Approved</flowNodeRef>
+        <flowNodeRef>EndEvent_UnderwriterPending</flowNodeRef>
+        <flowNodeRef>EndEvent_Rejected</flowNodeRef>
+      </lane>
+    </laneSet>
+
+    <startEvent id="StartEvent_1" name="Loan Application Received">
+      <outgoing>Flow_start_to_credit</outgoing>
+    </startEvent>
+
+    <serviceTask id="Task_CreditScore" name="Check Credit Score"
+                 operaton:delegateExpression="${creditScoreDelegate}">
+      <incoming>Flow_start_to_credit</incoming>
+      <outgoing>Flow_credit_to_dmn</outgoing>
+    </serviceTask>
+
+    <businessRuleTask id="Task_RiskAssessment" name="Assess Risk (DMN)"
+                      operaton:decisionRef="risk-assessment"
+                      operaton:decisionRefBinding="latest"
+                      operaton:mapDecisionResult="singleEntry"
+                      operaton:resultVariable="riskLevel">
+      <incoming>Flow_credit_to_dmn</incoming>
+      <outgoing>Flow_dmn_to_gw</outgoing>
+    </businessRuleTask>
+
+    <exclusiveGateway id="Gateway_Risk" name="Risk Level?">
+      <incoming>Flow_dmn_to_gw</incoming>
+      <outgoing>Flow_low</outgoing>
+      <outgoing>Flow_medium</outgoing>
+      <outgoing>Flow_high</outgoing>
+    </exclusiveGateway>
+
+    <serviceTask id="Task_AutoApprove" name="Auto-Approve Notify"
+                 operaton:delegateExpression="${notificationDelegate}">
+      <incoming>Flow_low</incoming>
+      <outgoing>Flow_approve_end</outgoing>
+    </serviceTask>
+
+    <userTask id="Task_UnderwriterReview" name="Underwriter Review"
+              operaton:candidateGroups="underwriters">
+      <incoming>Flow_medium</incoming>
+      <outgoing>Flow_medium_end</outgoing>
+    </userTask>
+
+    <sendTask id="Task_AutoReject" name="Send Rejection Email"
+              operaton:delegateExpression="${rejectionEmailDelegate}">
+      <incoming>Flow_high</incoming>
+      <outgoing>Flow_reject_end</outgoing>
+    </sendTask>
+
+    <endEvent id="EndEvent_Approved" name="Loan Approved">
+      <incoming>Flow_approve_end</incoming>
+    </endEvent>
+
+    <endEvent id="EndEvent_UnderwriterPending" name="Pending Underwriter Decision">
+      <incoming>Flow_medium_end</incoming>
+    </endEvent>
+
+    <endEvent id="EndEvent_Rejected" name="Loan Rejected">
+      <incoming>Flow_reject_end</incoming>
+    </endEvent>
+
+    <sequenceFlow id="Flow_start_to_credit" sourceRef="StartEvent_1" targetRef="Task_CreditScore"/>
+    <sequenceFlow id="Flow_credit_to_dmn" sourceRef="Task_CreditScore" targetRef="Task_RiskAssessment"/>
+    <sequenceFlow id="Flow_dmn_to_gw" sourceRef="Task_RiskAssessment" targetRef="Gateway_Risk"/>
+    <sequenceFlow id="Flow_low" name="low" sourceRef="Gateway_Risk" targetRef="Task_AutoApprove">
+      <conditionExpression xsi:type="tFormalExpression">${riskLevel == 'low'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_medium" name="medium" sourceRef="Gateway_Risk" targetRef="Task_UnderwriterReview">
+      <conditionExpression xsi:type="tFormalExpression">${riskLevel == 'medium'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_high" name="high" sourceRef="Gateway_Risk" targetRef="Task_AutoReject">
+      <conditionExpression xsi:type="tFormalExpression">${riskLevel == 'high'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_approve_end" sourceRef="Task_AutoApprove" targetRef="EndEvent_Approved"/>
+    <sequenceFlow id="Flow_medium_end" sourceRef="Task_UnderwriterReview" targetRef="EndEvent_UnderwriterPending">
+      <extensionElements>
+        <operaton:executionListener event="take" expression="${execution.setVariable('loanDecision', 'APPROVED')}"/>
+      </extensionElements>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_reject_end" sourceRef="Task_AutoReject" targetRef="EndEvent_Rejected"/>
+
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_LoanApplication">
+
+      <!-- Pool -->
+      <bpmndi:BPMNShape id="Pool_LoanApplication_di" bpmnElement="Pool_LoanApplication" isHorizontal="true">
+        <dc:Bounds x="160" y="40" width="1100" height="460"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Lane: employees (y=40, h=80) -->
+      <bpmndi:BPMNShape id="Lane_Employees_di" bpmnElement="Lane_Employees" isHorizontal="true">
+        <dc:Bounds x="190" y="40" width="1070" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Lane: underwriters (y=120, h=120) -->
+      <bpmndi:BPMNShape id="Lane_Underwriters_di" bpmnElement="Lane_Underwriters" isHorizontal="true">
+        <dc:Bounds x="190" y="120" width="1070" height="120"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Lane: System (y=240, h=260) -->
+      <bpmndi:BPMNShape id="Lane_System_di" bpmnElement="Lane_System" isHorizontal="true">
+        <dc:Bounds x="190" y="240" width="1070" height="260"/>
+      </bpmndi:BPMNShape>
+
+      <!-- StartEvent (employees, center y=80) -->
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="252" y="62" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="228" y="105" width="85" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Task_UnderwriterReview (underwriters, center y=180) -->
+      <bpmndi:BPMNShape id="Task_UnderwriterReview_di" bpmnElement="Task_UnderwriterReview">
+        <dc:Bounds x="820" y="140" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- System lane elements (center y=370) -->
+      <bpmndi:BPMNShape id="Task_CreditScore_di" bpmnElement="Task_CreditScore">
+        <dc:Bounds x="310" y="330" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_RiskAssessment_di" bpmnElement="Task_RiskAssessment">
+        <dc:Bounds x="500" y="330" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Gateway_Risk_di" bpmnElement="Gateway_Risk" isMarkerVisible="true">
+        <dc:Bounds x="695" y="345" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="685" y="402" width="70" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_AutoApprove_di" bpmnElement="Task_AutoApprove">
+        <dc:Bounds x="820" y="270" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_AutoReject_di" bpmnElement="Task_AutoReject">
+        <dc:Bounds x="820" y="400" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="EndEvent_Approved_di" bpmnElement="EndEvent_Approved">
+        <dc:Bounds x="1022" y="292" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1003" y="335" width="74" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="EndEvent_UnderwriterPending_di" bpmnElement="EndEvent_UnderwriterPending">
+        <dc:Bounds x="1022" y="162" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="998" y="205" width="85" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="EndEvent_Rejected_di" bpmnElement="EndEvent_Rejected">
+        <dc:Bounds x="1022" y="422" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1004" y="465" width="72" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Edges -->
+      <bpmndi:BPMNEdge id="Flow_start_to_credit_di" bpmnElement="Flow_start_to_credit">
+        <di:waypoint x="270" y="98"/><di:waypoint x="270" y="370"/><di:waypoint x="310" y="370"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_credit_to_dmn_di" bpmnElement="Flow_credit_to_dmn">
+        <di:waypoint x="450" y="370"/><di:waypoint x="500" y="370"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_dmn_to_gw_di" bpmnElement="Flow_dmn_to_gw">
+        <di:waypoint x="640" y="370"/><di:waypoint x="695" y="370"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_low_di" bpmnElement="Flow_low">
+        <di:waypoint x="720" y="345"/><di:waypoint x="720" y="310"/><di:waypoint x="820" y="310"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="724" y="320" width="21" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_medium_di" bpmnElement="Flow_medium">
+        <di:waypoint x="720" y="345"/><di:waypoint x="720" y="180"/><di:waypoint x="820" y="180"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="726" y="257" width="43" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_high_di" bpmnElement="Flow_high">
+        <di:waypoint x="720" y="395"/><di:waypoint x="720" y="440"/><di:waypoint x="820" y="440"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="727" y="415" width="23" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_approve_end_di" bpmnElement="Flow_approve_end">
+        <di:waypoint x="960" y="310"/><di:waypoint x="1022" y="310"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_medium_end_di" bpmnElement="Flow_medium_end">
+        <di:waypoint x="960" y="180"/><di:waypoint x="1022" y="180"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_reject_end_di" bpmnElement="Flow_reject_end">
+        <di:waypoint x="960" y="440"/><di:waypoint x="1022" y="440"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</definitions>
