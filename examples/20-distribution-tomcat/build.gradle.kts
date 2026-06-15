@@ -26,7 +26,7 @@ val testcontainersVersion = "2.0.5"
 dependencies {
     compileOnly(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
     compileOnly("org.operaton.bpm:operaton-engine")
-    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
 
     testImplementation(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testcontainersVersion"))
