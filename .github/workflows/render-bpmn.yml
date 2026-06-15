@@ -30,7 +30,7 @@ jobs:
         run: bash scripts/render-bpmn.sh
 
       - name: Commit rendered PNGs
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'ci: render BPMN diagrams to PNG [skip ci]'
           file_pattern: '**/*.png'
