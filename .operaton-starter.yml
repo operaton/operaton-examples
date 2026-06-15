@@ -228,3 +228,55 @@ examples:
     complexity: advanced
     integrations: [REST, WireMock]
     bpmnConcepts: [Error Boundary Event, Async Before, Exclusive Gateway, Service Task]
+
+  # ── Platform Integration Examples ─────────────────────────────────────────
+
+  - name: Integration — Connectors
+    description: HTTP connector (declarative REST call, no Java delegate) plus a custom Connector SPI implementation.
+    path: examples/18-integration-connectors
+    tags: [intermediate, connector, http-connector, custom-connector, wiremock, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Service Task, Boundary Error Event, Connector]
+
+  - name: Runtime — Quarkus
+    description: Embedded Operaton engine on Quarkus/CDI instead of Spring Boot.
+    path: examples/19-runtime-quarkus
+    tags: [intermediate, quarkus, cdi, embedded-engine]
+    buildSystem: maven
+    runtime: quarkus
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Service Task, Exclusive Gateway]
+
+  - name: Distribution — Tomcat
+    description: Process-application WAR deployed into the operaton/tomcat Docker image (shared-engine model).
+    path: examples/20-distribution-tomcat
+    tags: [intermediate, tomcat, war, process-application, shared-engine]
+    buildSystem: maven
+    runtime: tomcat
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Service Task, Exclusive Gateway, Process Application]
+
+  - name: Distribution — Wildfly
+    description: Process-application WAR deployed into the operaton/wildfly Docker image.
+    path: examples/21-distribution-wildfly
+    tags: [intermediate, wildfly, war, process-application, jakarta-ee]
+    buildSystem: maven
+    runtime: wildfly
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Service Task, Exclusive Gateway, Process Application]
+
+  - name: Operations — Flowset Control
+    description: operaton/operaton with built-in webapps disabled; Flowset Control Community as the external ops UI.
+    path: examples/22-operations-flowset-control
+    tags: [advanced, ops, flowset-control, docker-compose, webapps-disabled]
+    buildSystem: maven
+    runtime: docker
+    javaVersion: "21"
+    complexity: advanced
+    bpmnConcepts: [Operations, External UI]
