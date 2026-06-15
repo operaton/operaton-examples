@@ -29,21 +29,36 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 
 ## Catalog
 
-| # | Example | Demonstrates | Status |
-|---|---|---|---|
-| 01 | [getting-started](examples/01-getting-started) | Embedded engine, service task delegate, user task, exclusive gateway | ✅ |
-| 02 | [service-tasks](examples/02-service-tasks) | External service tasks, Java delegates, expression delegates | ✅ |
-| 03 | [external-task-worker](examples/03-external-task-worker) | External task pattern, long-polling worker, topic subscription | ✅ |
-| 04 | [user-task-forms](examples/04-user-task-forms) | User tasks, embedded forms, task lifecycle, form variables | ✅ |
-| 05 | [dmn-decision](examples/05-dmn-decision) | DMN decision tables, DRD, decision evaluation, loan-application process | ✅ |
-| 06 | [message-events](examples/06-message-events) | Message start event, intermediate message catch, business-key correlation, MismatchingMessageCorrelationException | ✅ |
-| 07 | [timer-events](examples/07-timer-events) | Timer boundary event (SLA escalation), job executor API, testing timers without wall-clock waits | ✅ |
-| 15 | [event-subprocess](examples/15-event-subprocess) | Event subprocesses — non-interrupting signal audit log, interrupting error handler, cross-cutting concerns without polluting the main flow | ✅ |
-| 16 | [inclusive-gateway](examples/16-inclusive-gateway) | Inclusive (OR) gateway — multiple concurrent paths, joining wait for all active tokens | ✅ |
-| 08–15, 17–18 | _see roadmap_ | compensation, REST integration, mail, Kafka, Keycloak, multi-tenancy, … | 🚧 |
+### Examples
 
-The full roadmap with per-example scope lives in
-[docs/superpowers/plans/2026-06-12-operaton-examples-repository.md](docs/superpowers/plans/2026-06-12-operaton-examples-repository.md).
+| # | Example | Demonstrates |
+|---|---|---|
+| 01 | [getting-started](examples/01-getting-started) | Embedded engine, service task delegate, user task, exclusive gateway |
+| 02 | [service-tasks](examples/02-service-tasks) | Java delegates, expression delegates, BpmnError, job retry |
+| 03 | [external-task-worker](examples/03-external-task-worker) | External task pattern, long-polling worker, topic subscription |
+| 04 | [user-task-forms](examples/04-user-task-forms) | User tasks, embedded forms, task lifecycle, form variables |
+| 05 | [dmn-decision](examples/05-dmn-decision) | DMN decision tables, DRD, decision evaluation, business rule task |
+| 06 | [message-events](examples/06-message-events) | Message start event, intermediate message catch, business-key correlation |
+| 07 | [timer-events](examples/07-timer-events) | Timer boundary event (SLA escalation), job executor API, testing timers |
+| 08 | [error-compensation](examples/08-error-compensation) | BPMN compensation (saga pattern), compensation handlers, BpmnError trigger |
+| 09 | [multi-instance](examples/09-multi-instance) | Parallel multi-instance user tasks, collection loop, completion condition |
+| 10 | [integration-rest](examples/10-integration-rest) | REST delegate via RestTemplate, 4xx→BpmnError, WireMock Testcontainers |
+| 11 | [integration-mail](examples/11-integration-mail) | Spring Mail in delegates, Mailpit Testcontainers for SMTP + REST assertions |
+| 12 | [integration-kafka](examples/12-integration-kafka) | Kafka listener starts process, delegate publishes result, Awaitility assertions |
+| 13 | [call-activity](examples/13-call-activity) | Process composition via call activity, variable in/out mappings, child process history |
+| 14 | [signal-events](examples/14-signal-events) | Signal broadcast vs. message point-to-point, intermediate catch/throw, multi-subscriber |
+| 15 | [event-subprocess](examples/15-event-subprocess) | Non-interrupting signal audit subprocess, interrupting error handler subprocess |
+| 16 | [inclusive-gateway](examples/16-inclusive-gateway) | Inclusive (OR) gateway — multiple concurrent paths, join waits for all active tokens |
+| 17 | [async-continuation](examples/17-async-continuation) | asyncBefore transaction boundaries, manual job execution, failedJobRetryTimeCycle |
+
+### Use Cases
+
+| # | Use Case | Process | Demonstrates |
+|---|---|---|---|
+| UC-01 | [leave-request](use-cases/uc-01-leave-request) | Employee leave approval | Timer escalation (non-interrupting), VacationBalanceService, SQL schema init |
+| UC-02 | [loan-application](use-cases/uc-02-loan-application) | Loan origination | REST credit scoring, DMN risk assessment, Spring Mail notifications |
+| UC-03 | [incident-management](use-cases/uc-03-incident-management) | IT support ticket | Signal escalation boundary, timer SLA boundary, 4-swimlane BPMN, REST integration |
+| UC-04 | [order-fulfillment](use-cases/uc-04-order-fulfillment) | E-commerce order | Error boundary on payment, async continuation, compensation, WireMock inventory/payment stubs |
 
 ## Anatomy of every example
 
