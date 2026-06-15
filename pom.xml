@@ -56,7 +56,12 @@
 
   <profiles>
     <profile>
-      <id>rancher-desktop</id>
+      <id>rancher</id>
+      <activation>
+        <file>
+          <exists>${user.home}/.rd/docker.sock</exists>
+        </file>
+      </activation>
       <build>
         <pluginManagement>
           <plugins>
