@@ -77,9 +77,9 @@
     </dependency>
     <!-- Testcontainers WireMock — CI-safe integration tests without Docker Compose -->
     <dependency>
-      <groupId>org.wiremock.integrations</groupId>
+      <groupId>org.wiremock.integrations.testcontainers</groupId>
       <artifactId>wiremock-testcontainers-module</artifactId>
-      <version>1.0-alpha-14</version>
+      <version>1.0-alpha-13</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -90,14 +90,14 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring-boot.version}</version>
-        <configuration>
-          <layout>ZIP</layout>
-        </configuration>
         <executions>
           <execution>
             <goals>
               <goal>repackage</goal>
             </goals>
+            <configuration>
+              <classifier>exec</classifier>
+            </configuration>
           </execution>
         </executions>
       </plugin>

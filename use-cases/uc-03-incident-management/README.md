@@ -26,11 +26,11 @@ flowchart LR
     PostMortem --> EndPostMortem([Post-Mortem Done])
 ```
 
-Note: Lanes (employees, first-line, second-line, System) and boundary-event attachment cannot be rendered in Mermaid; see `incident-management.bpmn` for the full diagram.
+Note: Lanes (employees, first-line, second-line, System) and boundary-event attachment cannot be rendered in Mermaid; see `incident-management.bpmn` for the full diagram interchange.
 
 ## Scenario
 
-The process starts when a caller reports an `incidentId`. First-line support gets an initial chance to resolve the issue. If the SLA expires, an interrupting timer boundary event escalates the work to second-line engineering and triggers a post-mortem notification path.
+The process starts when a caller reports an `incidentId`. First-line support gets an initial chance to resolve the issue. If the SLA expires, an interrupting timer boundary event escalates the work to second-line engineering and triggers a post-mortem notification path. A non-interrupting signal boundary event allows parallel escalation while the triage task stays active.
 
 ## Actors
 
@@ -102,7 +102,7 @@ curl -u frank:frank -X POST \
   -d '{"name": "EscalationSignal"}'
 ```
 
-The triage task remains active (non-interrupting) while a **Handle Escalation** task appears for `second-line`. `incidentPriority` is set to `HIGH`.
+The triage task remains active (non-interrupting) while a **Handle Escalation** task appears for the `second-line` group. `incidentPriority` is set to `HIGH`.
 
 ## How It Works
 
@@ -120,7 +120,7 @@ The triage task remains active (non-interrupting) while a **Handle Escalation** 
 ./gradlew build
 ```
 
-`IncidentManagementIT` verifies four scenarios against a real PostgreSQL database (via Testcontainers): process deployment, the resolved path, timer-driven escalation, and signal-driven parallel escalation.
+`IncidentManagementIT` verifies four scenarios against a real PostgreSQL database (via Testcontainers): process deployment, the resolved path, timer-driven escalation to second-line, and signal-driven parallel escalation.
 
 ## Project Structure
 
