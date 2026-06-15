@@ -42,11 +42,6 @@
       <groupId>org.operaton.bpm.springboot</groupId>
       <artifactId>operaton-bpm-spring-boot-starter-webapp</artifactId>
     </dependency>
-    <!-- Operaton DMN engine — explicitly declared (not relying on transitive resolution) -->
-    <dependency>
-      <groupId>org.operaton.bpm.springboot</groupId>
-      <artifactId>operaton-spring-boot-starter-dmn</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -88,7 +83,7 @@
     </dependency>
     <!-- Testcontainers WireMock — CI-safe integration tests without Docker Compose -->
     <dependency>
-      <groupId>org.wiremock.integrations</groupId>
+      <groupId>org.wiremock.integrations.testcontainers</groupId>
       <artifactId>wiremock-testcontainers-module</artifactId>
       <version>1.0-alpha-14</version>
       <scope>test</scope>
@@ -109,6 +104,9 @@
             <goals>
               <goal>repackage</goal>
             </goals>
+            <configuration>
+              <classifier>exec</classifier>
+            </configuration>
           </execution>
         </executions>
       </plugin>
