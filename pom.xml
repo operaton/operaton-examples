@@ -18,7 +18,10 @@
     <module>examples/05-dmn-decision</module>
     <module>examples/06-message-events</module>
     <module>examples/07-timer-events</module>
+    <module>examples/13-call-activity</module>
     <module>examples/15-event-subprocess</module>
+    <module>examples/16-inclusive-gateway</module>
+    <module>examples/17-async-continuation</module>
   </modules>
 
 </project>
