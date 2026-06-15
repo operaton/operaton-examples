@@ -1,0 +1,230 @@
+apiVersion: operaton-starter/v1
+
+repository:
+  name: "Operaton Examples"
+  description: "Curated, runnable examples illustrating common Operaton BPMN patterns and integrations."
+  maintainer:
+    name: "Karsten Thoms"
+    url: "https://github.com/kthoms"
+
+examples:
+
+  # ── Core Examples ──────────────────────────────────────────────────────────
+
+  - name: getting-started
+    description: Embedded engine, service task delegate, user task, exclusive gateway.
+    path: examples/01-getting-started
+    tags: [beginner, user-task, service-task, exclusive-gateway, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: beginner
+    bpmnConcepts: [Service Task, User Task, Exclusive Gateway]
+
+  - name: service-tasks
+    description: Java delegates, expression delegates, BpmnError propagation, job retry configuration.
+    path: examples/02-service-tasks
+    tags: [beginner, service-task, java-delegate, bpmn-error, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: beginner
+    bpmnConcepts: [Service Task, BpmnError, Job Retry]
+
+  - name: external-task-worker
+    description: External task pattern with long-polling worker and topic subscription.
+    path: examples/03-external-task-worker
+    tags: [intermediate, external-task, long-polling, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [External Task]
+
+  - name: user-task-forms
+    description: User tasks with embedded forms, task lifecycle management, and form variable handling.
+    path: examples/04-user-task-forms
+    tags: [beginner, user-task, embedded-form, tasklist, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: beginner
+    bpmnConcepts: [User Task, Embedded Form]
+
+  - name: dmn-decision
+    description: DMN decision tables, decision requirements diagram, business rule task evaluation.
+    path: examples/05-dmn-decision
+    tags: [intermediate, dmn, decision-table, business-rule-task, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Business Rule Task, DMN Decision Table, Decision Requirements Diagram]
+
+  - name: message-events
+    description: Message start event, intermediate message catch, business-key correlation.
+    path: examples/06-message-events
+    tags: [intermediate, message-event, correlation, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Message Start Event, Intermediate Message Catch Event, Correlation]
+
+  - name: timer-events
+    description: Timer boundary event for SLA escalation, job executor API, testing timers.
+    path: examples/07-timer-events
+    tags: [intermediate, timer-event, sla, job-executor, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Timer Boundary Event, Job Executor]
+
+  - name: error-compensation
+    description: BPMN compensation (saga pattern), compensation handlers, BpmnError trigger.
+    path: examples/08-error-compensation
+    tags: [advanced, compensation, saga, bpmn-error, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: advanced
+    bpmnConcepts: [Compensation, BPMN Error, Compensation Handler]
+
+  - name: multi-instance
+    description: Parallel multi-instance user tasks with collection loop and completion condition.
+    path: examples/09-multi-instance
+    tags: [intermediate, multi-instance, parallel-gateway, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Multi-Instance Subprocess, Parallel Multi-Instance, Completion Condition]
+
+  - name: integration-rest
+    description: REST service calls via RestTemplate, 4xx-to-BpmnError mapping, WireMock Testcontainers.
+    path: examples/10-integration-rest
+    tags: [intermediate, rest, wiremock, testcontainers, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    integrations: [REST, WireMock]
+    bpmnConcepts: [Service Task, BpmnError]
+
+  - name: integration-mail
+    description: Spring Mail in delegates, Mailpit Testcontainers for SMTP and REST assertions.
+    path: examples/11-integration-mail
+    tags: [intermediate, mail, smtp, testcontainers, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    integrations: [Jakarta Mail, Mailpit]
+    bpmnConcepts: [Service Task]
+
+  - name: integration-kafka
+    description: Kafka listener starts process, delegate publishes result, Awaitility assertions.
+    path: examples/12-integration-kafka
+    tags: [intermediate, kafka, messaging, testcontainers, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    integrations: [Apache Kafka]
+    bpmnConcepts: [Service Task, Message]
+
+  - name: call-activity
+    description: Process composition via call activity with variable in/out mappings and child process history.
+    path: examples/13-call-activity
+    tags: [intermediate, call-activity, process-composition, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Call Activity, Variable Mapping, Child Process]
+
+  - name: signal-events
+    description: Signal broadcast vs. message point-to-point, intermediate catch/throw, multi-subscriber.
+    path: examples/14-signal-events
+    tags: [intermediate, signal-event, broadcast, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Signal Intermediate Catch Event, Signal Throw Event, Signal Boundary Event]
+
+  - name: event-subprocess
+    description: Non-interrupting signal audit subprocess and interrupting error handler subprocess.
+    path: examples/15-event-subprocess
+    tags: [intermediate, event-subprocess, signal-event, error-event, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Event Subprocess, Non-Interrupting Subprocess, Interrupting Subprocess]
+
+  - name: inclusive-gateway
+    description: Inclusive (OR) gateway — multiple concurrent paths, join waits for all active tokens.
+    path: examples/16-inclusive-gateway
+    tags: [intermediate, inclusive-gateway, parallel-paths, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [Inclusive Gateway]
+
+  - name: async-continuation
+    description: asyncBefore transaction boundaries, manual job execution, failedJobRetryTimeCycle.
+    path: examples/17-async-continuation
+    tags: [advanced, async-continuation, job-executor, transaction, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: advanced
+    bpmnConcepts: [Async Before, Async After, Job Executor, failedJobRetryTimeCycle]
+
+  # ── Use Cases ──────────────────────────────────────────────────────────────
+
+  - name: leave-request
+    description: Employee leave approval with timer escalation, vacation balance service, and SQL schema init.
+    path: use-cases/uc-01-leave-request
+    tags: [intermediate, user-task, timer-event, approval, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: intermediate
+    bpmnConcepts: [User Task, Timer Boundary Event, Non-Interrupting Timer, Exclusive Gateway]
+
+  - name: loan-application
+    description: Loan origination with REST credit scoring, DMN risk assessment, and Spring Mail notifications.
+    path: use-cases/uc-02-loan-application
+    tags: [advanced, dmn, rest, mail, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: advanced
+    integrations: [REST, DMN, Jakarta Mail]
+    bpmnConcepts: [Business Rule Task, Service Task, Exclusive Gateway]
+
+  - name: incident-management
+    description: IT support ticket with signal escalation boundary, timer SLA boundary, 4-swimlane BPMN.
+    path: use-cases/uc-03-incident-management
+    tags: [advanced, signal-event, timer-event, swimlane, rest, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: advanced
+    integrations: [REST]
+    bpmnConcepts: [Signal Boundary Event, Timer Boundary Event, User Task, Lane]
+
+  - name: order-fulfillment
+    description: E-commerce order with error boundary on payment, async continuation, and WireMock stubs.
+    path: use-cases/uc-04-order-fulfillment
+    tags: [advanced, bpmn-error, async-continuation, wiremock, spring-boot]
+    buildSystem: maven
+    runtime: spring-boot
+    javaVersion: "21"
+    complexity: advanced
+    integrations: [REST, WireMock]
+    bpmnConcepts: [Error Boundary Event, Async Before, Exclusive Gateway, Service Task]
