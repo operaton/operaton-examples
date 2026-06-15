@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: integration-rest
+  datasource:
+    url: jdbc:postgresql://localhost:5432/operaton
+    username: operaton
+    password: operaton
+inventory:
+  service:
+    url: http://localhost:8080
+operaton:
+  bpm:
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    filter:
+      create: All tasks
