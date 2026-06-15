@@ -73,9 +73,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.wiremock.integrations</groupId>
+      <groupId>org.wiremock.integrations.testcontainers</groupId>
       <artifactId>wiremock-testcontainers-module</artifactId>
-      <version>1.0-alpha-14</version>
+      <version>1.0-alpha-13</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
