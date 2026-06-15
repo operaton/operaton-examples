@@ -93,7 +93,7 @@
                         attachedToRef="Task_ManagerReview" cancelActivity="false">
       <bpmn:outgoing>Flow_timer_to_reminder</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerDef_1">
-        <bpmn:timeDuration xsi:type="tFormalExpression">${managerReviewTimeout != null ? managerReviewTimeout : "PT72H"}</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT72H</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
 
@@ -169,14 +169,14 @@
     <bpmn:sequenceFlow id="Flow_start_to_validation" sourceRef="StartEvent_1" targetRef="Task_ValidateRequest"/>
     <bpmn:sequenceFlow id="Flow_validation_to_gateway" sourceRef="Task_ValidateRequest" targetRef="Gateway_Validation"/>
     <bpmn:sequenceFlow id="Flow_valid_request" name="valid" sourceRef="Gateway_Validation" targetRef="Task_ManagerReview">
-      <bpmn:conditionExpression xsi:type="tFormalExpression">${validationPassed == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${validationPassed == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_invalid_request" name="invalid" sourceRef="Gateway_Validation" targetRef="Task_SendRejectionEmail">
-      <bpmn:conditionExpression xsi:type="tFormalExpression">${validationPassed == false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${validationPassed == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_manager_to_gw" sourceRef="Task_ManagerReview" targetRef="Gateway_Decision"/>
     <bpmn:sequenceFlow id="Flow_approved" name="approved" sourceRef="Gateway_Decision" targetRef="Task_HRRecord">
-      <bpmn:conditionExpression xsi:type="tFormalExpression">${approved == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${approved == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_rejected" name="rejected" sourceRef="Gateway_Decision" targetRef="Task_SendRejectionEmail">
       <bpmn:extensionElements>
