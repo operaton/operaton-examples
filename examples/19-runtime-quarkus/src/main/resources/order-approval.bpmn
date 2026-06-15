@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_1"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="order-approval" name="Order Approval" isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_1" name="Order received">
+      <bpmn:outgoing>Flow_start_validate</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="ValidateOrder" name="Validate order"
+                      operaton:delegateExpression="${validateOrderDelegate}">
+      <bpmn:incoming>Flow_start_validate</bpmn:incoming>
+      <bpmn:outgoing>Flow_validate_gw</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:exclusiveGateway id="Gateway_Approved" name="Approved?" default="Flow_gw_rejected">
+      <bpmn:incoming>Flow_validate_gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_gw_approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_gw_rejected</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:endEvent id="EndEvent_Approved" name="Order approved">
+      <bpmn:incoming>Flow_gw_approved</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_Rejected" name="Order rejected">
+      <bpmn:incoming>Flow_gw_rejected</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_start_validate" sourceRef="StartEvent_1" targetRef="ValidateOrder"/>
+    <bpmn:sequenceFlow id="Flow_validate_gw" sourceRef="ValidateOrder" targetRef="Gateway_Approved"/>
+    <bpmn:sequenceFlow id="Flow_gw_approved" name="approved" sourceRef="Gateway_Approved" targetRef="EndEvent_Approved">
+      <bpmn:conditionExpression>${approved == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_gw_rejected" name="rejected" sourceRef="Gateway_Approved" targetRef="EndEvent_Rejected"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="order-approval">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="135" y="125" width="70" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ValidateOrder_di" bpmnElement="ValidateOrder">
+        <dc:Bounds x="240" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Approved_di" bpmnElement="Gateway_Approved" isMarkerVisible="true">
+        <dc:Bounds x="395" y="75" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="395" y="132" width="50" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Approved_di" bpmnElement="EndEvent_Approved">
+        <dc:Bounds x="502" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="481" y="125" width="78" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Rejected_di" bpmnElement="EndEvent_Rejected">
+        <dc:Bounds x="502" y="192" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="481" y="235" width="78" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_start_validate_di" bpmnElement="Flow_start_validate">
+        <di:waypoint x="188" y="100"/><di:waypoint x="240" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_validate_gw_di" bpmnElement="Flow_validate_gw">
+        <di:waypoint x="340" y="100"/><di:waypoint x="395" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_gw_approved_di" bpmnElement="Flow_gw_approved">
+        <di:waypoint x="445" y="100"/><di:waypoint x="502" y="100"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="458" y="82" width="46" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_gw_rejected_di" bpmnElement="Flow_gw_rejected">
+        <di:waypoint x="420" y="125"/><di:waypoint x="420" y="210"/><di:waypoint x="502" y="210"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="423" y="162" width="39" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
