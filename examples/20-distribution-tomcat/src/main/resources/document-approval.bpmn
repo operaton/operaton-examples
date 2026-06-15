@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             targetNamespace="http://operaton.org/schema/1.0/bpmn"
+             exporter="Operaton Modeler"
+             exporterVersion="1.0">
+
+    <process id="document-approval" name="Document Approval" isExecutable="true"
+             operaton:historyTimeToLive="P30D">
+
+        <startEvent id="StartEvent_1" name="Document received">
+            <outgoing>Flow_1</outgoing>
+        </startEvent>
+
+        <serviceTask id="CheckDocument" name="Check document type"
+                     operaton:class="org.operaton.examples.distributiontomcat.CheckDocumentDelegate">
+            <incoming>Flow_1</incoming>
+            <outgoing>Flow_2</outgoing>
+        </serviceTask>
+
+        <exclusiveGateway id="Gateway_Review" name="Needs review?" default="Flow_Approved">
+            <incoming>Flow_2</incoming>
+            <outgoing>Flow_Review</outgoing>
+            <outgoing>Flow_Approved</outgoing>
+        </exclusiveGateway>
+
+        <endEvent id="EndEvent_Review" name="Send for review">
+            <incoming>Flow_Review</incoming>
+        </endEvent>
+
+        <endEvent id="EndEvent_Approved" name="Document approved">
+            <incoming>Flow_Approved</incoming>
+        </endEvent>
+
+        <sequenceFlow id="Flow_1" name="document" sourceRef="StartEvent_1" targetRef="CheckDocument"/>
+        <sequenceFlow id="Flow_2" name="checked" sourceRef="CheckDocument" targetRef="Gateway_Review"/>
+        <sequenceFlow id="Flow_Review" name="requiresReview" sourceRef="Gateway_Review" targetRef="EndEvent_Review">
+            <conditionExpression xsi:type="tFormalExpression">${requiresReview == true}</conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="Flow_Approved" name="otherwise" sourceRef="Gateway_Review" targetRef="EndEvent_Approved"/>
+
+    </process>
+
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="document-approval">
+            <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+                <dc:Bounds x="152" y="82" width="36" height="36"/>
+                <bpmndi:BPMNLabel><dc:Bounds x="125" y="125" width="90" height="14"/></bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="CheckDocument_di" bpmnElement="CheckDocument">
+                <dc:Bounds x="250" y="60" width="100" height="80"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="Gateway_Review_di" bpmnElement="Gateway_Review" isMarkerVisible="true">
+                <dc:Bounds x="405" y="75" width="50" height="50"/>
+                <bpmndi:BPMNLabel><dc:Bounds x="388" y="132" width="85" height="14"/></bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="EndEvent_Review_di" bpmnElement="EndEvent_Review">
+                <dc:Bounds x="522" y="32" width="36" height="36"/>
+                <bpmndi:BPMNLabel><dc:Bounds x="495" y="75" width="90" height="14"/></bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="EndEvent_Approved_di" bpmnElement="EndEvent_Approved">
+                <dc:Bounds x="522" y="132" width="36" height="36"/>
+                <bpmndi:BPMNLabel><dc:Bounds x="495" y="175" width="90" height="14"/></bpmndi:BPMNLabel>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+                <di:waypoint x="188" y="100"/><di:waypoint x="250" y="100"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+                <di:waypoint x="350" y="100"/><di:waypoint x="405" y="100"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="Flow_Review_di" bpmnElement="Flow_Review">
+                <di:waypoint x="430" y="75"/><di:waypoint x="430" y="50"/><di:waypoint x="522" y="50"/>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge id="Flow_Approved_di" bpmnElement="Flow_Approved">
+                <di:waypoint x="430" y="125"/><di:waypoint x="430" y="150"/><di:waypoint x="522" y="150"/>
+            </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</definitions>
