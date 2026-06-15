@@ -12,11 +12,10 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -35,8 +34,7 @@ class OrderProcessingIT {
     static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine");
 
     @Container
-    static KafkaContainer kafka = new KafkaContainer(
-            DockerImageName.parse("confluentinc/cp-kafka:7.4.0"));
+    static KafkaContainer kafka = new KafkaContainer("apache/kafka:3.7.0");
 
     static class KafkaInitializer
             implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -74,8 +72,12 @@ class OrderProcessingIT {
             });
 
         // Verify the process instance was created with correct variables
-        var historicVars = historyService.createHistoricVariableInstanceQuery()
+        var historicInstance = historyService.createHistoricProcessInstanceQuery()
             .processInstanceBusinessKey(orderId)
+            .singleResult();
+        assertThat(historicInstance).isNotNull();
+        var historicVars = historyService.createHistoricVariableInstanceQuery()
+            .processInstanceId(historicInstance.getId())
             .variableName("orderId")
             .singleResult();
         assertThat(historicVars).isNotNull();
