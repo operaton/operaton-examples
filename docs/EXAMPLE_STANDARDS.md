@@ -181,3 +181,57 @@ Every example README contains, in this order:
 - [ ] §7 app conventions: demo/demo admin user, named seed users, application.yaml
 - [ ] No dead code, no unused dependencies, no TODO/stub delegates
 ```
+
+## 11. Platform Integration Examples
+
+Platform integration examples (18–22) demonstrate runtimes and deployment
+topologies that differ from the embedded Spring Boot shape. The following table
+defines which base rules apply unchanged, which are relaxed, and what
+replaces them for each shape.
+
+### Shape A — Embedded, non-Spring-Boot (example 19)
+
+Applies to: `19-runtime-quarkus`
+
+| Base rule | Status | Notes |
+|---|---|---|
+| §3 Dual build Maven + Gradle | **Applies** | Use Quarkus Maven plugin + Quarkus Gradle plugin |
+| §7 Spring Boot `@SpringBootApplication` | **Waived** | Use Quarkus CDI application |
+| §7 `application.yaml` | **Waived** | Use `application.properties` (Quarkus convention) |
+| §7 `demo/demo` Cockpit admin user | **Waived** — no Cockpit webapp | Engine REST API verified instead |
+| §5 Testcontainers IT | **Applies** | `@QuarkusTest` + `QuarkusTestResourceLifecycleManager` for Postgres |
+| All other §1–§9 rules | **Apply unchanged** | — |
+
+### Shape B — Process-application WAR / shared engine (examples 20, 21)
+
+Applies to: `20-distribution-tomcat`, `21-distribution-wildfly`
+
+| Base rule | Status | Notes |
+|---|---|---|
+| §3 Dual build Maven + Gradle | **Applies** | `war` packaging in both build systems |
+| §7 Spring Boot | **Waived** | `ServletProcessApplication` + `META-INF/processes.xml` |
+| §7 `application.yaml` | **Waived** | No application config file; engine config lives in the container |
+| §5 Testcontainers IT | **Applies — modified** | IT starts `operaton/tomcat` or `operaton/wildfly` + Postgres as `GenericContainer`; copies the built WAR in; drives process via engine REST API |
+| §7 `demo/demo` admin user | **Applies** — pre-seeded in the container image | — |
+| §6 docker-compose | **Applies** | Postgres + distribution container with `DB_*` env + WAR volume-mounted |
+| Version pinning | **Split** | Library version from root README; image tag pinned to `2.1.1` (see version table) |
+| All other §1–§4, §8–§9 rules | **Apply unchanged** | — |
+
+### Shape C — Container-only / no application JAR (example 22)
+
+Applies to: `22-operations-flowset-control`
+
+| Base rule | Status | Notes |
+|---|---|---|
+| §2 Project structure | **Modified** | No `src/main/java`; test-only module with docker-compose and a sample BPMN mounted into the engine |
+| §3 Dual build | **Applies** | Both wrappers run the smoke IT |
+| §5 Testcontainers IT | **Reduced to smoke IT** | Assert engine REST up; built-in webapp paths return 404; Flowset Control container healthy |
+| §7 App conventions | **Waived** | No application code |
+| §6 docker-compose | **Applies** | Postgres (engine) + `operaton/operaton` (webapps disabled) + Flowset Control own Postgres + flowset-control service |
+| All other §8–§9 rules | **Apply unchanged** | — |
+
+### Version table addendum
+
+The root `README.md` version table includes a **Distribution images** row for
+`operaton/tomcat`, `operaton/wildfly`, and `operaton/operaton`. The image tag
+(`2.1.1`) may differ from the embedded library version; both are correct.
