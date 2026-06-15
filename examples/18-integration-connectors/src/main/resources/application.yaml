@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: integration-connectors
+  datasource:
+    url: jdbc:postgresql://localhost:5432/operaton
+    username: operaton
+    password: operaton
+
+operaton:
+  bpm:
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    filter:
+      create: All tasks
+
+exchange-rate:
+  service:
+    url: http://localhost:9090
