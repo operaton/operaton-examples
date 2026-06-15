@@ -30,6 +30,8 @@ flowchart TB
     RL -->|informationRequirement| CD
 ```
 
+![Process diagram](docs/process.png)
+
 ## Prerequisites
 
 - JDK 21

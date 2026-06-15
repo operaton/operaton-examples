@@ -147,6 +147,19 @@ Every example README contains, in this order:
    gateway) and every named sequence flow in the BPMN appears in the Mermaid
    diagram; constructs Mermaid cannot render (lanes, boundary-event
    attachment) are approximated and noted in prose.
+   Every Mermaid diagram **must also be rendered to `docs/process.png`**
+   and referenced immediately after the code fence:
+   ```markdown
+   \`\`\`mermaid
+   flowchart LR
+       ...
+   \`\`\`
+
+   ![Process diagram](docs/process.png)
+   ```
+   Render command: `npx @mermaid-js/mermaid-cli -i docs/process.mmd -o docs/process.png -w 1200 -b white`
+   Commit both the `.png` and the updated README together.
+   The PNG is consumed by the Operaton Starter gallery (`screenshots` field in `.operaton-starter.yml`).
 4. **Prerequisites** — JDK 21, Docker; exact versions.
 5. **Run it** — `docker compose up -d`, then both
    `./mvnw spring-boot:run` and `./gradlew bootRun`; URLs and credentials
@@ -176,7 +189,7 @@ Every example README contains, in this order:
 - [ ] BPMN/DMN use operaton namespace, have DI, names, historyTimeToLive
 - [ ] ITs use Testcontainers (PostgreSQL + real integrations), no H2, no sleeps
 - [ ] Happy path + alternative path tested end-to-end
-- [ ] README has all 8 sections; Mermaid matches BPMN element-for-element
+- [ ] README has all 8 sections; Mermaid matches BPMN element-for-element; `docs/process.png` rendered and referenced
 - [ ] Versions match pom.xml == build.gradle.kts == root README table
 - [ ] §7 app conventions: demo/demo admin user, named seed users, application.yaml
 - [ ] No dead code, no unused dependencies, no TODO/stub delegates

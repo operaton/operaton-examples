@@ -20,6 +20,8 @@ flowchart LR
     GW -->|otherwise| A([Document approved])
 ```
 
+![Process diagram](docs/process.png)
+
 ## Prerequisites
 
 | Tool | Version |

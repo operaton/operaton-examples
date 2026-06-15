@@ -21,6 +21,8 @@ flowchart LR
     C -->|RATE_UNAVAILABLE\nboundary error| ER([Rate unavailable])
 ```
 
+![Process diagram](docs/process.png)
+
 ## Prerequisites
 
 | Tool | Version |

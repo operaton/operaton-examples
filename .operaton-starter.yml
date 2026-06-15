@@ -81,6 +81,8 @@ examples:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/02-service-tasks/README.md"
+    screenshots:
+      - examples/02-service-tasks/docs/process.png
     lastUpdated: "2026-06-15"
 
   - id: external-task-worker
@@ -117,6 +119,8 @@ examples:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/03-external-task-worker/README.md"
+    screenshots:
+      - examples/03-external-task-worker/docs/process.png
     lastUpdated: "2026-06-15"
 
   - id: user-task-forms
@@ -187,6 +191,8 @@ examples:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/05-dmn-decision/README.md"
+    screenshots:
+      - examples/05-dmn-decision/docs/process.png
     lastUpdated: "2026-06-15"
 
   - id: message-events
@@ -222,6 +228,8 @@ examples:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/06-message-events/README.md"
+    screenshots:
+      - examples/06-message-events/docs/process.png
     lastUpdated: "2026-06-15"
 
   - id: timer-events
@@ -526,6 +534,8 @@ examples:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/14-signal-events/README.md"
+    screenshots:
+      - examples/14-signal-events/docs/process.png
     lastUpdated: "2026-06-15"
 
   - id: event-subprocess
@@ -857,6 +867,8 @@ examples:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/18-integration-connectors/README.md"
+    screenshots:
+      - examples/18-integration-connectors/docs/process.png
     lastUpdated: "2026-06-15"
 
   - id: runtime-quarkus
@@ -899,6 +911,8 @@ examples:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/19-runtime-quarkus/README.md"
+    screenshots:
+      - examples/19-runtime-quarkus/docs/process.png
     lastUpdated: "2026-06-15"
 
   - id: distribution-tomcat
@@ -944,6 +958,8 @@ examples:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/20-distribution-tomcat/README.md"
+    screenshots:
+      - examples/20-distribution-tomcat/docs/process.png
     lastUpdated: "2026-06-15"
 
   - id: distribution-wildfly

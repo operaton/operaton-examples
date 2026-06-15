@@ -47,6 +47,8 @@ sequenceDiagram
     end
 ```
 
+![Process diagram](docs/process.png)
+
 ## Prerequisites
 
 - JDK 21

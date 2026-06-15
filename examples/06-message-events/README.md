@@ -32,6 +32,8 @@ sequenceDiagram
     Note over Engine: resumes, stores trackingId, completes
 ```
 
+![Process diagram](docs/process.png)
+
 ## Prerequisites
 
 - JDK 21

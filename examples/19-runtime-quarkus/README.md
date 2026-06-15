@@ -20,6 +20,8 @@ flowchart LR
     GW -->|rejected| ER([Order rejected])
 ```
 
+![Process diagram](docs/process.png)
+
 ## Prerequisites
 
 | Tool | Version |

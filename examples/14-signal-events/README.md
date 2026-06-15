@@ -35,6 +35,8 @@ sequenceDiagram
     Engine-->>W2: signal received → fulfill order → complete
 ```
 
+![Process diagram](docs/process.png)
+
 ## Prerequisites
 
 - JDK 21
