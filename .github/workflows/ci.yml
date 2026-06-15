@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       examples: ${{ steps.list.outputs.examples }}
+      gradle-examples: ${{ steps.gradle.outputs.examples }}
     steps:
       - uses: actions/checkout@v6
       - id: list
@@ -21,6 +22,11 @@ jobs:
           examples=$(ls -d examples/*/ | sed 's|/$||' | jq -R . | jq -cs .)
           echo "examples=$examples" >> "$GITHUB_OUTPUT"
           echo "Discovered: $examples"
+      - id: gradle
+        run: |
+          gradle_examples=$(find examples -name "build.gradle*" | sed 's|.*examples/||' | sed 's|/.*||' | sort -u | jq -R . | jq -cs .)
+          echo "examples=$gradle_examples" >> "$GITHUB_OUTPUT"
+          echo "Gradle examples: $gradle_examples"
 
   build:
     needs: discover
@@ -43,6 +49,8 @@ jobs:
         working-directory: ${{ matrix.example }}
         run: ./mvnw -B -ntp verify
       - name: Build and test (Gradle)
-        if: matrix.build == 'gradle'
+        if: |
+          matrix.build == 'gradle' &&
+          contains(fromJson(needs.discover.outputs.gradle-examples), matrix.example)
         working-directory: ${{ matrix.example }}
         run: ./gradlew build --no-daemon
