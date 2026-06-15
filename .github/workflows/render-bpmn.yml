@@ -1,0 +1,36 @@
+name: Render BPMN diagrams
+
+on:
+  push:
+    paths:
+      - '**/*.bpmn'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history so the auto-commit can push back
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install bpmn-to-image
+        run: npm install -g bpmn-to-image
+
+      - name: Render BPMN files to PNG
+        run: bash scripts/render-bpmn.sh
+
+      - name: Commit rendered PNGs
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'ci: render BPMN diagrams to PNG [skip ci]'
+          file_pattern: '**/*.png'
