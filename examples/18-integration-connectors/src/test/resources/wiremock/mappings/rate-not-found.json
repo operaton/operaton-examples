@@ -1,0 +1,11 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/rates/UNKNOWN/EUR"
+  },
+  "response": {
+    "status": 404,
+    "body": "Rate not found",
+    "headers": { "Content-Type": "text/plain" }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/rates/USD/EUR"
+  },
+  "response": {
+    "status": 200,
+    "body": "0.92",
+    "headers": { "Content-Type": "text/plain" }
+  }
+}
