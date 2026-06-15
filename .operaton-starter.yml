@@ -11,272 +11,1025 @@ examples:
 
   # ── Core Examples ──────────────────────────────────────────────────────────
 
-  - name: Getting Started
-    description: Embedded engine, service task delegate, user task, exclusive gateway.
+  - id: getting-started
+    title: "Getting Started"
+    icon: "🚀"
     path: examples/01-getting-started
-    tags: [beginner, user-task, service-task, exclusive-gateway, spring-boot]
+    shortDescription: >
+      Embedded engine, service task delegate, user task, exclusive gateway — the minimal
+      working Operaton application on Spring Boot.
+    longDescription: |
+      The canonical "hello world" for Operaton. A single Spring Boot application embeds
+      the process engine and deploys a simple order-approval process on startup.
+
+      - **Service Task** — Java delegate sets an `approved` variable based on order value
+      - **Exclusive Gateway** — routes to "Approved" or "Rejected" based on the variable
+      - **User Task** — manual review step for borderline orders
+      - **Integration test** — starts the process via the Java API, asserts the end state
+
+      A PostgreSQL container is managed by Testcontainers; no manual setup required.
+      The Operaton REST API and Cockpit are available at `localhost:8080` via `docker compose up`.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: beginner
-    bpmnConcepts: [Service Task, User Task, Exclusive Gateway]
+    tags:
+      - { label: "Service Task", category: concept }
+      - { label: "User Task", category: concept }
+      - { label: "Exclusive Gateway", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [service-task, user-task, exclusive-gateway]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/01-getting-started/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Service Tasks
-    description: Java delegates, expression delegates, BpmnError propagation, job retry configuration.
+  - id: service-tasks
+    title: "Service Tasks"
+    icon: "⚙️"
     path: examples/02-service-tasks
-    tags: [beginner, service-task, java-delegate, bpmn-error, spring-boot]
+    shortDescription: >
+      Java delegates, expression delegates, BpmnError propagation, and job retry configuration
+      on a single Spring Boot example.
+    longDescription: |
+      A deep-dive into all the ways Operaton executes service logic inside a process.
+
+      - **Java delegate** — a `JavaDelegate` bean resolved by class reference
+      - **Expression delegate** — a Spring bean resolved by EL expression (`${myBean}`)
+      - **Inline expression** — `${execution.setVariable(...)}` directly in the BPMN
+      - **BpmnError** — thrown by a delegate and caught by a boundary error event
+      - **Job retry cycle** — `operaton:failedJobRetryTimeCycle` for transient failures
+
+      All four service-invocation patterns are tested in a single integration test suite
+      that asserts both the happy path and the error boundary path.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: beginner
-    bpmnConcepts: [Service Task, BpmnError, Job Retry]
+    tags:
+      - { label: "Service Task", category: concept }
+      - { label: "BpmnError", category: concept }
+      - { label: "Job Retry", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [service-task, bpmn-error, error-boundary-event, job-retry]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/02-service-tasks/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: External Task Worker
-    description: External task pattern with long-polling worker and topic subscription.
+  - id: external-task-worker
+    title: "External Task Worker"
+    icon: "🔌"
     path: examples/03-external-task-worker
-    tags: [intermediate, external-task, long-polling, spring-boot]
+    shortDescription: >
+      Long-polling external task worker that fetches-and-locks work items from a topic
+      and completes them asynchronously.
+    longDescription: |
+      Demonstrates the **external task pattern** — the engine publishes work items to a
+      topic and a worker polls for them. This decouples the process engine from the
+      service implementation and supports multiple languages and runtimes as workers.
+
+      - `ExternalTaskService.fetchAndLock()` — polls for tasks on a named topic
+      - Lock expiry and failure handling — `handleFailure()` with retry count and backoff
+      - Variable passing — the worker reads input variables and sets output variables on complete
+      - Long-polling — efficient push-style polling with a configurable wait time
+
+      The example ships a worker alongside a Spring Boot engine; both run in the same JVM
+      to keep the setup simple, but the pattern applies equally to separate deployments.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [External Task]
+    tags:
+      - { label: "External Task", category: concept }
+      - { label: "Long Polling", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [external-task, service-task]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/03-external-task-worker/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: User Task Forms
-    description: User tasks with embedded forms, task lifecycle management, and form variable handling.
+  - id: user-task-forms
+    title: "User Task Forms"
+    icon: "📋"
     path: examples/04-user-task-forms
-    tags: [beginner, user-task, embedded-form, tasklist, spring-boot]
+    shortDescription: >
+      User tasks with embedded Operaton forms, task lifecycle management (claim, complete),
+      and form variable handling via the Task API.
+    longDescription: |
+      Shows how to build human-centric workflows where operators interact with structured forms.
+
+      - **Embedded form** — form fields defined directly in the BPMN with `operaton:formField`
+      - **Task API** — create, claim, and complete tasks programmatically
+      - **Form variables** — submitted form values are written back as process variables
+      - **Task lifecycle** — demonstrates the full claim → work → complete flow
+      - **Candidate groups** — tasks are assigned to a group, not an individual
+
+      The integration test uses the `TaskService` directly; no Tasklist UI is required.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: beginner
-    bpmnConcepts: [User Task, Embedded Form]
+    tags:
+      - { label: "User Task", category: concept }
+      - { label: "Embedded Form", category: concept }
+      - { label: "Task Lifecycle", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [user-task, embedded-form, candidate-group]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/04-user-task-forms/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: DMN Decision
-    description: DMN decision tables, decision requirements diagram, business rule task evaluation.
+  - id: dmn-decision
+    title: "DMN Decision"
+    icon: "📊"
     path: examples/05-dmn-decision
-    tags: [intermediate, dmn, decision-table, business-rule-task, spring-boot]
+    shortDescription: >
+      DMN decision tables and a Decision Requirements Diagram evaluated from a Business
+      Rule Task inside a BPMN process.
+    longDescription: |
+      Demonstrates Operaton's native DMN engine for externalising business rules from process logic.
+
+      - **DMN decision table** — maps input variables to output via hit policies (FIRST, UNIQUE)
+      - **Decision Requirements Diagram (DRD)** — two decisions wired by data dependency
+      - **Business Rule Task** — binds a decision key to a BPMN task; result written to a variable
+      - **Expression-based routing** — exclusive gateway reads the DMN output to pick a path
+      - **DMN unit test** — `DmnEngine.evaluate()` directly against the `.dmn` file
+
+      Rules are in a `.dmn` file; swapping them requires no Java code changes.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Business Rule Task, DMN Decision Table, Decision Requirements Diagram]
+    tags:
+      - { label: "DMN", category: concept }
+      - { label: "Business Rule Task", category: concept }
+      - { label: "Decision Table", category: concept }
+    integrations: [postgres, dmn]
+    bpmnConcepts: [business-rule-task, exclusive-gateway, dmn-decision-table, drd]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/05-dmn-decision/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Message Events
-    description: Message start event, intermediate message catch, business-key correlation.
+  - id: message-events
+    title: "Message Events"
+    icon: "✉️"
     path: examples/06-message-events
-    tags: [intermediate, message-event, correlation, spring-boot]
+    shortDescription: >
+      Message start event, intermediate message catch, and business-key correlation —
+      integrating external systems by sending named messages.
+    longDescription: |
+      Shows how processes communicate with the outside world using **message events** —
+      the standard BPMN mechanism for point-to-point, named, correlated messages.
+
+      - **Message Start Event** — a REST call delivers a message to start a new process instance
+      - **Intermediate Message Catch Event** — the process parks at a wait state until a message arrives
+      - **Business key correlation** — `RuntimeService.correlateMessage()` with a business key finds
+        the right waiting instance without knowing its internal ID
+      - **Two-message flow** — process starts on one message and resumes on a second message
+
+      Real-world patterns: order placed → order shipped, payment initiated → payment confirmed.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Message Start Event, Intermediate Message Catch Event, Correlation]
+    tags:
+      - { label: "Message Event", category: concept }
+      - { label: "Correlation", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [message-start-event, intermediate-message-catch-event, correlation, business-key]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/06-message-events/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Timer Events
-    description: Timer boundary event for SLA escalation, job executor API, testing timers.
+  - id: timer-events
+    title: "Timer Events"
+    icon: "⏱️"
     path: examples/07-timer-events
-    tags: [intermediate, timer-event, sla, job-executor, spring-boot]
+    shortDescription: >
+      Timer boundary event for SLA escalation, testing timers via job manipulation,
+      and failedJobRetryTimeCycle configuration.
+    longDescription: |
+      Teaches time-based process control — how to escalate, cancel, or retry based on elapsed time.
+
+      - **Non-interrupting timer boundary event** — fires an escalation email after an SLA without
+        cancelling the original task
+      - **Interrupting timer boundary event** — cancels the task and reroutes on timeout
+      - **ISO 8601 duration** — `PT1H`, `R3/PT10M` (repeat) in BPMN `timeDuration`
+      - **Testing with job API** — `ManagementService.executeJob()` triggers timers in tests
+        without Thread.sleep or clock manipulation
+      - **failedJobRetryTimeCycle** — configures automatic retry backoff on job failure
+
+      Knowing how to test timers without real wall-clock waiting is essential for CI.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Timer Boundary Event, Job Executor]
+    tags:
+      - { label: "Timer", category: concept }
+      - { label: "SLA", category: concept }
+      - { label: "Escalation", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [timer-boundary-event, non-interrupting-timer, job-executor, failed-job-retry]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/07-timer-events/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Error Compensation
-    description: BPMN compensation (saga pattern), compensation handlers, BpmnError trigger.
+  - id: error-compensation
+    title: "Error Compensation"
+    icon: "↩️"
     path: examples/08-error-compensation
-    tags: [advanced, compensation, saga, bpmn-error, spring-boot]
+    shortDescription: >
+      BPMN compensation (saga pattern) with compensation handlers and BpmnError-triggered rollback.
+    longDescription: |
+      Models a distributed transaction using the **BPMN compensation** mechanism — the process
+      equivalent of a saga pattern.
+
+      - **Compensation boundary event** — attaches a rollback task to a completed activity
+      - **Compensation handler** — the task that undoes a prior step (e.g., refund a charge)
+      - **Compensation throw event** — explicitly triggers compensation for a scope
+      - **BpmnError propagation** — a delegate throws `BpmnError`; the boundary event catches it
+        and triggers compensation
+      - **Multi-step saga** — three service tasks each with their own compensation handler,
+        all triggered atomically on failure
+
+      Compensation in BPMN does not use database rollback — it executes compensating business logic.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: advanced
-    bpmnConcepts: [Compensation, BPMN Error, Compensation Handler]
+    tags:
+      - { label: "Compensation", category: concept }
+      - { label: "Saga Pattern", category: concept }
+      - { label: "BpmnError", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [compensation-boundary-event, compensation-handler, compensation-throw-event, bpmn-error]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/08-error-compensation/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Multi-Instance
-    description: Parallel multi-instance user tasks with collection loop and completion condition.
+  - id: multi-instance
+    title: "Multi-Instance"
+    icon: "🔀"
     path: examples/09-multi-instance
-    tags: [intermediate, multi-instance, parallel-gateway, spring-boot]
+    shortDescription: >
+      Parallel multi-instance user tasks over a collection, with a completion condition that
+      terminates early once enough approvals are received.
+    longDescription: |
+      Demonstrates **multi-instance subprocesses** — a BPMN built-in for iterating a task or
+      subprocess over a list, optionally in parallel.
+
+      - **Parallel multi-instance** — one token per item in the input collection, all active simultaneously
+      - **Sequential multi-instance** — items processed one after another (second variant shown)
+      - **Completion condition** — `${nrOfCompletedInstances >= 2}` terminates the loop early
+        once a majority has approved (majority-vote pattern)
+      - **Loop variables** — `loopCounter`, `nrOfInstances`, `nrOfCompletedInstances` available
+        inside the loop body
+      - **Collection input** — the BPMN `operaton:collection` and `operaton:elementVariable` attributes
+
+      Real-world use: send to N reviewers in parallel, continue once K have responded.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Multi-Instance Subprocess, Parallel Multi-Instance, Completion Condition]
+    tags:
+      - { label: "Multi-Instance", category: concept }
+      - { label: "Parallel", category: concept }
+      - { label: "Completion Condition", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [parallel-multi-instance, sequential-multi-instance, completion-condition, user-task]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/09-multi-instance/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Integration REST
-    description: REST service calls via RestTemplate, 4xx-to-BpmnError mapping, WireMock Testcontainers.
+  - id: integration-rest
+    title: "Integration — REST"
+    icon: "🌐"
     path: examples/10-integration-rest
-    tags: [intermediate, rest, wiremock, testcontainers, spring-boot]
+    shortDescription: >
+      REST service calls via RestTemplate, 4xx/5xx response mapped to BpmnError, and WireMock
+      Testcontainers for full integration testing.
+    longDescription: |
+      The standard pattern for calling external REST services from a BPMN process, including
+      error handling without mocking the HTTP layer.
+
+      - **RestTemplate in a Java delegate** — synchronous HTTP call with response binding
+      - **4xx → BpmnError mapping** — non-2xx responses throw `BpmnError` and route to an
+        error boundary event (e.g., "credit service unavailable")
+      - **WireMock Testcontainers** — a real WireMock container stubs the downstream service;
+        no mocking in the test class itself
+      - **Stub scenarios** — success stub returns a JSON payload; error stub returns 503 to
+        trigger the error path
+      - **Dynamic URL injection** — the WireMock container URL is injected via Spring properties
+        so the delegate always points at the stub in tests
+
+      This pattern applies equally to any HTTP-based downstream (payment, scoring, inventory).
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    integrations: [REST, WireMock]
-    bpmnConcepts: [Service Task, BpmnError]
+    tags:
+      - { label: "REST", category: integration }
+      - { label: "WireMock", category: integration }
+      - { label: "BpmnError", category: concept }
+    integrations: [rest, wiremock, postgres]
+    bpmnConcepts: [service-task, bpmn-error, error-boundary-event]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/10-integration-rest/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Integration Mail
-    description: Spring Mail in delegates, Mailpit Testcontainers for SMTP and REST assertions.
+  - id: integration-mail
+    title: "Integration — Mail"
+    icon: "📧"
     path: examples/11-integration-mail
-    tags: [intermediate, mail, smtp, testcontainers, spring-boot]
+    shortDescription: >
+      Sending emails from process delegates via Spring Mail, with Mailpit Testcontainers
+      verifying message delivery over SMTP and the REST API.
+    longDescription: |
+      Demonstrates email notification from BPMN processes — a common integration requirement
+      in approval, onboarding, and alerting workflows.
+
+      - **Spring Mail** — `JavaMailSender` in a `JavaDelegate` sends templated emails
+      - **Mailpit Testcontainers** — a local SMTP server catches outbound mail in tests
+      - **REST API assertion** — the Mailpit REST API confirms subject, recipient, and body
+        without needing a real mail server
+      - **Template rendering** — Thymeleaf HTML template populated from process variables
+      - **Multiple recipients** — CC and BCC from a list variable
+
+      The test infrastructure covers the real SMTP path; no mock is used for the mail sender.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    integrations: [Jakarta Mail, Mailpit]
-    bpmnConcepts: [Service Task]
+    tags:
+      - { label: "Email", category: integration }
+      - { label: "SMTP", category: integration }
+      - { label: "Mailpit", category: integration }
+    integrations: [jakarta-mail, mailpit, postgres]
+    bpmnConcepts: [service-task]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/11-integration-mail/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Integration Kafka
-    description: Kafka listener starts process, delegate publishes result, Awaitility assertions.
+  - id: integration-kafka
+    title: "Integration — Kafka"
+    icon: "📨"
     path: examples/12-integration-kafka
-    tags: [intermediate, kafka, messaging, testcontainers, spring-boot]
+    shortDescription: >
+      Kafka listener starts a process instance, a delegate publishes a result event, and
+      Awaitility assertions verify end-to-end async delivery.
+    longDescription: |
+      Shows how to integrate Operaton with Apache Kafka for event-driven process triggering
+      and result publishing.
+
+      - **Kafka → process start** — a `@KafkaListener` consumes an inbound event and calls
+        `RuntimeService.startProcessInstanceByKey()` to kick off the process
+      - **Delegate → Kafka** — a service task delegate publishes a result event to an output topic
+      - **Testcontainers Kafka** — a real Kafka broker (Apache Kafka image) runs in the test JVM;
+        no embedded Kafka
+      - **Awaitility** — async assertion waits for the output message without `Thread.sleep`
+      - **Variable passing** — the inbound Kafka message payload is mapped to process variables
+
+      Pattern applies to any event-driven integration (RabbitMQ, AWS SQS, Azure Service Bus).
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    integrations: [Apache Kafka]
-    bpmnConcepts: [Service Task, Message]
+    tags:
+      - { label: "Kafka", category: integration }
+      - { label: "Event-Driven", category: concept }
+      - { label: "Async", category: concept }
+    integrations: [kafka, postgres]
+    bpmnConcepts: [service-task, message]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/12-integration-kafka/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Call Activity
-    description: Process composition via call activity with variable in/out mappings and child process history.
+  - id: call-activity
+    title: "Call Activity"
+    icon: "🔗"
     path: examples/13-call-activity
-    tags: [intermediate, call-activity, process-composition, spring-boot]
+    shortDescription: >
+      Process composition via call activity with variable in/out mappings and verification
+      of child process history.
+    longDescription: |
+      Teaches how to build modular, reusable processes by composing them with **call activities**.
+
+      - **Call activity** — `calledElement` references another process definition by key;
+        the child process runs as an independent instance
+      - **Variable in-mapping** — `operaton:in` copies parent variables into the child scope
+      - **Variable out-mapping** — `operaton:out` propagates child output back to the parent
+      - **Reusable child process** — the "creditCheck" subprocess can be called from any parent
+      - **History verification** — the test asserts both the parent and child `HistoricProcessInstance`
+        to confirm the full call tree completed correctly
+
+      Real-world use: invoice processing calling a shared "payment" sub-process.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Call Activity, Variable Mapping, Child Process]
+    tags:
+      - { label: "Call Activity", category: concept }
+      - { label: "Variable Mapping", category: concept }
+      - { label: "Process Composition", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [call-activity, variable-in-mapping, variable-out-mapping, child-process]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/13-call-activity/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Signal Events
-    description: Signal broadcast vs. message point-to-point, intermediate catch/throw, multi-subscriber.
+  - id: signal-events
+    title: "Signal Events"
+    icon: "📡"
     path: examples/14-signal-events
-    tags: [intermediate, signal-event, broadcast, spring-boot]
+    shortDescription: >
+      Signal broadcast vs. message point-to-point — intermediate catch/throw events and
+      multi-subscriber fan-out.
+    longDescription: |
+      Contrasts **signals** (broadcast) with **messages** (point-to-point) — both common
+      inter-process communication mechanisms.
+
+      - **Signal Intermediate Throw Event** — the process broadcasts a named signal to all
+        waiting receivers; no target instance specified
+      - **Signal Intermediate Catch Event** — a process parks waiting for any broadcast of
+        a named signal
+      - **Signal Boundary Event** — interrupting and non-interrupting variants on a sub-process
+      - **Multi-subscriber** — two independent process instances both receive the same signal
+        broadcast; message correlation is not needed
+      - **`RuntimeService.signalEventReceived()`** — programmatic signal delivery from outside
+        the engine
+
+      Use signals for publish/subscribe across process instances; use messages for targeted delivery.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Signal Intermediate Catch Event, Signal Throw Event, Signal Boundary Event]
+    tags:
+      - { label: "Signal", category: concept }
+      - { label: "Broadcast", category: concept }
+      - { label: "Inter-Process", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [signal-throw-event, signal-catch-event, signal-boundary-event]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/14-signal-events/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Event Subprocess
-    description: Non-interrupting signal audit subprocess and interrupting error handler subprocess.
+  - id: event-subprocess
+    title: "Event Subprocess"
+    icon: "🔔"
     path: examples/15-event-subprocess
-    tags: [intermediate, event-subprocess, signal-event, error-event, spring-boot]
+    shortDescription: >
+      Non-interrupting signal audit subprocess for cross-cutting concerns and interrupting
+      error handler subprocess for global error handling.
+    longDescription: |
+      Demonstrates **event subprocesses** — special subprocesses that are triggered by events
+      and run in the scope of their parent process or subprocess.
+
+      - **Non-interrupting event subprocess** — triggered by a signal; the parent process continues
+        in parallel; used for audit logging, side-effect notifications
+      - **Interrupting event subprocess** — triggered by an error event; replaces the normal
+        flow for global error handling (like a try/catch around the entire process)
+      - **Scope hierarchy** — the event subprocess shares variables with its parent scope
+      - **Embedded vs. top-level** — showing both an embedded event subprocess inside a
+        subprocess and a top-level one at the process level
+
+      Contrasts with boundary events: event subprocesses apply to the entire enclosing scope.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Event Subprocess, Non-Interrupting Subprocess, Interrupting Subprocess]
+    tags:
+      - { label: "Event Subprocess", category: concept }
+      - { label: "Non-Interrupting", category: concept }
+      - { label: "Interrupting", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [event-subprocess, non-interrupting-subprocess, signal-start-event, error-start-event]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/15-event-subprocess/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Inclusive Gateway
-    description: Inclusive (OR) gateway — multiple concurrent paths, join waits for all active tokens.
+  - id: inclusive-gateway
+    title: "Inclusive Gateway"
+    icon: "🔵"
     path: examples/16-inclusive-gateway
-    tags: [intermediate, inclusive-gateway, parallel-paths, spring-boot]
+    shortDescription: >
+      Inclusive (OR) gateway — multiple concurrent paths activated when conditions are true,
+      join waits for all active tokens before continuing.
+    longDescription: |
+      The **inclusive gateway** is the "OR" counterpart to the exclusive (XOR) gateway.
+      Multiple outgoing paths can be taken simultaneously, and the joining gateway waits
+      for all active branches to complete before proceeding.
+
+      - **Split** — three outgoing conditions evaluated; 1, 2, or all 3 paths may be taken
+      - **Join** — the closing inclusive gateway waits only for the branches that were actually activated
+      - **Default flow** — a default sequence flow taken if no condition evaluates to true
+      - **Variable-driven branching** — process variable flags control which paths are active
+      - **History assertion** — the test verifies exactly which intermediate activities ran
+
+      Inclusive gateways model "do A, and optionally B and/or C" — common in approval and enrichment flows.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Inclusive Gateway]
+    tags:
+      - { label: "Inclusive Gateway", category: concept }
+      - { label: "Parallel Paths", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [inclusive-gateway, default-flow]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/16-inclusive-gateway/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Async Continuation
-    description: asyncBefore transaction boundaries, manual job execution, failedJobRetryTimeCycle.
+  - id: async-continuation
+    title: "Async Continuation"
+    icon: "⚡"
     path: examples/17-async-continuation
-    tags: [advanced, async-continuation, job-executor, transaction, spring-boot]
+    shortDescription: >
+      asyncBefore/asyncAfter transaction boundaries, manual job execution in tests, and
+      failedJobRetryTimeCycle for resilient retry scheduling.
+    longDescription: |
+      Shows how **async continuation** transforms what would be a single synchronous transaction
+      into multiple independent jobs, enabling resilience, parallelism, and retry.
+
+      - **`asyncBefore`** — the engine persists the token before executing the activity; the actual
+        execution runs in a separate job/transaction
+      - **`asyncAfter`** — the engine persists after activity completion; subsequent tasks run later
+      - **Transaction boundaries** — each async point creates a separate DB transaction; process
+        survives server restarts between async steps
+      - **Manual job execution** — `ManagementService.executeJob()` triggers async jobs in tests
+        without a running job executor
+      - **`failedJobRetryTimeCycle`** — ISO 8601 repeat expression (`R3/PT10M`) schedules retries
+        with backoff on delegate failure
+      - **Exclusive jobs** — `operaton:exclusive="true"` prevents parallel execution of jobs
+        for the same process instance
+
+      Essential for production deployments where service calls must survive transient failures.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: advanced
-    bpmnConcepts: [Async Before, Async After, Job Executor, failedJobRetryTimeCycle]
+    tags:
+      - { label: "Async", category: concept }
+      - { label: "Job Executor", category: concept }
+      - { label: "Transaction", category: concept }
+      - { label: "Retry", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [async-before, async-after, job-executor, failed-job-retry-time-cycle]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/17-async-continuation/README.md"
+    lastUpdated: "2026-06-15"
 
   # ── Use Cases ──────────────────────────────────────────────────────────────
 
-  - name: Leave Request
-    description: Employee leave approval with timer escalation, vacation balance service, and SQL schema init.
+  - id: leave-request
+    title: "Use Case — Leave Request"
+    icon: "🏖️"
     path: use-cases/uc-01-leave-request
-    tags: [intermediate, user-task, timer-event, approval, spring-boot]
+    shortDescription: >
+      Employee leave approval with manager user task, non-interrupting timer escalation, and
+      vacation balance validation via a service.
+    longDescription: |
+      A realistic HR use case that combines user tasks, timer escalation, and a backend service.
+
+      - **Leave submission** — employee starts the process via REST with start and end dates
+      - **Manager approval task** — assigned to the employee's manager via candidate group
+      - **Non-interrupting timer escalation** — if the manager has not acted within 48 hours,
+        an escalation email is sent; the task remains open
+      - **Vacation balance service** — a delegate checks remaining days against a database;
+        if insufficient, a `BpmnError` rejects the request immediately
+      - **SQL schema initialisation** — `DataInitializer` creates and seeds the balance table
+        on startup
+
+      The integration test covers all three outcomes: approved, rejected (insufficient balance),
+      and escalation triggered.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [User Task, Timer Boundary Event, Non-Interrupting Timer, Exclusive Gateway]
+    tags:
+      - { label: "HR Workflow", category: concept }
+      - { label: "Approval", category: concept }
+      - { label: "Timer Escalation", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [user-task, timer-boundary-event, non-interrupting-timer, exclusive-gateway, bpmn-error]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/use-cases/uc-01-leave-request/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Loan Application
-    description: Loan origination with REST credit scoring, DMN risk assessment, and Spring Mail notifications.
+  - id: loan-application
+    title: "Use Case — Loan Application"
+    icon: "🏦"
     path: use-cases/uc-02-loan-application
-    tags: [advanced, dmn, rest, mail, spring-boot]
+    shortDescription: >
+      Loan origination with REST credit scoring, DMN risk assessment, and Spring Mail
+      decision notifications.
+    longDescription: |
+      An end-to-end loan origination use case covering external REST integration, DMN-based
+      risk decisioning, and email notification — three common patterns in a single flow.
+
+      - **REST credit scoring** — a service task calls an external credit bureau (WireMocked
+        in tests) and maps the score to a process variable
+      - **DMN risk assessment** — a Business Rule Task evaluates a decision table with the
+        applicant's income, credit score, and loan amount to produce a risk rating
+      - **Conditional approval** — the exclusive gateway routes APPROVED, REVIEW, or REJECTED
+        based on the DMN output
+      - **Email notification** — a Spring Mail delegate sends an HTML decision letter to
+        the applicant; Mailpit verifies delivery in tests
+      - **Manual review user task** — borderline cases go to an underwriter task before
+        the final decision
+
+      Covers the full spectrum: external system → rules engine → human task → notification.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: advanced
-    integrations: [REST, DMN, Jakarta Mail]
-    bpmnConcepts: [Business Rule Task, Service Task, Exclusive Gateway]
+    tags:
+      - { label: "Loan Origination", category: concept }
+      - { label: "DMN", category: concept }
+      - { label: "REST", category: integration }
+      - { label: "Email", category: integration }
+    integrations: [rest, dmn, jakarta-mail, wiremock, mailpit, postgres]
+    bpmnConcepts: [business-rule-task, service-task, user-task, exclusive-gateway]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/use-cases/uc-02-loan-application/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Incident Management
-    description: IT support ticket with signal escalation boundary, timer SLA boundary, 4-swimlane BPMN.
+  - id: incident-management
+    title: "Use Case — Incident Management"
+    icon: "🚨"
     path: use-cases/uc-03-incident-management
-    tags: [advanced, signal-event, timer-event, swimlane, rest, spring-boot]
-    buildSystem: maven
-    runtime: spring-boot
-    javaVersion: "21"
-    complexity: advanced
-    integrations: [REST]
-    bpmnConcepts: [Signal Boundary Event, Timer Boundary Event, User Task, Lane]
+    shortDescription: >
+      IT support ticket with signal escalation boundary, timer SLA boundary, 4-swimlane BPMN
+      and REST resolution API.
+    longDescription: |
+      A realistic ITSM (IT Service Management) use case modelling a support ticket from
+      receipt to resolution, with two independent escalation paths.
 
-  - name: Order Fulfillment
-    description: E-commerce order with error boundary on payment, async continuation, and WireMock stubs.
-    path: use-cases/uc-04-order-fulfillment
-    tags: [advanced, bpmn-error, async-continuation, wiremock, spring-boot]
+      - **4-lane BPMN** — Customer, L1 Support, L2 Support, and Management lanes making
+        the responsibility boundaries visually explicit
+      - **Interrupting timer boundary event** — SLA breach after 4 hours automatically
+        escalates the ticket to L2
+      - **Non-interrupting signal boundary event** — a customer callback signal triggers a
+        parallel notification without disrupting active work
+      - **REST resolution API** — `POST /incidents/{id}/resolve` correlates a message to
+        the waiting process instance
+      - **Reopen path** — after resolution, the customer can reopen the ticket within a
+        satisfaction window via a boundary message event
+
+      Demonstrates how BPMN lanes, boundaries, and message correlation model real
+      enterprise workflows without code sprawl.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: advanced
-    integrations: [REST, WireMock]
-    bpmnConcepts: [Error Boundary Event, Async Before, Exclusive Gateway, Service Task]
+    tags:
+      - { label: "ITSM", category: concept }
+      - { label: "SLA", category: concept }
+      - { label: "Escalation", category: concept }
+      - { label: "REST", category: integration }
+    integrations: [rest, postgres]
+    bpmnConcepts: [user-task, timer-boundary-event, signal-boundary-event, message-catch-event, lane]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/use-cases/uc-03-incident-management/README.md"
+    lastUpdated: "2026-06-15"
+
+  - id: order-fulfillment
+    title: "Use Case — Order Fulfillment"
+    icon: "📦"
+    path: use-cases/uc-04-order-fulfillment
+    shortDescription: >
+      E-commerce order with error boundary on payment, async continuation for resilience,
+      and WireMock stubs for inventory and payment services.
+    longDescription: |
+      An e-commerce order processing use case that combines async resilience, error recovery,
+      and downstream REST stubs — ready for adaptation to real microservice integrations.
+
+      - **Parallel gateway** — inventory reservation and payment authorisation run concurrently
+      - **Error boundary on payment** — a `BpmnError("PAYMENT_DECLINED")` reroutes to a
+        user task for manual retry or order cancellation
+      - **Async continuation** — `asyncBefore` on the payment step isolates the payment
+        transaction; a server restart between steps does not lose the order
+      - **WireMock** — inventory (`/inventory/reserve`) and payment (`/payment/charge`) REST
+        services are stubbed; error scenario returns 402
+      - **Compensation** — if cancellation is chosen, compensation handlers unreserve inventory
+        and void any partial authorisation
+
+      A production-grade template for multi-service order orchestration.
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: advanced
+    tags:
+      - { label: "Order Mgmt", category: concept }
+      - { label: "Compensation", category: concept }
+      - { label: "Async", category: concept }
+      - { label: "REST", category: integration }
+    integrations: [rest, wiremock, postgres]
+    bpmnConcepts: [parallel-gateway, error-boundary-event, async-before, compensation, bpmn-error]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/use-cases/uc-04-order-fulfillment/README.md"
+    lastUpdated: "2026-06-15"
 
   # ── Platform Integration Examples ─────────────────────────────────────────
 
-  - name: Integration — Connectors
-    description: HTTP connector (declarative REST call, no Java delegate) plus a custom Connector SPI implementation.
+  - id: integration-connectors
+    title: "Integration — Connectors"
+    icon: "🔧"
     path: examples/18-integration-connectors
-    tags: [intermediate, connector, http-connector, custom-connector, wiremock, spring-boot]
+    shortDescription: >
+      HTTP connector for declarative REST calls without Java delegates, plus a custom Connector
+      SPI implementation with BpmnError propagation.
+    longDescription: |
+      Introduces the **Operaton Connector** mechanism — a first-class abstraction for binding
+      BPMN service tasks to I/O integrations without writing `JavaDelegate` boilerplate.
+
+      - **HTTP connector** — `connectorId="http-connector"` in the BPMN performs a REST call
+        declaratively; URL, method, and headers are set via `<operaton:inputOutput>` inside the BPMN,
+        no Java code needed for the service task
+      - **Custom Connector SPI** — `ConnectorProvider` and `AbstractConnector` implement a
+        `currency-convert` connector that reads exchange rates and converts amounts
+      - **`AbstractConnectorResponse.collectResponseParameters()`** — the correct API for
+        returning output from a connector (not a setter)
+      - **BpmnError from a connector** — `execute()` throws `new BpmnError("RATE_UNAVAILABLE")`
+        when the exchange rate is unparseable; caught by a boundary error event
+      - **`ConnectProcessEnginePlugin`** — explicit plugin registration required; connectors
+        are not auto-activated in Spring Boot without it
+      - **WireMock Testcontainers** — the exchange-rate REST service is stubbed; both the
+        success path and the 404 error path are tested end-to-end
+
+      The `META-INF/services/org.operaton.connect.spi.ConnectorProvider` SPI file is the
+      registration mechanism; the full implementation is ~50 lines of Java.
     buildSystem: maven
     runtime: spring-boot
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Service Task, Boundary Error Event, Connector]
+    tags:
+      - { label: "Connector SPI", category: concept }
+      - { label: "HTTP Connector", category: integration }
+      - { label: "WireMock", category: integration }
+    integrations: [rest, wiremock, postgres]
+    bpmnConcepts: [service-task, connector, error-boundary-event, bpmn-error]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/18-integration-connectors/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Runtime — Quarkus
-    description: Embedded Operaton engine on Quarkus/CDI instead of Spring Boot.
+  - id: runtime-quarkus
+    title: "Runtime — Quarkus"
+    icon: "☕"
     path: examples/19-runtime-quarkus
-    tags: [intermediate, quarkus, cdi, embedded-engine]
+    shortDescription: >
+      Embedded Operaton engine on Quarkus/CDI — named CDI delegates, process deployment via
+      OperatonEngineStartupEvent, and @QuarkusTest integration tests.
+    longDescription: |
+      Demonstrates that Operaton is not tied to Spring Boot — the engine runs equally well
+      on **Quarkus** with CDI bean injection and Agroal JDBC.
+
+      - **`operaton-bpm-quarkus-engine`** — the Quarkus extension providing a CDI-managed
+        `ProcessEngine` bean and `ProcessEngineConfiguration`
+      - **Named datasource** — `quarkus.datasource.operaton-db.*` + `quarkus.operaton.datasource=operaton-db`
+        connects the engine to a named Agroal pool
+      - **CDI delegate** — `@ApplicationScoped @Named("validateOrderDelegate")` resolved by
+        `${validateOrderDelegate}` in the BPMN; no Spring annotation needed
+      - **Explicit BPMN deployment** — the Quarkus extension does NOT auto-scan the classpath;
+        an `@Observes OperatonEngineStartupEvent` bean deploys the BPMN via `RepositoryService`
+      - **`@QuarkusTest` + `QuarkusTestResourceLifecycleManager`** — `PostgresTestResource`
+        starts a Testcontainers Postgres and injects the JDBC URL before Quarkus boots
+      - **assertj-core** — must be declared explicitly; it is not transitive from the Quarkus BOM
+
+      Two test scenarios: order total < 1000 → approved; total ≥ 1000 → rejected.
     buildSystem: maven
     runtime: quarkus
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Service Task, Exclusive Gateway]
+    tags:
+      - { label: "Quarkus", category: runtime }
+      - { label: "CDI", category: runtime }
+      - { label: "Embedded Engine", category: concept }
+    integrations: [postgres, quarkus-arc]
+    bpmnConcepts: [service-task, exclusive-gateway]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/19-runtime-quarkus/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Distribution — Tomcat
-    description: Process-application WAR deployed into the operaton/tomcat Docker image (shared-engine model).
+  - id: distribution-tomcat
+    title: "Distribution — Tomcat"
+    icon: "🐱"
     path: examples/20-distribution-tomcat
-    tags: [intermediate, tomcat, war, process-application, shared-engine]
+    shortDescription: >
+      Process-application WAR deployed into the operaton/tomcat Docker image — shared-engine
+      model, ServletProcessApplication, and Testcontainers e2e IT.
+    longDescription: |
+      Shows the **process application / shared engine** deployment model on Tomcat — the traditional
+      Java EE approach where the engine runs in the servlet container and WARs register themselves.
+
+      - **`operaton/tomcat:2.1.1`** — the official Operaton Tomcat distribution Docker image;
+        engine and REST API pre-installed, no Spring Boot involved
+      - **`ServletProcessApplication`** — extends Operaton's base class, annotated `@WebListener`
+        and `@ProcessApplication`; Tomcat auto-initialises it on WAR deploy
+      - **`META-INF/processes.xml`** — declares the process archive and enables BPMN class scanning
+      - **`operaton:class`** — plain Java delegate referenced by FQN; no CDI or Spring required
+      - **WAR bytecode at JDK 17** — the Tomcat image ships OpenJDK 17; main sources must
+        compile at `--release 17` (test sources can stay at 21)
+      - **Testcontainers e2e IT** — `GenericContainer("operaton/tomcat:2.1.1")` + `PostgreSQLContainer`
+        on a shared Docker network; WAR mounted at startup; REST API assertions with RestAssured
+      - **History endpoint** — `GET /engine-rest/history/activity-instance?activityType=noneEndEvent`
+        is the correct way to assert the end event (the `/history/process-instance` response has
+        no `endActivityId` field in Operaton 2.1.1)
+
+      Two test paths: invoice → EndEvent_Approved; contract → EndEvent_Review.
     buildSystem: maven
     runtime: tomcat
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Service Task, Exclusive Gateway, Process Application]
+    tags:
+      - { label: "Tomcat", category: platform }
+      - { label: "WAR", category: concept }
+      - { label: "Process Application", category: concept }
+      - { label: "Shared Engine", category: concept }
+    integrations: [rest, postgres, testcontainers]
+    bpmnConcepts: [service-task, exclusive-gateway, process-application]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/20-distribution-tomcat/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Distribution — Wildfly
-    description: Process-application WAR deployed into the operaton/wildfly Docker image.
+  - id: distribution-wildfly
+    title: "Distribution — WildFly"
+    icon: "🔥"
     path: examples/21-distribution-wildfly
-    tags: [intermediate, wildfly, war, process-application, jakarta-ee]
+    shortDescription: >
+      Process-application WAR deployed into the operaton/wildfly Docker image — Operaton
+      as a WildFly subsystem, CDI enabled via beans.xml.
+    longDescription: |
+      The **WildFly** counterpart to the Tomcat distribution example — same process application
+      model, different container, with WildFly-specific CDI wiring.
+
+      - **`operaton/wildfly:2.1.1`** — the official Operaton WildFly distribution Docker image;
+        Operaton is installed as a WildFly subsystem module
+      - **`ServletProcessApplication`** — same Java EE approach as Tomcat; `@WebListener` and
+        `@ProcessApplication` on the WAR's entry point class
+      - **`WEB-INF/beans.xml`** — CDI marker file required for WildFly to activate CDI bean
+        scanning in the WAR (not needed on Tomcat with Weld on the classpath)
+      - **Autodeploy directory** — WAR is mounted at
+        `/opt/jboss/wildfly/standalone/deployments/`; WildFly picks it up and creates
+        `*.war.deployed` on success
+      - **Testcontainers e2e IT** — `GenericContainer("operaton/wildfly:2.1.1")` with a 300s
+        startup timeout (WildFly takes longer than Tomcat to initialise the subsystem)
+      - **Same REST assertion pattern** as Example 20 — `history/activity-instance?activityType=noneEndEvent`
+
+      Demonstrates that the same process application source is portable across Tomcat and WildFly.
     buildSystem: maven
     runtime: wildfly
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: intermediate
-    bpmnConcepts: [Service Task, Exclusive Gateway, Process Application]
+    tags:
+      - { label: "WildFly", category: platform }
+      - { label: "WAR", category: concept }
+      - { label: "Process Application", category: concept }
+      - { label: "Jakarta EE", category: platform }
+    integrations: [rest, postgres, testcontainers]
+    bpmnConcepts: [service-task, exclusive-gateway, process-application]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/21-distribution-wildfly/README.md"
+    lastUpdated: "2026-06-15"
 
-  - name: Operations — Flowset Control
-    description: operaton/operaton with built-in webapps disabled; Flowset Control Community as the external ops UI.
+  - id: operations-flowset-control
+    title: "Operations — Flowset Control"
+    icon: "🎛️"
     path: examples/22-operations-flowset-control
-    tags: [advanced, ops, flowset-control, docker-compose, webapps-disabled]
+    shortDescription: >
+      operaton/operaton with built-in webapps disabled; Flowset Control Community as the
+      external operations UI — docker-compose + smoke IT.
+    longDescription: |
+      Demonstrates how to run the Operaton engine **without its bundled web applications**
+      (Cockpit, Tasklist, Admin) and substitute an external operations UI.
+
+      - **`operaton/operaton:2.1.1`** — the all-in-one Docker image; webapps disabled by
+        setting `SKIP_DB_CONFIG=false` and overriding the webapp deployment flags
+      - **Flowset Control Community** (`flowset/flowset-control-community`) — an open-source
+        operations and monitoring UI for Operaton; connects via the standard REST API
+      - **4-service `docker-compose.yml`** — PostgreSQL, Operaton engine (no webapps),
+        Flowset Control, and a WireMock stub for the demo process
+      - **Webapps-disabled configuration** — environment variables that suppress Cockpit/Tasklist
+        deployment while keeping the REST API and job executor active
+      - **Smoke integration test** — `OperationsIT` verifies that the engine REST API responds,
+        that Flowset Control UI is reachable, and that a test process can be started and
+        queried via the REST API
+
+      This is the recommended pattern for production deployments where a custom or third-party
+      front end replaces the built-in Operaton web applications.
     buildSystem: maven
     runtime: docker
+    operatonVersion: "2.1.1"
     javaVersion: "21"
     complexity: advanced
-    bpmnConcepts: [Operations, External UI]
+    tags:
+      - { label: "Operations", category: concept }
+      - { label: "Flowset Control", category: integration }
+      - { label: "Docker Compose", category: concept }
+      - { label: "Webapps Disabled", category: concept }
+    integrations: [flowset-control, rest, postgres]
+    bpmnConcepts: [operations, external-ui]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/22-operations-flowset-control/README.md"
+    lastUpdated: "2026-06-15"
