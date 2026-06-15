@@ -45,6 +45,8 @@ If the DMN decision returns `high`, the process skips the user task completely a
 
 ## Process Model
 
+![Process diagram](src/main/resources/loan-application.png)
+
 ![Loan Application Process](src/main/resources/loan-application.png)
 
 ## Risk Rules Reference

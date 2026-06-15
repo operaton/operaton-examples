@@ -142,24 +142,22 @@ Every example README contains, in this order:
 
 1. **Title + one-sentence statement** of the demonstrated concept.
 2. **What you will learn** — 3-5 bullets.
-3. **Process model** — Mermaid `flowchart` mirroring the BPMN (and a Mermaid
-   `sequenceDiagram` when systems interact). Every flow node (event, task,
-   gateway) and every named sequence flow in the BPMN appears in the Mermaid
-   diagram; constructs Mermaid cannot render (lanes, boundary-event
-   attachment) are approximated and noted in prose.
-   Every Mermaid diagram **must also be rendered to `docs/process.png`**
-   and referenced immediately after the code fence:
-   ```markdown
-   \`\`\`mermaid
-   flowchart LR
-       ...
-   \`\`\`
-
-   ![Process diagram](docs/process.png)
+3. **Process model** — An embedded PNG rendered directly from the BPMN source.
+   Do **not** use Mermaid diagrams; they do not render reliably in all contexts.
+   Render with `scripts/render-bpmn.sh` (uses `bpmn-to-image`), which outputs
+   a PNG alongside every `.bpmn` file:
+   ```bash
+   ./scripts/render-bpmn.sh           # renders all; or pass a pattern to filter
    ```
-   Render command: `npx @mermaid-js/mermaid-cli -i docs/process.mmd -o docs/process.png -w 1200 -b white`
-   Commit both the `.png` and the updated README together.
-   The PNG is consumed by the Operaton Starter gallery (`screenshots` field in `.operaton-starter.yml`).
+   Reference the PNG in the README immediately after the "Process model" heading:
+   ```markdown
+   ## Process model
+
+   ![Process diagram](src/main/resources/<process-name>.png)
+   ```
+   Commit the `.png` and the updated README together.
+   Register the PNG path in `.operaton-starter.yml` under `screenshots`.
+   Prerequisites: `npm install -g bpmn-to-image`.
 4. **Prerequisites** — JDK 21, Docker; exact versions.
 5. **Run it** — `docker compose up -d`, then both
    `./mvnw spring-boot:run` and `./gradlew bootRun`; URLs and credentials
@@ -189,7 +187,7 @@ Every example README contains, in this order:
 - [ ] BPMN/DMN use operaton namespace, have DI, names, historyTimeToLive
 - [ ] ITs use Testcontainers (PostgreSQL + real integrations), no H2, no sleeps
 - [ ] Happy path + alternative path tested end-to-end
-- [ ] README has all 8 sections; Mermaid matches BPMN element-for-element; `docs/process.png` rendered and referenced
+- [ ] README has all 8 sections; `src/main/resources/<name>.png` rendered via `render-bpmn.sh` and referenced
 - [ ] Versions match pom.xml == build.gradle.kts == root README table
 - [ ] §7 app conventions: demo/demo admin user, named seed users, application.yaml
 - [ ] No dead code, no unused dependencies, no TODO/stub delegates

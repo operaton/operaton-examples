@@ -12,6 +12,8 @@ A self-contained Operaton example for **incident management with SLA escalation*
 
 ## Process Model
 
+![Process diagram](src/main/resources/incident-management.png)
+
 ![Incident Management Process](src/main/resources/incident-management.png)
 
 ## Scenario

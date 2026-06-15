@@ -13,15 +13,8 @@ Demonstrates the `operaton:connector` mechanism: calling a REST endpoint **witho
 
 The boundary error event is attached to `ConvertAmount`. Mermaid cannot render boundary event attachment directly; the error path is shown as a labelled edge from the task.
 
-```mermaid
-flowchart LR
-    S([Conversion requested]) --> F[Fetch exchange rate\nHTTP connector]
-    F -->|success| C[Convert amount\ncurrency-convert connector]
-    C -->|success| E([Amount converted])
-    C -->|RATE_UNAVAILABLE\nboundary error| ER([Rate unavailable])
-```
+![Process diagram](src/main/resources/currency-conversion.png)
 
-![Process diagram](docs/process.png)
 
 ## Prerequisites
 

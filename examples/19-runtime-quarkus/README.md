@@ -12,15 +12,8 @@ Demonstrates the Operaton engine embedded in a **Quarkus/CDI** application — t
 
 ## Process model
 
-```mermaid
-flowchart LR
-    S([Order received]) --> V[Validate order\nvalidateOrderDelegate]
-    V --> GW{Approved?}
-    GW -->|approved| EA([Order approved])
-    GW -->|rejected| ER([Order rejected])
-```
+![Process diagram](src/main/resources/order-approval.png)
 
-![Process diagram](docs/process.png)
 
 ## Prerequisites
 

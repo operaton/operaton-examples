@@ -23,14 +23,8 @@ sent for review, or declined.
 
 DMN Decision Requirements Graph:
 
-```mermaid
-flowchart TB
-    RL["risk-level\n(UNIQUE)\ncreditScore → riskLevel\nLOW / MEDIUM / HIGH"]
-    CD["credit-decision\n(FIRST)\nriskLevel + requestedAmount → loanDecision\napproved / review / declined"]
-    RL -->|informationRequirement| CD
-```
+![Process diagram](src/main/resources/loan-application.png)
 
-![Process diagram](docs/process.png)
 
 ## Prerequisites
 

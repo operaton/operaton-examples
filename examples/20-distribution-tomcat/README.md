@@ -12,15 +12,8 @@ Demonstrates deploying an Operaton **process application WAR** to the `operaton/
 
 ## Process model
 
-```mermaid
-flowchart LR
-    S([Document received]) -->|document| C[Check document type\nCheckDocumentDelegate]
-    C -->|checked| GW{Needs review?}
-    GW -->|requiresReview| R([Send for review])
-    GW -->|otherwise| A([Document approved])
-```
+![Process diagram](src/main/resources/document-approval.png)
 
-![Process diagram](docs/process.png)
 
 ## Prerequisites
 

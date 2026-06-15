@@ -19,34 +19,8 @@ and completing (or failing) them in its own thread and transaction.
 
 Worker interaction:
 
-```mermaid
-sequenceDiagram
-    participant Engine as Process Engine
-    participant Worker as External Worker
+![Process diagram](src/main/resources/order-fulfillment.png)
 
-    Engine->>Engine: start order-fulfillment
-    Note over Engine: parks at Check inventory
-
-    Worker->>Engine: fetchAndLock(inventory-check)
-    Engine-->>Worker: locked ExternalTask
-    alt stock available
-        Worker->>Engine: complete(reservationId=RES-...)
-        Note over Engine: advances to Arrange shipping
-        Worker->>Engine: fetchAndLock(arrange-shipping)
-        Engine-->>Worker: locked ExternalTask
-        Worker->>Engine: complete(trackingId=TRK-...)
-        Note over Engine: ends at Order fulfilled
-    else out of stock
-        Worker->>Engine: handleBpmnError(OUT_OF_STOCK)
-        Note over Engine: boundary event → Order backordered
-    else transient failure
-        Worker->>Engine: handleFailure(retries=2, retryTimeout=0)
-        Note over Engine: re-queues task
-        Worker->>Engine: fetchAndLock again → complete(...)
-    end
-```
-
-![Process diagram](docs/process.png)
 
 ## Prerequisites
 

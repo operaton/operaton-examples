@@ -16,6 +16,8 @@ backed by a Java delegate, a **user task** with a candidate group, and an
 
 ## Process model
 
+![Process diagram](src/main/resources/order-approval.png)
+
 ![Order Approval Process](src/main/resources/order-approval.png)
 
 ## Prerequisites

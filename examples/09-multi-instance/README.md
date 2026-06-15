@@ -12,6 +12,8 @@ This example demonstrates parallel multi-instance user tasks — running the sam
 
 ## Process model
 
+![Process diagram](src/main/resources/document-review.png)
+
 The `document-review` process starts a parallel review cycle where every reviewer in the `reviewers` list receives their own task simultaneously. Once all tasks are complete, a gateway checks the final value of `approved` and routes to the appropriate end event.
 
 ![Document Review Process](src/main/resources/document-review.png)

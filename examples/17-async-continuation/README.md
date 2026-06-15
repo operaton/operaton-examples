@@ -12,6 +12,8 @@ This example demonstrates **async continuations** in Operaton: marking service t
 
 ## Process model
 
+![Process diagram](src/main/resources/report-generation.png)
+
 ![Report Generation Process](src/main/resources/report-generation.png)
 
 All three service tasks carry `asyncBefore="true"`. After `startProcessInstanceByKey` returns, execution is suspended at `Task_FetchData` — the process instance is persisted but the delegate has not yet run. Each call to `executeJob()` advances the process by one task.

@@ -12,6 +12,8 @@ This example demonstrates **process composition via `callActivity`**: a parent p
 
 ## Process model
 
+![Process diagram](src/main/resources/order-orchestration.png)
+
 The parent process orchestrates two child processes. The gateway branches on the `orderValid` variable mapped out of the first child.
 
 ![Order Orchestration Process](src/main/resources/order-orchestration.png)

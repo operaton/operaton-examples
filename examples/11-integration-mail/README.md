@@ -12,6 +12,8 @@ This example demonstrates how to send emails from JavaDelegates using Spring Mai
 
 ## Process model
 
+![Process diagram](src/main/resources/job-application.png)
+
 ![Job Application Process](src/main/resources/job-application.png)
 
 ## Prerequisites

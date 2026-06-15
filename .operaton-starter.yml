@@ -82,7 +82,7 @@ examples:
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/02-service-tasks/README.md"
     screenshots:
-      - examples/02-service-tasks/docs/process.png
+      - examples/02-service-tasks/src/main/resources/payment-processing.png
     lastUpdated: "2026-06-15"
 
   - id: external-task-worker
@@ -120,7 +120,7 @@ examples:
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/03-external-task-worker/README.md"
     screenshots:
-      - examples/03-external-task-worker/docs/process.png
+      - examples/03-external-task-worker/src/main/resources/order-fulfillment.png
     lastUpdated: "2026-06-15"
 
   - id: user-task-forms
@@ -192,7 +192,7 @@ examples:
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/05-dmn-decision/README.md"
     screenshots:
-      - examples/05-dmn-decision/docs/process.png
+      - examples/05-dmn-decision/src/main/resources/loan-application.png
     lastUpdated: "2026-06-15"
 
   - id: message-events
@@ -229,7 +229,7 @@ examples:
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/06-message-events/README.md"
     screenshots:
-      - examples/06-message-events/docs/process.png
+      - examples/06-message-events/src/main/resources/order-shipment.png
     lastUpdated: "2026-06-15"
 
   - id: timer-events
@@ -535,7 +535,7 @@ examples:
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/14-signal-events/README.md"
     screenshots:
-      - examples/14-signal-events/docs/process.png
+      - examples/14-signal-events/src/main/resources/inventory-manager.png
     lastUpdated: "2026-06-15"
 
   - id: event-subprocess
@@ -868,7 +868,7 @@ examples:
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/18-integration-connectors/README.md"
     screenshots:
-      - examples/18-integration-connectors/docs/process.png
+      - examples/18-integration-connectors/src/main/resources/currency-conversion.png
     lastUpdated: "2026-06-15"
 
   - id: runtime-quarkus
@@ -912,7 +912,7 @@ examples:
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/19-runtime-quarkus/README.md"
     screenshots:
-      - examples/19-runtime-quarkus/docs/process.png
+      - examples/19-runtime-quarkus/src/main/resources/order-approval.png
     lastUpdated: "2026-06-15"
 
   - id: distribution-tomcat
@@ -959,7 +959,7 @@ examples:
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/20-distribution-tomcat/README.md"
     screenshots:
-      - examples/20-distribution-tomcat/docs/process.png
+      - examples/20-distribution-tomcat/src/main/resources/document-approval.png
     lastUpdated: "2026-06-15"
 
   - id: distribution-wildfly

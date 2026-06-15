@@ -12,6 +12,8 @@ This example demonstrates the **inclusive (OR) gateway** in Operaton: multiple o
 
 ## Process model
 
+![Process diagram](src/main/resources/insurance-claim.png)
+
 An insurance claim is routed to one or both review tracks based on the `claimType` variable. When all active reviews are complete, the claim is settled. If no conditions match, the claim is rejected immediately.
 
 ![Insurance Claim Process](src/main/resources/insurance-claim.png)

@@ -22,20 +22,8 @@ This example demonstrates **signal events in Operaton**: a signal intermediate t
 
 ### Broadcast interaction
 
-```mermaid
-sequenceDiagram
-    participant W1 as stock-watcher #1
-    participant W2 as stock-watcher #2
-    participant IM as inventory-manager
+![Process diagram](src/main/resources/inventory-manager.png)
 
-    W1->>Engine: start (waiting at signal catch)
-    W2->>Engine: start (waiting at signal catch)
-    IM->>Engine: start → update inventory → throw "StockAvailable"
-    Engine-->>W1: signal received → fulfill order → complete
-    Engine-->>W2: signal received → fulfill order → complete
-```
-
-![Process diagram](docs/process.png)
 
 ## Prerequisites
 

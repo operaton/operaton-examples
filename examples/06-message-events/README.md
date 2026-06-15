@@ -20,19 +20,8 @@ named message and later resumes when a second message arrives, with correlation 
 
 Message correlation sequence:
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Engine as Process Engine
+![Process diagram](src/main/resources/order-shipment.png)
 
-    Client->>Engine: startProcessInstanceByMessage("OrderPlaced", "ORDER-001")
-    Note over Engine: starts, runs service task, parks at catch event
-
-    Client->>Engine: correlateMessage("ShipmentReady", "ORDER-001", {trackingId})
-    Note over Engine: resumes, stores trackingId, completes
-```
-
-![Process diagram](docs/process.png)
 
 ## Prerequisites
 

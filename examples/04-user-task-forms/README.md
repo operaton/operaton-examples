@@ -15,6 +15,8 @@ the engine validates on submission.
 
 ## Process model
 
+![Process diagram](src/main/resources/leave-request.png)
+
 ![Leave Request Process](src/main/resources/leave-request.png)
 
 ## Prerequisites

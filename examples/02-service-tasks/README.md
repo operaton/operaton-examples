@@ -21,33 +21,8 @@ service tasks: **synchronous** (caller's transaction) and **asynchronous**
 
 How the engine and payment gateway interact:
 
-```mermaid
-sequenceDiagram
-    participant Caller
-    participant Engine
-    participant JobExecutor
-    participant Delegate
+![Process diagram](src/main/resources/payment-processing.png)
 
-    Caller->>Engine: startProcessInstance(variables)
-    Engine->>Delegate: EnrichPaymentDelegate.execute()
-    Delegate-->>Engine: sets currency, enriched=true
-    Engine-->>Caller: returns ProcessInstance (job persisted)
-
-    JobExecutor->>Engine: poll for jobs
-    Engine->>Delegate: ChargePaymentDelegate.execute()
-    alt success
-        Delegate-->>Engine: sets chargeId, charged=true
-        Engine->>Engine: complete process
-    else PAYMENT_DECLINED
-        Delegate-->>Engine: throw BpmnError("PAYMENT_DECLINED")
-        Engine->>Engine: route to boundary event → Declined
-    else transient error
-        Delegate-->>Engine: throw RuntimeException
-        Engine->>Engine: decrement retries, reschedule job
-    end
-```
-
-![Process diagram](docs/process.png)
 
 ## Prerequisites
 

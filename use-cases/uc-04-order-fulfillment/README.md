@@ -12,6 +12,8 @@ A self-contained Operaton example for **order fulfillment orchestration** across
 
 ## Process Model
 
+![Process diagram](src/main/resources/order-fulfillment.png)
+
 ![Order Fulfillment Process](src/main/resources/order-fulfillment.png)
 
 ## Scenario
