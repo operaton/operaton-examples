@@ -32,7 +32,9 @@
     <module>examples/19-runtime-quarkus</module>
     <module>examples/20-distribution-tomcat</module>
     <module>examples/21-distribution-wildfly</module>
+    <!--
     <module>examples/22-operations-flowset-control</module>
+    -->
     <module>use-cases/uc-01-leave-request</module>
     <module>use-cases/uc-02-loan-application</module>
     <module>use-cases/uc-03-incident-management</module>
