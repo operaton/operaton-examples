@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="Definitions_1"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="currency-conversion" name="Currency Conversion" isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_1" name="Conversion requested">
+      <bpmn:outgoing>Flow_start_fetch</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="FetchExchangeRate" name="Fetch exchange rate">
+      <bpmn:extensionElements>
+        <operaton:connector>
+          <operaton:connectorId>http-connector</operaton:connectorId>
+          <operaton:inputOutput>
+            <operaton:inputParameter name="url">${exchangeRateServiceUrl}</operaton:inputParameter>
+            <operaton:inputParameter name="method">GET</operaton:inputParameter>
+            <operaton:outputParameter name="exchangeRate">${response}</operaton:outputParameter>
+          </operaton:inputOutput>
+        </operaton:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_start_fetch</bpmn:incoming>
+      <bpmn:outgoing>Flow_fetch_convert</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:boundaryEvent id="BoundaryError_1" name="Rate unavailable" attachedToRef="FetchExchangeRate">
+      <bpmn:outgoing>Flow_error_end</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorDef_1" errorRef="Error_RateUnavailable"/>
+    </bpmn:boundaryEvent>
+
+    <bpmn:serviceTask id="ConvertAmount" name="Convert amount">
+      <bpmn:extensionElements>
+        <operaton:connector>
+          <operaton:connectorId>currency-convert</operaton:connectorId>
+          <operaton:inputOutput>
+            <operaton:inputParameter name="amount">${amount}</operaton:inputParameter>
+            <operaton:inputParameter name="exchangeRate">${exchangeRate}</operaton:inputParameter>
+            <operaton:outputParameter name="convertedAmount">${convertedAmount}</operaton:outputParameter>
+          </operaton:inputOutput>
+        </operaton:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_fetch_convert</bpmn:incoming>
+      <bpmn:outgoing>Flow_convert_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_Converted" name="Amount converted">
+      <bpmn:incoming>Flow_convert_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_RateUnavailable" name="Rate unavailable">
+      <bpmn:incoming>Flow_error_end</bpmn:incoming>
+      <bpmn:errorEventDefinition id="ErrorDef_2" errorRef="Error_RateUnavailable"/>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_start_fetch" sourceRef="StartEvent_1" targetRef="FetchExchangeRate"/>
+    <bpmn:sequenceFlow id="Flow_fetch_convert" sourceRef="FetchExchangeRate" targetRef="ConvertAmount"/>
+    <bpmn:sequenceFlow id="Flow_convert_end" sourceRef="ConvertAmount" targetRef="EndEvent_Converted"/>
+    <bpmn:sequenceFlow id="Flow_error_end" sourceRef="BoundaryError_1" targetRef="EndEvent_RateUnavailable"/>
+  </bpmn:process>
+
+  <bpmn:error id="Error_RateUnavailable" name="Rate Unavailable" errorCode="RATE_UNAVAILABLE"/>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="currency-conversion">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="130" y="125" width="80" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="FetchExchangeRate_di" bpmnElement="FetchExchangeRate">
+        <dc:Bounds x="240" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryError_1_di" bpmnElement="BoundaryError_1">
+        <dc:Bounds x="302" y="122" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ConvertAmount_di" bpmnElement="ConvertAmount">
+        <dc:Bounds x="390" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Converted_di" bpmnElement="EndEvent_Converted">
+        <dc:Bounds x="542" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="525" y="125" width="70" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_RateUnavailable_di" bpmnElement="EndEvent_RateUnavailable">
+        <dc:Bounds x="302" y="222" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="278" y="265" width="84" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_start_fetch_di" bpmnElement="Flow_start_fetch">
+        <di:waypoint x="188" y="100"/><di:waypoint x="240" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_fetch_convert_di" bpmnElement="Flow_fetch_convert">
+        <di:waypoint x="340" y="100"/><di:waypoint x="390" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_convert_end_di" bpmnElement="Flow_convert_end">
+        <di:waypoint x="490" y="100"/><di:waypoint x="542" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_error_end_di" bpmnElement="Flow_error_end">
+        <di:waypoint x="320" y="158"/><di:waypoint x="320" y="222"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
