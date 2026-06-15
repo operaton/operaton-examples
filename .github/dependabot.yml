@@ -56,7 +56,8 @@ updates:
           - "org.testcontainers*"
 
   - package-ecosystem: "docker"
-    directory: "/"
+    directories:
+      - "*"
     schedule:
       interval: "weekly"
     labels:
