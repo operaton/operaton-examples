@@ -23,9 +23,7 @@
       <bpmn:multiInstanceLoopCharacteristics isSequential="false"
                                               operaton:collection="${reviewers}"
                                               operaton:elementVariable="reviewer">
-        <bpmn:completionCondition>
-          ${nrOfCompletedInstances == nrOfInstances}
-        </bpmn:completionCondition>
+        <bpmn:completionCondition>${nrOfCompletedInstances == nrOfInstances}</bpmn:completionCondition>
       </bpmn:multiInstanceLoopCharacteristics>
     </bpmn:userTask>
 
