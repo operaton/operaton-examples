@@ -24,6 +24,13 @@ updates:
       testcontainers:
         patterns:
           - "org.testcontainers*"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.springframework.boot:*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "io.quarkus:*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: "gradle"
     directory: "/"
