@@ -8,7 +8,20 @@ include(
   "examples:05-dmn-decision",
   "examples:06-message-events",
   "examples:07-timer-events",
-  "examples:17-async-continuation"
+  "examples:08-error-compensation",
+  "examples:09-multi-instance",
+  "examples:10-integration-rest",
+  "examples:11-integration-mail",
+  "examples:12-integration-kafka",
+  "examples:13-call-activity",
+  "examples:14-signal-events",
+  "examples:15-event-subprocess",
+  "examples:16-inclusive-gateway",
+  "examples:17-async-continuation",
+  "use-cases:uc-01-leave-request",
+  "use-cases:uc-02-loan-application",
+  "use-cases:uc-03-incident-management",
+  "use-cases:uc-04-order-fulfillment"
 )
 
 project(":examples:01-getting-started").projectDir = file("examples/01-getting-started")
@@ -18,4 +31,17 @@ project(":examples:04-user-task-forms").projectDir = file("examples/04-user-task
 project(":examples:05-dmn-decision").projectDir = file("examples/05-dmn-decision")
 project(":examples:06-message-events").projectDir = file("examples/06-message-events")
 project(":examples:07-timer-events").projectDir = file("examples/07-timer-events")
+project(":examples:08-error-compensation").projectDir = file("examples/08-error-compensation")
+project(":examples:09-multi-instance").projectDir = file("examples/09-multi-instance")
+project(":examples:10-integration-rest").projectDir = file("examples/10-integration-rest")
+project(":examples:11-integration-mail").projectDir = file("examples/11-integration-mail")
+project(":examples:12-integration-kafka").projectDir = file("examples/12-integration-kafka")
+project(":examples:13-call-activity").projectDir = file("examples/13-call-activity")
+project(":examples:14-signal-events").projectDir = file("examples/14-signal-events")
+project(":examples:15-event-subprocess").projectDir = file("examples/15-event-subprocess")
+project(":examples:16-inclusive-gateway").projectDir = file("examples/16-inclusive-gateway")
 project(":examples:17-async-continuation").projectDir = file("examples/17-async-continuation")
+project(":use-cases:uc-01-leave-request").projectDir = file("use-cases/uc-01-leave-request")
+project(":use-cases:uc-02-loan-application").projectDir = file("use-cases/uc-02-loan-application")
+project(":use-cases:uc-03-incident-management").projectDir = file("use-cases/uc-03-incident-management")
+project(":use-cases:uc-04-order-fulfillment").projectDir = file("use-cases/uc-04-order-fulfillment")

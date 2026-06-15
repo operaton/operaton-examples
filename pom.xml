@@ -18,7 +18,20 @@
     <module>examples/05-dmn-decision</module>
     <module>examples/06-message-events</module>
     <module>examples/07-timer-events</module>
+    <module>examples/08-error-compensation</module>
+    <module>examples/09-multi-instance</module>
+    <module>examples/10-integration-rest</module>
+    <module>examples/11-integration-mail</module>
+    <module>examples/12-integration-kafka</module>
+    <module>examples/13-call-activity</module>
+    <module>examples/14-signal-events</module>
+    <module>examples/15-event-subprocess</module>
+    <module>examples/16-inclusive-gateway</module>
     <module>examples/17-async-continuation</module>
+    <module>use-cases/uc-01-leave-request</module>
+    <module>use-cases/uc-02-loan-application</module>
+    <module>use-cases/uc-03-incident-management</module>
+    <module>use-cases/uc-04-order-fulfillment</module>
   </modules>
 
 </project>
