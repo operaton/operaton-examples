@@ -13,6 +13,7 @@ example means testing its processes against real integrations.
 |---|---|
 | JDK | 21 |
 | Docker | any recent version (required for tests and local run) |
+| Distribution images (`operaton/tomcat`, `operaton/wildfly`, `operaton/operaton`) | `2.1.1` |
 
 Pinned stack (all examples): Spring Boot **4.0.6**, Operaton **2.1.0**,
 Maven Wrapper **3.9.12**, Gradle Wrapper **9.2.0**, PostgreSQL **16**.
@@ -59,6 +60,16 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | UC-02 | [loan-application](use-cases/uc-02-loan-application) | Loan origination | REST credit scoring, DMN risk assessment, Spring Mail notifications |
 | UC-03 | [incident-management](use-cases/uc-03-incident-management) | IT support ticket | Signal escalation boundary, timer SLA boundary, 4-swimlane BPMN, REST integration |
 | UC-04 | [order-fulfillment](use-cases/uc-04-order-fulfillment) | E-commerce order | Error boundary on payment, async continuation, compensation, WireMock inventory/payment stubs |
+
+### Platform Integration
+
+| # | Example | Demonstrates |
+|---|---|---|
+| 18 | [integration-connectors](examples/18-integration-connectors) | HTTP connector (declarative, no Java delegate) + custom Connector SPI |
+| 19 | [runtime-quarkus](examples/19-runtime-quarkus) | Embedded engine in Quarkus/CDI (no Spring Boot) |
+| 20 | [distribution-tomcat](examples/20-distribution-tomcat) | Process-application WAR deployed into `operaton/tomcat` shared-engine container |
+| 21 | [distribution-wildfly](examples/21-distribution-wildfly) | Process-application WAR deployed into `operaton/wildfly` shared-engine container |
+| 22 | [operations-flowset-control](examples/22-operations-flowset-control) | `operaton/operaton` with built-in webapps disabled; Flowset Control as external ops UI |
 
 ## Anatomy of every example
 
