@@ -18,6 +18,11 @@ include(
   "examples:15-event-subprocess",
   "examples:16-inclusive-gateway",
   "examples:17-async-continuation",
+  "examples:18-integration-connectors",
+  "examples:19-runtime-quarkus",
+  "examples:20-distribution-tomcat",
+  "examples:21-distribution-wildfly",
+  "examples:22-operations-flowset-control",
   "use-cases:uc-01-leave-request",
   "use-cases:uc-02-loan-application",
   "use-cases:uc-03-incident-management",
@@ -41,6 +46,11 @@ project(":examples:14-signal-events").projectDir = file("examples/14-signal-even
 project(":examples:15-event-subprocess").projectDir = file("examples/15-event-subprocess")
 project(":examples:16-inclusive-gateway").projectDir = file("examples/16-inclusive-gateway")
 project(":examples:17-async-continuation").projectDir = file("examples/17-async-continuation")
+project(":examples:18-integration-connectors").projectDir = file("examples/18-integration-connectors")
+project(":examples:19-runtime-quarkus").projectDir = file("examples/19-runtime-quarkus")
+project(":examples:20-distribution-tomcat").projectDir = file("examples/20-distribution-tomcat")
+project(":examples:21-distribution-wildfly").projectDir = file("examples/21-distribution-wildfly")
+project(":examples:22-operations-flowset-control").projectDir = file("examples/22-operations-flowset-control")
 project(":use-cases:uc-01-leave-request").projectDir = file("use-cases/uc-01-leave-request")
 project(":use-cases:uc-02-loan-application").projectDir = file("use-cases/uc-02-loan-application")
 project(":use-cases:uc-03-incident-management").projectDir = file("use-cases/uc-03-incident-management")

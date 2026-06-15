@@ -28,6 +28,11 @@
     <module>examples/15-event-subprocess</module>
     <module>examples/16-inclusive-gateway</module>
     <module>examples/17-async-continuation</module>
+    <module>examples/18-integration-connectors</module>
+    <module>examples/19-runtime-quarkus</module>
+    <module>examples/20-distribution-tomcat</module>
+    <module>examples/21-distribution-wildfly</module>
+    <module>examples/22-operations-flowset-control</module>
     <module>use-cases/uc-01-leave-request</module>
     <module>use-cases/uc-02-loan-application</module>
     <module>use-cases/uc-03-incident-management</module>
