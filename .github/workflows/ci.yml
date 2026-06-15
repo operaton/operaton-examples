@@ -33,11 +33,15 @@ jobs:
       - id: changed
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            base_ref="${{ github.base_ref }}"
+            base_ref="origin/${{ github.base_ref }}"
           else
-            base_ref="HEAD~1"
+            base_ref="origin/main"
           fi
-          changed=$(git diff --name-only --diff-filter=d $base_ref | grep -o '^examples/[^/]*' | sort -u | sed 's|examples/||' | jq -R . | jq -cs . || echo "[]")
+          changed=$(git diff --name-only --diff-filter=d $base_ref 2>/dev/null | grep -o '^examples/[^/]*' | sort -u | sed 's|examples/||' | jq -R . | jq -cs . 2>/dev/null || echo "[]")
+          if [ "$changed" == "[]" ]; then
+            # If no changes detected, build all examples (first push or all files changed)
+            changed=$(ls -d examples/*/ | sed 's|/$||' | jq -R . | jq -cs .)
+          fi
           echo "examples=$changed" >> "$GITHUB_OUTPUT"
           echo "Changed examples: $changed"
 
