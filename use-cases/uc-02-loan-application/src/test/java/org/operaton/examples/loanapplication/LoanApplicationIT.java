@@ -4,37 +4,33 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.operaton.bpm.engine.DecisionService;
+import org.operaton.bpm.engine.HistoryService;
 import org.operaton.bpm.engine.ProcessEngine;
 import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.TaskService;
-import org.operaton.bpm.engine.repository.ProcessDefinition;
 import org.operaton.bpm.engine.runtime.ProcessInstance;
 import org.operaton.bpm.engine.task.Task;
 import org.operaton.bpm.engine.variable.Variables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, properties = "management.health.mail.enabled=false")
 @Testcontainers
-@ContextConfiguration(initializers = LoanApplicationIT.WireMockInitializer.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class LoanApplicationIT {
 
@@ -47,14 +43,10 @@ class LoanApplicationIT {
     static WireMockContainer wireMock = new WireMockContainer("wiremock/wiremock:3.5.4")
             .withMappingFromResource("wiremock/mappings/credit-score-stub.json");
 
-    static class WireMockInitializer
-            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext ctx) {
-            TestPropertyValues.of(
-                    "credit.score.service.url=http://" + wireMock.getHost() + ":" + wireMock.getMappedPort(8080)
-            ).applyTo(ctx.getEnvironment());
-        }
+    @DynamicPropertySource
+    static void wireMockProperties(DynamicPropertyRegistry registry) {
+        String baseUrl = "http://" + wireMock.getHost() + ":" + wireMock.getMappedPort(8080);
+        registry.add("credit.score.service.url", () -> baseUrl);
     }
 
     @Autowired
@@ -63,7 +55,10 @@ class LoanApplicationIT {
     @Autowired
     private RuntimeService runtimeService;
 
-    @MockBean
+    @Autowired
+    private HistoryService historyService;
+
+    @MockitoBean
     private JavaMailSender mailSender;
 
     @Test
@@ -144,7 +139,18 @@ class LoanApplicationIT {
 
         assertNotNull(instance);
 
-        assertEquals(expectedRisk, runtimeService.getVariable(instance.getId(), "riskLevel"),
+        // For processes that complete synchronously (low/high risk), use history service
+        String actualRiskLevel;
+        if (runtimeService.createProcessInstanceQuery().processInstanceId(instance.getId()).count() > 0) {
+            actualRiskLevel = (String) runtimeService.getVariable(instance.getId(), "riskLevel");
+        } else {
+            actualRiskLevel = (String) historyService.createHistoricVariableInstanceQuery()
+                    .processInstanceId(instance.getId())
+                    .variableName("riskLevel")
+                    .singleResult()
+                    .getValue();
+        }
+        assertEquals(expectedRisk, actualRiskLevel,
                 "Expected DMN to set the matching riskLevel");
 
         // For medium risk, a user task should be pending for underwriters
