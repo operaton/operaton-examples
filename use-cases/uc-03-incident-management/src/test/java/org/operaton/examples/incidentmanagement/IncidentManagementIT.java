@@ -11,11 +11,9 @@ import org.operaton.bpm.engine.task.Task;
 import org.operaton.bpm.engine.variable.Variables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -28,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Testcontainers
-@ContextConfiguration(initializers = IncidentManagementIT.WireMockInitializer.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class IncidentManagementIT {
 
@@ -39,19 +36,14 @@ class IncidentManagementIT {
 
     @Container
     static WireMockContainer wireMock = new WireMockContainer("wiremock/wiremock:3.5.4")
-            .withMappingFromResource("close-ticket-stub.json")
-            .withMappingFromResource("post-mortem-stub.json");
+            .withMappingFromResource("close-ticket-stub", "wiremock/mappings/close-ticket-stub.json")
+            .withMappingFromResource("post-mortem-stub", "wiremock/mappings/post-mortem-stub.json");
 
-    static class WireMockInitializer
-            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext ctx) {
-            String baseUrl = "http://" + wireMock.getHost() + ":" + wireMock.getMappedPort(8080);
-            TestPropertyValues.of(
-                    "ticket.service.url=" + baseUrl,
-                    "notification.service.url=" + baseUrl
-            ).applyTo(ctx.getEnvironment());
-        }
+    @DynamicPropertySource
+    static void wireMockProperties(DynamicPropertyRegistry registry) {
+        String baseUrl = "http://" + wireMock.getHost() + ":" + wireMock.getMappedPort(8080);
+        registry.add("ticket.service.url", () -> baseUrl);
+        registry.add("notification.service.url", () -> baseUrl);
     }
 
     @Autowired
@@ -93,9 +85,9 @@ class IncidentManagementIT {
         // Frank claims and resolves
         List<Task> tasks = taskService.createTaskQuery()
                 .processInstanceId(instance.getId())
-                .taskCandidateGroup("first-line")
+                .taskCandidateGroup("firstline")
                 .list();
-        assertFalse(tasks.isEmpty(), "Expected first-line triage task");
+        assertFalse(tasks.isEmpty(), "Expected firstline triage task");
 
         taskService.claim(tasks.get(0).getId(), "frank");
         taskService.complete(tasks.get(0).getId(),
@@ -136,15 +128,15 @@ class IncidentManagementIT {
                 .list()
                 .forEach(job -> managementService.executeJob(job.getId()));
 
-        // Task should now be with second-line
+        // Task should now be with secondline
         List<Task> secondLineTasks = taskService.createTaskQuery()
                 .processInstanceId(instance.getId())
-                .taskCandidateGroup("second-line")
+                .taskCandidateGroup("secondline")
                 .list();
         assertFalse(secondLineTasks.isEmpty(),
-                "Expected second-line task after timer escalation");
+                "Expected secondline task after timer escalation");
 
-        // Complete second-line task and post-mortem
+        // Complete secondline task and post-mortem
         taskService.claim(secondLineTasks.get(0).getId(), "grace");
         taskService.complete(secondLineTasks.get(0).getId());
 

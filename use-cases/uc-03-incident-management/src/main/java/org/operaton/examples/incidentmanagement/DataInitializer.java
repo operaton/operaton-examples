@@ -19,16 +19,16 @@ public class DataInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         createGroupIfAbsent("employees", "Employees", "WORKFLOW");
-        createGroupIfAbsent("first-line", "First-Line Support", "WORKFLOW");
-        createGroupIfAbsent("second-line", "Second-Line Engineering", "WORKFLOW");
+        createGroupIfAbsent("firstline", "First-Line Support", "WORKFLOW");
+        createGroupIfAbsent("secondline", "Second-Line Engineering", "WORKFLOW");
 
         createUserIfAbsent("alice", "Alice", "Employee", "alice@example.com", "alice");
         createUserIfAbsent("frank", "Frank", "FirstLine", "frank@example.com", "frank");
         createUserIfAbsent("grace", "Grace", "SecondLine", "grace@example.com", "grace");
 
         createMembershipIfAbsent("alice", "employees");
-        createMembershipIfAbsent("frank", "first-line");
-        createMembershipIfAbsent("grace", "second-line");
+        createMembershipIfAbsent("frank", "firstline");
+        createMembershipIfAbsent("grace", "secondline");
     }
 
     private void createGroupIfAbsent(String id, String name, String type) {

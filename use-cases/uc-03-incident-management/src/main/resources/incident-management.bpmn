@@ -23,10 +23,10 @@
       <lane id="Lane_Employees" name="employees">
         <flowNodeRef>StartEvent_1</flowNodeRef>
       </lane>
-      <lane id="Lane_FirstLine" name="first-line">
+      <lane id="Lane_FirstLine" name="firstline">
         <flowNodeRef>Task_FirstLineTriage</flowNodeRef>
       </lane>
-      <lane id="Lane_SecondLine" name="second-line">
+      <lane id="Lane_SecondLine" name="secondline">
         <flowNodeRef>Task_SecondLine</flowNodeRef>
       </lane>
       <lane id="Lane_System" name="System">
@@ -47,19 +47,19 @@
     </startEvent>
 
     <userTask id="Task_FirstLineTriage" name="Triage"
-              operaton:candidateGroups="first-line">
+              operaton:candidateGroups="firstline">
       <incoming>Flow_start_to_triage</incoming>
       <outgoing>Flow_triage_to_gw</outgoing>
     </userTask>
 
-    <!-- Non-interrupting boundary signal: parallel escalation to second-line -->
+    <!-- Non-interrupting boundary signal: parallel escalation to secondline -->
     <boundaryEvent id="Signal_Escalation" name="Escalation Signal"
                    attachedToRef="Task_FirstLineTriage" cancelActivity="false">
       <outgoing>Flow_signal_to_priority</outgoing>
       <signalEventDefinition signalRef="EscalationSignal"/>
     </boundaryEvent>
 
-    <!-- Interrupting boundary timer: escalates to second-line after SLA duration -->
+    <!-- Interrupting boundary timer: escalates to secondline after SLA duration -->
     <boundaryEvent id="BoundaryTimer_Escalate" name="SLA Timer"
                    cancelActivity="true"
                    attachedToRef="Task_FirstLineTriage">
@@ -77,7 +77,7 @@
     </serviceTask>
 
     <userTask id="Task_SecondLine" name="Handle Escalation"
-              operaton:candidateGroups="second-line">
+              operaton:candidateGroups="secondline">
       <incoming>Flow_timer_to_secondline</incoming>
       <incoming>Flow_not_resolved</incoming>
       <incoming>Flow_priority_to_secondline</incoming>
@@ -140,12 +140,12 @@
         <dc:Bounds x="190" y="40" width="1030" height="80"/>
       </bpmndi:BPMNShape>
 
-      <!-- Lane: first-line (y=120, h=140) -->
+      <!-- Lane: firstline (y=120, h=140) -->
       <bpmndi:BPMNShape id="Lane_FirstLine_di" bpmnElement="Lane_FirstLine" isHorizontal="true">
         <dc:Bounds x="190" y="120" width="1030" height="140"/>
       </bpmndi:BPMNShape>
 
-      <!-- Lane: second-line (y=260, h=120) -->
+      <!-- Lane: secondline (y=260, h=120) -->
       <bpmndi:BPMNShape id="Lane_SecondLine_di" bpmnElement="Lane_SecondLine" isHorizontal="true">
         <dc:Bounds x="190" y="260" width="1030" height="120"/>
       </bpmndi:BPMNShape>
@@ -161,7 +161,7 @@
         <bpmndi:BPMNLabel><dc:Bounds x="231" y="105" width="79" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Task_FirstLineTriage (first-line lane, center y=190) -->
+      <!-- Task_FirstLineTriage (firstline lane, center y=190) -->
       <bpmndi:BPMNShape id="Task_FirstLineTriage_di" bpmnElement="Task_FirstLineTriage">
         <dc:Bounds x="310" y="150" width="140" height="80"/>
       </bpmndi:BPMNShape>
@@ -178,7 +178,7 @@
         <bpmndi:BPMNLabel><dc:Bounds x="343" y="255" width="74" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Task_SecondLine (second-line, center y=320) -->
+      <!-- Task_SecondLine (secondline, center y=320) -->
       <bpmndi:BPMNShape id="Task_SecondLine_di" bpmnElement="Task_SecondLine">
         <dc:Bounds x="700" y="280" width="140" height="80"/>
       </bpmndi:BPMNShape>
