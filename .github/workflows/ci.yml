@@ -13,44 +13,53 @@ jobs:
   discover:
     runs-on: ubuntu-latest
     outputs:
-      maven-examples: ${{ steps.maven.outputs.examples }}
-      gradle-examples: ${{ steps.gradle.outputs.examples }}
+      maven-examples: ${{ steps.discover.outputs.maven }}
+      gradle-examples: ${{ steps.discover.outputs.gradle }}
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - id: changed
+      - id: discover
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             base_ref="origin/${{ github.base_ref }}"
           else
             base_ref="origin/main"
           fi
+
+          # Extract project paths relative to examples/:
+          # - examples/getting-started/... -> getting-started
+          # - examples/use-cases/leave-request/... -> use-cases/leave-request
           changed=$(git diff --name-only --diff-filter=d "$base_ref" 2>/dev/null \
-            | grep -o '^examples/[^/]*' | sort -u | sed 's|examples/||' \
-            | jq -R . | jq -cs . 2>/dev/null || echo "[]")
-          if [ "$changed" == "[]" ]; then
-            changed=$(ls -d examples/*/ | sed 's|/$||' | sed 's|examples/||' | jq -R . | jq -cs .)
+            | grep '^examples/' \
+            | awk -F'/' '{
+                if ($2 == "use-cases" && NF >= 3) print $2"/"$3
+                else if ($2 != "" && $2 != "use-cases") print $2
+              }' \
+            | sort -u | jq -R . | jq -cs . 2>/dev/null || echo "[]")
+
+          # Fall back to all examples when nothing changed (fresh push / workflow change)
+          if [ "$changed" = "[]" ]; then
+            changed=$(find examples -name "mvnw" -mindepth 2 -maxdepth 3 \
+              | sed 's|^examples/||' | sed 's|/mvnw$||' \
+              | sort -u | jq -R . | jq -cs .)
           fi
-          echo "list=$changed" >> "$GITHUB_OUTPUT"
-          echo "Changed examples: $changed"
 
-      - id: maven
-        run: |
-          echo "examples=${{ steps.changed.outputs.list }}" >> "$GITHUB_OUTPUT"
-          echo "Maven examples: ${{ steps.changed.outputs.list }}"
+          echo "Changed: $changed"
 
-      - id: gradle
-        run: |
-          changed='${{ steps.changed.outputs.list }}'
-          gradle_all=$(find examples -name "build.gradle*" \
-            | sed 's|examples/||' | sed 's|/.*||' | sort -u \
-            | jq -R . | jq -cs .)
-          gradle=$(echo "$changed" | jq -c --argjson all "$gradle_all" \
-            '[.[] | select(. as $e | $all | any(. == $e))]')
-          echo "examples=$gradle" >> "$GITHUB_OUTPUT"
-          echo "Gradle examples: $gradle"
+          # Maven: all changed examples (every project has mvnw)
+          maven=$(printf '%s' "$changed")
+          echo "maven=$maven" >> "$GITHUB_OUTPUT"
+          echo "Maven: $maven"
+
+          # Gradle: only whitelisted examples that were changed
+          gradle_whitelist='["getting-started"]'
+          gradle=$(printf '%s' "$changed" | jq -c \
+            --argjson wl "$gradle_whitelist" \
+            '[.[] | select(. as $e | $wl | any(. == $e))]')
+          echo "gradle=$gradle" >> "$GITHUB_OUTPUT"
+          echo "Gradle: $gradle"
 
   build-maven:
     needs: discover

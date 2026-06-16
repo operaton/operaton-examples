@@ -1,67 +1,73 @@
 rootProject.name = "operaton-examples-aggregate"
 
 include(
-  "examples:01-getting-started",
-  "examples:02-service-tasks",
-  "examples:03-external-task-worker",
-  "examples:04-user-task-forms",
-  "examples:05-dmn-decision",
-  "examples:06-message-events",
-  "examples:07-timer-events",
-  "examples:08-error-compensation",
-  "examples:09-multi-instance",
-  "examples:10-integration-rest",
-  "examples:11-integration-mail",
-  "examples:12-integration-kafka",
-  "examples:13-call-activity",
-  "examples:14-signal-events",
-  "examples:15-event-subprocess",
-  "examples:16-inclusive-gateway",
-  "examples:17-async-continuation",
-  "examples:18-integration-connectors",
-  "examples:19-runtime-quarkus",
-  "examples:20-distribution-tomcat",
-  "examples:21-distribution-wildfly",
-  "examples:22-operations-flowset-control",
-  "examples:23-engine-plugin",
-  "examples:24-job-retry-profile",
-  "examples:25-command-interceptor",
-  "examples:26-process-migration",
-  "examples:27-spin-json",
-  "examples:28-multi-tenancy",
-  "examples:29-bpmn-model-api-parse",
-  "examples:30-bpmn-model-api-generate",
-  "examples:31-standalone-dmn",
-  "examples:32-unit-testing",
-  "use-cases:uc-01-leave-request",
-  "use-cases:uc-02-loan-application",
-  "use-cases:uc-03-incident-management",
-  "use-cases:uc-04-order-fulfillment"
+  "examples:getting-started",
+  "examples:service-tasks",
+  "examples:external-task-worker",
+  "examples:user-task-forms",
+  "examples:dmn-decision",
+  "examples:message-events",
+  "examples:timer-events",
+  "examples:error-compensation",
+  "examples:multi-instance",
+  "examples:integration-rest",
+  "examples:integration-mail",
+  "examples:integration-kafka",
+  "examples:call-activity",
+  "examples:signal-events",
+  "examples:event-subprocess",
+  "examples:inclusive-gateway",
+  "examples:async-continuation",
+  "examples:integration-connectors",
+  "examples:runtime-quarkus",
+  "examples:distribution-tomcat",
+  "examples:distribution-wildfly",
+  "examples:engine-plugin",
+  "examples:job-retry-profile",
+  "examples:command-interceptor",
+  "examples:process-migration",
+  "examples:spin-json",
+  "examples:multi-tenancy",
+  "examples:bpmn-model-api-parse",
+  "examples:bpmn-model-api-generate",
+  "examples:unit-testing",
+  "examples:use-cases:leave-request",
+  "examples:use-cases:loan-application",
+  "examples:use-cases:incident-management",
+  "examples:use-cases:order-fulfillment"
 )
 
-project(":examples:01-getting-started").projectDir = file("examples/01-getting-started")
-project(":examples:02-service-tasks").projectDir = file("examples/02-service-tasks")
-project(":examples:03-external-task-worker").projectDir = file("examples/03-external-task-worker")
-project(":examples:04-user-task-forms").projectDir = file("examples/04-user-task-forms")
-project(":examples:05-dmn-decision").projectDir = file("examples/05-dmn-decision")
-project(":examples:06-message-events").projectDir = file("examples/06-message-events")
-project(":examples:07-timer-events").projectDir = file("examples/07-timer-events")
-project(":examples:08-error-compensation").projectDir = file("examples/08-error-compensation")
-project(":examples:09-multi-instance").projectDir = file("examples/09-multi-instance")
-project(":examples:10-integration-rest").projectDir = file("examples/10-integration-rest")
-project(":examples:11-integration-mail").projectDir = file("examples/11-integration-mail")
-project(":examples:12-integration-kafka").projectDir = file("examples/12-integration-kafka")
-project(":examples:13-call-activity").projectDir = file("examples/13-call-activity")
-project(":examples:14-signal-events").projectDir = file("examples/14-signal-events")
-project(":examples:15-event-subprocess").projectDir = file("examples/15-event-subprocess")
-project(":examples:16-inclusive-gateway").projectDir = file("examples/16-inclusive-gateway")
-project(":examples:17-async-continuation").projectDir = file("examples/17-async-continuation")
-project(":examples:18-integration-connectors").projectDir = file("examples/18-integration-connectors")
-project(":examples:19-runtime-quarkus").projectDir = file("examples/19-runtime-quarkus")
-project(":examples:20-distribution-tomcat").projectDir = file("examples/20-distribution-tomcat")
-project(":examples:21-distribution-wildfly").projectDir = file("examples/21-distribution-wildfly")
-project(":examples:22-operations-flowset-control").projectDir = file("examples/22-operations-flowset-control")
-project(":use-cases:uc-01-leave-request").projectDir = file("use-cases/uc-01-leave-request")
-project(":use-cases:uc-02-loan-application").projectDir = file("use-cases/uc-02-loan-application")
-project(":use-cases:uc-03-incident-management").projectDir = file("use-cases/uc-03-incident-management")
-project(":use-cases:uc-04-order-fulfillment").projectDir = file("use-cases/uc-04-order-fulfillment")
+project(":examples:getting-started").projectDir = file("examples/getting-started")
+project(":examples:service-tasks").projectDir = file("examples/service-tasks")
+project(":examples:external-task-worker").projectDir = file("examples/external-task-worker")
+project(":examples:user-task-forms").projectDir = file("examples/user-task-forms")
+project(":examples:dmn-decision").projectDir = file("examples/dmn-decision")
+project(":examples:message-events").projectDir = file("examples/message-events")
+project(":examples:timer-events").projectDir = file("examples/timer-events")
+project(":examples:error-compensation").projectDir = file("examples/error-compensation")
+project(":examples:multi-instance").projectDir = file("examples/multi-instance")
+project(":examples:integration-rest").projectDir = file("examples/integration-rest")
+project(":examples:integration-mail").projectDir = file("examples/integration-mail")
+project(":examples:integration-kafka").projectDir = file("examples/integration-kafka")
+project(":examples:call-activity").projectDir = file("examples/call-activity")
+project(":examples:signal-events").projectDir = file("examples/signal-events")
+project(":examples:event-subprocess").projectDir = file("examples/event-subprocess")
+project(":examples:inclusive-gateway").projectDir = file("examples/inclusive-gateway")
+project(":examples:async-continuation").projectDir = file("examples/async-continuation")
+project(":examples:integration-connectors").projectDir = file("examples/integration-connectors")
+project(":examples:runtime-quarkus").projectDir = file("examples/runtime-quarkus")
+project(":examples:distribution-tomcat").projectDir = file("examples/distribution-tomcat")
+project(":examples:distribution-wildfly").projectDir = file("examples/distribution-wildfly")
+project(":examples:engine-plugin").projectDir = file("examples/engine-plugin")
+project(":examples:job-retry-profile").projectDir = file("examples/job-retry-profile")
+project(":examples:command-interceptor").projectDir = file("examples/command-interceptor")
+project(":examples:process-migration").projectDir = file("examples/process-migration")
+project(":examples:spin-json").projectDir = file("examples/spin-json")
+project(":examples:multi-tenancy").projectDir = file("examples/multi-tenancy")
+project(":examples:bpmn-model-api-parse").projectDir = file("examples/bpmn-model-api-parse")
+project(":examples:bpmn-model-api-generate").projectDir = file("examples/bpmn-model-api-generate")
+project(":examples:unit-testing").projectDir = file("examples/unit-testing")
+project(":examples:use-cases:leave-request").projectDir = file("examples/use-cases/leave-request")
+project(":examples:use-cases:loan-application").projectDir = file("examples/use-cases/loan-application")
+project(":examples:use-cases:incident-management").projectDir = file("examples/use-cases/incident-management")
+project(":examples:use-cases:order-fulfillment").projectDir = file("examples/use-cases/order-fulfillment")
