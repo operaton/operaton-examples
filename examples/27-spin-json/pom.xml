@@ -53,6 +53,16 @@
       <artifactId>operaton-bpm-spring-boot-starter-rest</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.operaton.bpm</groupId>
+      <artifactId>operaton-engine-plugin-spin</artifactId>
+      <version>${operaton.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.operaton.spin</groupId>
+      <artifactId>operaton-spin-dataformat-json-jackson</artifactId>
+      <version>${operaton.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>

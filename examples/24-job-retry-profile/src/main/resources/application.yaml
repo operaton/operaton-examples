@@ -14,4 +14,3 @@ operaton:
       first-name: Demo
     filter:
       create: All tasks
-    job-executor-activate: false

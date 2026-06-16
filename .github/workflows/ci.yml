@@ -13,23 +13,13 @@ jobs:
   discover:
     runs-on: ubuntu-latest
     outputs:
-      examples: ${{ steps.list.outputs.examples }}
+      maven-examples: ${{ steps.maven.outputs.examples }}
       gradle-examples: ${{ steps.gradle.outputs.examples }}
-      changed-examples: ${{ steps.changed.outputs.examples }}
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - id: list
-        run: |
-          examples=$(ls -d examples/*/ | sed 's|/$||' | jq -R . | jq -cs .)
-          echo "examples=$examples" >> "$GITHUB_OUTPUT"
-          echo "Discovered: $examples"
-      - id: gradle
-        run: |
-          gradle_examples=$(find examples -name "build.gradle*" | sed 's|.*examples/||' | sed 's|/.*||' | sort -u | jq -R . | jq -cs .)
-          echo "examples=$gradle_examples" >> "$GITHUB_OUTPUT"
-          echo "Gradle examples: $gradle_examples"
+
       - id: changed
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
@@ -37,37 +27,67 @@ jobs:
           else
             base_ref="origin/main"
           fi
-          changed=$(git diff --name-only --diff-filter=d $base_ref 2>/dev/null | grep -o '^examples/[^/]*' | sort -u | sed 's|examples/||' | jq -R . | jq -cs . 2>/dev/null || echo "[]")
+          changed=$(git diff --name-only --diff-filter=d "$base_ref" 2>/dev/null \
+            | grep -o '^examples/[^/]*' | sort -u | sed 's|examples/||' \
+            | jq -R . | jq -cs . 2>/dev/null || echo "[]")
           if [ "$changed" == "[]" ]; then
-            # If no changes detected, build all examples (first push or all files changed)
-            changed=$(ls -d examples/*/ | sed 's|/$||' | jq -R . | jq -cs .)
+            changed=$(ls -d examples/*/ | sed 's|/$||' | sed 's|examples/||' | jq -R . | jq -cs .)
           fi
-          echo "examples=$changed" >> "$GITHUB_OUTPUT"
+          echo "list=$changed" >> "$GITHUB_OUTPUT"
           echo "Changed examples: $changed"
 
-  build:
+      - id: maven
+        run: |
+          echo "examples=${{ steps.changed.outputs.list }}" >> "$GITHUB_OUTPUT"
+          echo "Maven examples: ${{ steps.changed.outputs.list }}"
+
+      - id: gradle
+        run: |
+          changed='${{ steps.changed.outputs.list }}'
+          gradle_all=$(find examples -name "build.gradle*" \
+            | sed 's|examples/||' | sed 's|/.*||' | sort -u \
+            | jq -R . | jq -cs .)
+          gradle=$(echo "$changed" | jq -c --argjson all "$gradle_all" \
+            '[.[] | select(. as $e | $all | any(. == $e))]')
+          echo "examples=$gradle" >> "$GITHUB_OUTPUT"
+          echo "Gradle examples: $gradle"
+
+  build-maven:
     needs: discover
+    if: needs.discover.outputs.maven-examples != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        example: ${{ fromJson(needs.discover.outputs.changed-examples) }}
-        build: [maven, gradle]
-    name: ${{ matrix.example }} (${{ matrix.build }})
+        example: ${{ fromJson(needs.discover.outputs.maven-examples) }}
+    name: ${{ matrix.example }} (maven)
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
-          cache: ${{ matrix.build }}
+          cache: maven
       - name: Build and test (Maven)
-        if: matrix.build == 'maven'
-        working-directory: ${{ matrix.example }}
+        working-directory: examples/${{ matrix.example }}
         run: ./mvnw -B -ntp verify
+
+  build-gradle:
+    needs: discover
+    if: needs.discover.outputs.gradle-examples != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: ${{ fromJson(needs.discover.outputs.gradle-examples) }}
+    name: ${{ matrix.example }} (gradle)
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
       - name: Build and test (Gradle)
-        if: |
-          matrix.build == 'gradle' &&
-          contains(fromJson(needs.discover.outputs.gradle-examples), matrix.example)
-        working-directory: ${{ matrix.example }}
+        working-directory: examples/${{ matrix.example }}
         run: ./gradlew build --no-daemon

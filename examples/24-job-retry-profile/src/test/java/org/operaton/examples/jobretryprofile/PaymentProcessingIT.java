@@ -17,7 +17,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(properties = "operaton.bpm.job-execution.enabled=false", classes = JobRetryProfileApplication.class)
 @Testcontainers
 class PaymentProcessingIT {
 

@@ -26,6 +26,8 @@ dependencies {
 
     implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-webapp")
     implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-rest")
+    implementation("org.operaton.bpm:operaton-engine-plugin-spin:$operatonVersion")
+    implementation("org.operaton.spin:operaton-spin-dataformat-json-jackson:$operatonVersion")
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
