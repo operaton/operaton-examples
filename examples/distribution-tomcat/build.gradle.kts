@@ -35,7 +35,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
-    testImplementation("io.rest-assured:rest-assured:5.5.7")
+    testImplementation("io.rest-assured:rest-assured:6.0.0")
     testImplementation("org.assertj:assertj-core:3.27.7")
     testImplementation("org.slf4j:slf4j-simple:2.0.16")
 }
