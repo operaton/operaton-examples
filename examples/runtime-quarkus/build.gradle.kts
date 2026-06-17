@@ -1,6 +1,6 @@
 plugins {
     java
-    id("io.quarkus") version "3.33.2"
+    id("io.quarkus") version "3.36.2"
 }
 
 group = "org.operaton.examples"
