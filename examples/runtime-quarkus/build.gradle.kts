@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
 }
 
-val quarkusVersion = "3.33.2"
+val quarkusVersion = "3.36.2"
 val operatonVersion = "2.1.1"
 
 dependencies {
