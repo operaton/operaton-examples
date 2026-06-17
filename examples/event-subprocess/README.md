@@ -12,7 +12,6 @@ Demonstrates **event subprocesses** in Operaton: subprocesses embedded inside a 
 
 ## Process model
 
-![Process diagram](src/main/resources/document-processing.png)
 
 Single process: `document-processing`
 

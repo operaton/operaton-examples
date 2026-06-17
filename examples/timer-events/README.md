@@ -16,7 +16,6 @@ the job executor API — no `Thread.sleep` required.
 
 ## Process model
 
-![Process diagram](src/main/resources/sla-escalation.png)
 
 `src/main/resources/sla-escalation.bpmn`
 

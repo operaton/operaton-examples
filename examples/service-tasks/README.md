@@ -21,7 +21,6 @@ service tasks: **synchronous** (caller's transaction) and **asynchronous**
 
 How the engine and payment gateway interact:
 
-![Process diagram](src/main/resources/payment-processing.png)
 
 
 ## Prerequisites

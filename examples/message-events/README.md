@@ -20,7 +20,6 @@ named message and later resumes when a second message arrives, with correlation 
 
 Message correlation sequence:
 
-![Process diagram](src/main/resources/order-shipment.png)
 
 
 ## Prerequisites

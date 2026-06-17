@@ -12,7 +12,6 @@ This example demonstrates BPMN compensation — a saga pattern where a failed st
 
 ## Process model
 
-![Process diagram](src/main/resources/book-travel.png)
 
 The `book-travel` process books a hotel and a flight, then processes payment. If payment fails, a BPMN error boundary event catches the error and triggers compensation, which cancels both the hotel and the flight in reverse order.
 

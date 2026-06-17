@@ -23,7 +23,6 @@ sent for review, or declined.
 
 DMN Decision Requirements Graph:
 
-![Process diagram](src/main/resources/loan-application.png)
 
 
 ## Prerequisites

@@ -22,7 +22,6 @@ This example demonstrates **signal events in Operaton**: a signal intermediate t
 
 ### Broadcast interaction
 
-![Process diagram](src/main/resources/inventory-manager.png)
 
 
 ## Prerequisites

@@ -12,7 +12,6 @@ This example demonstrates how a JavaDelegate calls an external REST API and hand
 
 ## Process model
 
-![Process diagram](src/main/resources/product-availability.png)
 
 ![Product Availability Process](src/main/resources/product-availability.png)
 

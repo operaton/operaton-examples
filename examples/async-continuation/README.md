@@ -12,7 +12,6 @@ This example demonstrates **async continuations** in Operaton: marking service t
 
 ## Process model
 
-![Process diagram](src/main/resources/report-generation.png)
 
 ![Report Generation Process](src/main/resources/report-generation.png)
 

@@ -19,7 +19,6 @@ and completing (or failing) them in its own thread and transaction.
 
 Worker interaction:
 
-![Process diagram](src/main/resources/order-fulfillment.png)
 
 
 ## Prerequisites

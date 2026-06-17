@@ -12,7 +12,6 @@ This example demonstrates how to trigger an Operaton process from a Kafka messag
 
 ## Process model
 
-![Process diagram](src/main/resources/order-processing.png)
 
 ![Order Processing Process](src/main/resources/order-processing.png)
 
