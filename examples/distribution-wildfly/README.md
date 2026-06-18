@@ -79,3 +79,27 @@ The integration test deploys the WAR to a real `operaton/wildfly` container back
 ```
 
 Tests take approximately 60–90 seconds (container startup + WAR deployment). The IT waits until `/engine-rest/process-definition/key/document-approval` responds (not just `/engine-rest/engine`) because the WildFly deployment scanner runs every 5 seconds and the REST endpoint resolves before the WAR is fully deployed. The IT asserts end events via `GET /engine-rest/history/activity-instance?activityType=noneEndEvent`.
+
+## Variant: Non-ProcessApplication Spring client
+
+A plain Spring web application can connect to the WildFly-managed engine
+**without** becoming a `ProcessApplication`. This is useful when the app wants
+Spring DI but does not own the BPMN deployment lifecycle.
+
+**Key files:**
+- [`client/SpringWildflyConfig.java`](src/main/java/org/operaton/examples/distributionwildfly/client/SpringWildflyConfig.java) —
+  `@Configuration` that exposes a `ProcessEngine` bean by looking up
+  `java:global/operaton-bpm-platform/process-engine/default` from WildFly's JNDI registry.
+- [`client/ProcessEngineClient.java`](src/main/java/org/operaton/examples/distributionwildfly/client/ProcessEngineClient.java) —
+  `@Component` injected with the JNDI-sourced `ProcessEngine`; calls
+  `repositoryService.createDeploymentQuery()`.
+- [`WEB-INF/applicationContext.xml`](src/main/webapp/WEB-INF/applicationContext.xml) —
+  XML alternative showing the same lookup via `<jee:jndi-lookup>`.
+- [`WEB-INF/web.xml`](src/main/webapp/WEB-INF/web.xml) —
+  wires `ContextLoaderListener` and declares the resource reference.
+
+**When to use this pattern** rather than `JakartaServletProcessApplication`:
+
+- The application is a pure Spring MVC / JAX-RS service that has no processes of its own to deploy.
+- The BPMN processes are already deployed by another WAR (or the engine admin).
+- You want Spring DI (`@Autowired`) to access engine services without the ProcessApplication lifecycle.
