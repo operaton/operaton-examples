@@ -61,6 +61,7 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | [command-interceptor](examples/command-interceptor) | `CommandInterceptor` wrapping all engine API calls for auditing (name + duration) |
 | [process-migration](examples/process-migration) | `MigrationPlan` API to migrate running instances between process definition versions |
 | [spin-json](examples/spin-json) | JSON-typed process variables via Operaton Spin — store and retrieve Java objects as JSON |
+| [xslt-script-task](examples/xslt-script-task) | XSLT transformation in a Groovy script task using javax.xml.transform |
 | [multi-tenancy](examples/multi-tenancy) | Tenant-identifier multi-tenancy: shared engine, isolated deployments and instances per tenant |
 | [bpmn-model-api-parse](examples/bpmn-model-api-parse) | Programmatic inspection of deployed BPMN models using the BPMN Model API |
 | [bpmn-model-api-generate](examples/bpmn-model-api-generate) | Create and deploy BPMN processes programmatically without XML authoring |
