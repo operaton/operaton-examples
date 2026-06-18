@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<order>
+  <id>ORD-001</id>
+  <customer>Alice Smith</customer>
+  <amount>250.00</amount>
+</order>
