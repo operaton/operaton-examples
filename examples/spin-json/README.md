@@ -30,29 +30,35 @@ Open http://localhost:8080 — Cockpit and Tasklist, login `demo` / `demo`.
 
 ## Walk through it
 
-1. Start a loan application by posting a JSON variable via the REST API:
-   ```bash
-   curl -u demo:demo -H 'Content-Type: application/json' \
-     -d '{
-       "variables": {
-         "application": {
-           "value": "{\"applicantName\":\"Alice Smith\",\"amount\":10000.0,\"termMonths\":36,\"purpose\":\"Home renovation\"}",
-           "type": "String",
-           "valueInfo": {
-             "serializationDataFormat": "application/json",
-             "objectTypeName": "org.operaton.examples.spinjson.LoanApplication"
-           }
-         }
-       }
-     }' \
-     http://localhost:8080/engine-rest/process-definition/key/loan-application/start
-   ```
-2. In Cockpit, open the completed instance — the **Variables** tab shows `application`
-   stored as type `Object` with serialization format `application/json`, alongside the
-   calculated `applicationValid`, `annualInterestRate`, and `monthlyPayment` variables.
-3. Inspect the JSON value stored in the database: Cockpit's variable detail view shows
-   the serialized JSON string, demonstrating that the object was stored as JSON and
-   deserialized transparently in each delegate.
+### Starting the process
+
+**Option A — Tasklist start form (recommended):**
+
+Open http://localhost:8080 and log in as `demo` / `demo`. In Tasklist, click
+**Start process** and select `loan-application`. Fill in the form fields; the
+start form creates the `application` JSON variable directly from those fields.
+
+**Option B — REST API:**
+
+```bash
+curl -u demo:demo -H 'Content-Type: application/json' \
+  -d '{"variables":{"application":{"value":"{\"applicantName\":\"Alice\",\"amount\":15000,\"termMonths\":48,\"purpose\":\"Home reno\"}","type":"String","valueInfo":{"objectTypeName":"org.operaton.examples.spinjson.LoanApplication","serializationDataFormat":"application/json"}}}}' \
+  http://localhost:8080/engine-rest/process-definition/key/loan-application/start
+```
+
+### Review the offer
+
+1. Log in to Tasklist as `carol` (password `carol`). The **Review offer** task
+   appears for the `loanOfficers` group.
+2. Claim and complete the task. The review form shows the calculated
+   `annualInterestRate` and `monthlyPayment` computed by **Prepare offer**.
+3. In Cockpit, verify that the process instance has completed at **Offer ready**.
+   The **Variables** tab shows `application` stored as type `Object` with
+   serialization format `application/json`, alongside the calculated
+   `applicationValid`, `annualInterestRate`, and `monthlyPayment` variables.
+4. Cockpit's variable detail view shows the serialized JSON string, demonstrating
+   that the object was stored as JSON and deserialized transparently in each
+   delegate.
 
 ## How it works
 
