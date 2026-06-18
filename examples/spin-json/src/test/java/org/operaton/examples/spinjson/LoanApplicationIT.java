@@ -82,7 +82,7 @@ class LoanApplicationIT {
                         .serializationDataFormat("application/json")
                         .create()));
 
-        // Verify the review task appeared and is visible to loan-officers group
+        // Verify the review task appeared and is visible to loanOfficers group
         Task task = taskService.createTaskQuery()
             .processInstanceId(instance.getId())
             .taskDefinitionKey("UserTask_ReviewOffer")
