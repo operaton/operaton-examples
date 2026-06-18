@@ -99,3 +99,23 @@ Log in as `bob` (password `bob`) to see and complete the legal review task.
 boots the application against a Testcontainers PostgreSQL and verifies three
 scenarios: Tenant A rejects non-standard contracts, Tenant B accepts enterprise
 contracts, and tenant process instances are isolated from each other.
+
+## Multi-tenancy approaches
+
+Operaton supports two distinct multi-tenancy strategies; this example uses the first:
+
+**Tenant-identifier (this example)**
+
+A single process engine and a single database schema. Every row (process instance,
+task, variable, …) carries a `tenantId` column. Isolation is enforced by the engine
+API — callers filter by tenant. Low operational overhead; suitable when all tenants
+trust the same application deployment.
+
+**Schema isolation (not shown here)**
+
+A separate database schema per tenant; a separate `ProcessEngine` bean per tenant.
+Stronger isolation: one tenant's data is physically unreachable from another tenant's
+engine. Higher resource cost.
+
+For a schema isolation example (Camunda 7 / WildFly, Arquillian-tested):
+[camunda-bpm-examples/multi-tenancy/schema-isolation](https://github.com/camunda/camunda-bpm-examples/tree/master/multi-tenancy/schema-isolation).
