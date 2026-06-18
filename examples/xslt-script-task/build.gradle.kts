@@ -39,11 +39,4 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    // Support Rancher Desktop Docker socket (falls back to standard path if not present)
-    val rdSocket = "/Users/kthoms/.rd/docker.sock"
-    if (file(rdSocket).exists()) {
-        environment("DOCKER_HOST", "unix://$rdSocket")
-        environment("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", rdSocket)
-    }
-    environment("TESTCONTAINERS_RYUK_DISABLED", "true")
 }
