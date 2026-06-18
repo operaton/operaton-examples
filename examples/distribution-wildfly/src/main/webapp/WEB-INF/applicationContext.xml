@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/jee
+           https://www.springframework.org/schema/jee/spring-jee.xsd
+         http://www.springframework.org/schema/context
+           https://www.springframework.org/schema/context/spring-context.xsd">
+
+  <context:annotation-config/>
+  <context:component-scan base-package="org.operaton.examples.distributionwildfly.client"/>
+
+  <!-- Look up the Operaton process engine managed by WildFly via JNDI.
+       The JNDI name is bound by the Operaton subsystem in standalone.xml. -->
+  <jee:jndi-lookup id="processEngine"
+                   jndi-name="java:global/operaton-bpm-platform/process-engine/default"
+                   expected-type="org.operaton.bpm.engine.ProcessEngine"/>
+</beans>

@@ -28,6 +28,11 @@ dependencies {
     compileOnly("org.operaton.bpm:operaton-engine")
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
 
+    // Spring context for the non-ProcessApplication client variant
+    implementation("org.springframework:spring-context:6.2.9")
+    implementation("org.springframework:spring-beans:6.2.9")
+    implementation("org.springframework:spring-web:6.2.9")
+
     testImplementation(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testcontainersVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
