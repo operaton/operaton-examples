@@ -1,11 +1,13 @@
 package org.operaton.examples.spinjson;
 
 import org.junit.jupiter.api.Test;
-import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.HistoryService;
+import org.operaton.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.TaskService;
 import org.operaton.bpm.engine.history.HistoricProcessInstance;
 import org.operaton.bpm.engine.history.HistoricVariableInstance;
 import org.operaton.bpm.engine.runtime.ProcessInstance;
+import org.operaton.bpm.engine.task.Task;
 import org.operaton.bpm.engine.variable.Variables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,40 +27,28 @@ class LoanApplicationIT {
     static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine");
 
     @Autowired RuntimeService runtimeService;
+    @Autowired TaskService taskService;
     @Autowired HistoryService historyService;
 
     @Test
     void loanApplicationIsProcessedWithJsonVariable() {
         LoanApplication app = new LoanApplication("Alice Smith", 10000.0, 36, "Home renovation");
 
-        // Store the domain object as a JSON variable using Spin serialization
         ProcessInstance instance = runtimeService.startProcessInstanceByKey(
-                "loan-application",
-                Variables.createVariables()
-                        .putValueTyped("application",
-                                Variables.objectValue(app)
-                                        .serializationDataFormat("application/json")
-                                        .create()));
+            "loan-application",
+            Variables.createVariables()
+                .putValueTyped("application",
+                    Variables.objectValue(app)
+                        .serializationDataFormat("application/json")
+                        .create()));
 
-        // Process should have completed (no wait states)
-        HistoricProcessInstance historic = historyService.createHistoricProcessInstanceQuery()
-                .processInstanceId(instance.getId())
-                .singleResult();
+        completeReviewTask(instance);
+
+        HistoricProcessInstance historic = historicInstance(instance);
         assertThat(historic.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
 
-        // Verify applicationValid was set to true by the validate delegate
-        HistoricVariableInstance validVar = historyService.createHistoricVariableInstanceQuery()
-                .processInstanceId(instance.getId())
-                .variableName("applicationValid")
-                .singleResult();
-        assertThat(validVar.getValue()).isEqualTo(Boolean.TRUE);
-
-        // Verify annual interest rate was calculated
-        HistoricVariableInstance rateVar = historyService.createHistoricVariableInstanceQuery()
-                .processInstanceId(instance.getId())
-                .variableName("annualInterestRate")
-                .singleResult();
-        assertThat((Double) rateVar.getValue()).isGreaterThan(5.0);
+        assertThat(historicVariable(instance, "applicationValid")).isEqualTo(Boolean.TRUE);
+        assertThat((Double) historicVariable(instance, "annualInterestRate")).isGreaterThan(5.0);
     }
 
     @Test
@@ -66,23 +56,69 @@ class LoanApplicationIT {
         LoanApplication app = new LoanApplication("Bob Jones", 50000.0, 60, "Business expansion");
 
         ProcessInstance instance = runtimeService.startProcessInstanceByKey(
-                "loan-application",
-                Variables.createVariables()
-                        .putValueTyped("application",
-                                Variables.objectValue(app)
-                                        .serializationDataFormat("application/json")
-                                        .create()));
+            "loan-application",
+            Variables.createVariables()
+                .putValueTyped("application",
+                    Variables.objectValue(app)
+                        .serializationDataFormat("application/json")
+                        .create()));
 
-        HistoricProcessInstance historic = historyService.createHistoricProcessInstanceQuery()
-                .processInstanceId(instance.getId())
-                .singleResult();
+        completeReviewTask(instance);
+
+        HistoricProcessInstance historic = historicInstance(instance);
         assertThat(historic.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+        assertThat((Double) historicVariable(instance, "monthlyPayment")).isGreaterThan(0.0);
+    }
 
-        // Monthly payment should have been calculated (non-zero)
-        HistoricVariableInstance paymentVar = historyService.createHistoricVariableInstanceQuery()
-                .processInstanceId(instance.getId())
-                .variableName("monthlyPayment")
-                .singleResult();
-        assertThat((Double) paymentVar.getValue()).isGreaterThan(0.0);
+    @Test
+    void reviewOfferUserTaskIsAssignableToLoanOfficers() {
+        LoanApplication app = new LoanApplication("Carol White", 20000.0, 24, "Car purchase");
+
+        ProcessInstance instance = runtimeService.startProcessInstanceByKey(
+            "loan-application",
+            Variables.createVariables()
+                .putValueTyped("application",
+                    Variables.objectValue(app)
+                        .serializationDataFormat("application/json")
+                        .create()));
+
+        // Verify the review task appeared and is visible to loan-officers group
+        Task task = taskService.createTaskQuery()
+            .processInstanceId(instance.getId())
+            .taskDefinitionKey("UserTask_ReviewOffer")
+            .taskCandidateGroup("loanOfficers")
+            .singleResult();
+        assertThat(task).isNotNull();
+        assertThat(task.getName()).isEqualTo("Review offer");
+
+        // Carol (loan officer) claims and completes it
+        taskService.claim(task.getId(), "carol");
+        taskService.complete(task.getId());
+
+        HistoricProcessInstance historic = historicInstance(instance);
+        assertThat(historic.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+    }
+
+    private void completeReviewTask(ProcessInstance instance) {
+        Task task = taskService.createTaskQuery()
+            .processInstanceId(instance.getId())
+            .taskDefinitionKey("UserTask_ReviewOffer")
+            .singleResult();
+        assertThat(task).as("Review offer task must exist").isNotNull();
+        taskService.complete(task.getId());
+    }
+
+    private HistoricProcessInstance historicInstance(ProcessInstance instance) {
+        return historyService.createHistoricProcessInstanceQuery()
+            .processInstanceId(instance.getId())
+            .singleResult();
+    }
+
+    private Object historicVariable(ProcessInstance instance, String name) {
+        HistoricVariableInstance var = historyService.createHistoricVariableInstanceQuery()
+            .processInstanceId(instance.getId())
+            .variableName(name)
+            .singleResult();
+        return var == null ? null : var.getValue();
     }
 }

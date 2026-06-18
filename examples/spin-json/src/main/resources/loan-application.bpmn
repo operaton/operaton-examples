@@ -28,7 +28,7 @@
     </bpmn:serviceTask>
 
     <bpmn:userTask id="UserTask_ReviewOffer" name="Review offer"
-                   operaton:candidateGroups="loan-officers"
+                   operaton:candidateGroups="loanOfficers"
                    operaton:formKey="embedded:app:forms/review-offer.html">
       <bpmn:incoming>Flow_ToReview</bpmn:incoming>
       <bpmn:outgoing>Flow_ToEnd</bpmn:outgoing>

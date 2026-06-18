@@ -16,10 +16,10 @@ public class DataInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        createGroupIfAbsent("loan-officers", "Loan Officers");
+        createGroupIfAbsent("loanOfficers", "Loan Officers");
         createUserIfAbsent("alice", "Alice", "Smith", "alice");
         createUserIfAbsent("carol", "Carol", "White", "carol");
-        addToGroupIfAbsent("carol", "loan-officers");
+        addToGroupIfAbsent("carol", "loanOfficers");
     }
 
     private void createGroupIfAbsent(String id, String name) {
