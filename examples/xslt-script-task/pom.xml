@@ -57,6 +57,11 @@
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy</artifactId>
     </dependency>
+    <!-- Groovy JSR-223 scripting engine (required for Groovy 4+) -->
+    <dependency>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy-jsr223</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>

@@ -27,6 +27,7 @@ dependencies {
     implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-webapp")
     implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-rest")
     implementation("org.apache.groovy:groovy")
+    implementation("org.apache.groovy:groovy-jsr223")
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -38,4 +39,11 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    // Support Rancher Desktop Docker socket (falls back to standard path if not present)
+    val rdSocket = "/Users/kthoms/.rd/docker.sock"
+    if (file(rdSocket).exists()) {
+        environment("DOCKER_HOST", "unix://$rdSocket")
+        environment("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", rdSocket)
+    }
+    environment("TESTCONTAINERS_RYUK_DISABLED", "true")
 }
