@@ -53,10 +53,12 @@ jobs:
           echo "maven=$maven" >> "$GITHUB_OUTPUT"
           echo "Maven: $maven"
 
-          # Gradle: only whitelisted examples that were changed
-          gradle_whitelist='["getting-started"]'
+          # Gradle: changed examples that have a build.gradle.kts
+          gradle_capable=$(find examples -name "build.gradle.kts" -mindepth 2 -maxdepth 4 \
+            | sed 's|^examples/||' | sed 's|/build\.gradle\.kts$||' \
+            | jq -R . | jq -cs .)
           gradle=$(printf '%s' "$changed" | jq -c \
-            --argjson wl "$gradle_whitelist" \
+            --argjson wl "$gradle_capable" \
             '[.[] | select(. as $e | $wl | any(. == $e))]')
           echo "gradle=$gradle" >> "$GITHUB_OUTPUT"
           echo "Gradle: $gradle"
