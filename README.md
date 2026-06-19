@@ -61,6 +61,7 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | [command-interceptor](examples/command-interceptor) | `CommandInterceptor` wrapping all engine API calls for auditing (name + duration) |
 | [process-migration](examples/process-migration) | `MigrationPlan` API to migrate running instances between process definition versions |
 | [spin-json](examples/spin-json) | JSON-typed process variables via Operaton Spin — store and retrieve Java objects as JSON |
+| [xslt-script-task](examples/xslt-script-task) | XSLT transformation in a Groovy script task using javax.xml.transform |
 | [multi-tenancy](examples/multi-tenancy) | Tenant-identifier multi-tenancy: shared engine, isolated deployments and instances per tenant |
 | [bpmn-model-api-parse](examples/bpmn-model-api-parse) | Programmatic inspection of deployed BPMN models using the BPMN Model API |
 | [bpmn-model-api-generate](examples/bpmn-model-api-generate) | Create and deploy BPMN processes programmatically without XML authoring |
@@ -83,6 +84,7 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | [loan-application](examples/use-cases/loan-application) | Loan origination | REST credit scoring, DMN risk assessment, Spring Mail notifications |
 | [incident-management](examples/use-cases/incident-management) | IT support ticket | Signal escalation boundary, timer SLA boundary, 4-swimlane BPMN, REST integration |
 | [order-fulfillment](examples/use-cases/order-fulfillment) | E-commerce order | Error boundary on payment, async continuation, compensation, WireMock inventory/payment stubs |
+| [candidate-screening](examples/use-cases/candidate-screening) | AI recruiting screening | LLM scoring + email generation via HTTP connector, LLM-driven confidence gateway, human-in-the-loop on borderline, calendar slot query, WireMock IT |
 
 ## Anatomy of every example
 

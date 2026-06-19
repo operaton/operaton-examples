@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [ { "contains": "rejection email" } ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [
+        { "message": { "role": "assistant", "content": "Dear candidate, thank you for applying. We will not be moving forward." } }
+      ]
+    }
+  }
+}

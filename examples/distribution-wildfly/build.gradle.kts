@@ -20,13 +20,21 @@ repositories {
     mavenCentral()
 }
 
+val springBootVersion = "4.1.0"
 val operatonVersion = "2.1.1"
 val testcontainersVersion = "2.0.5"
 
 dependencies {
+    // Spring Boot BOM provides Spring Framework 7.x version management
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
     compileOnly(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
     compileOnly("org.operaton.bpm:operaton-engine")
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
+
+    // Spring context for the non-ProcessApplication client variant (version from BOM)
+    implementation("org.springframework:spring-context")
+    implementation("org.springframework:spring-beans")
+    implementation("org.springframework:spring-web")
 
     testImplementation(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testcontainersVersion"))

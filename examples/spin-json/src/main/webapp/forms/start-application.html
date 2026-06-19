@@ -1,0 +1,47 @@
+<form role="form" class="form-horizontal">
+
+  <script cam-script type="text/form-script">
+    var application = $scope.application = {};
+
+    camForm.on('form-loaded', function() {
+      camForm.variableManager.createVariable({
+        name: 'application',
+        type: 'json',
+        value: application
+      });
+    });
+  </script>
+
+  <div class="control-group">
+    <label class="control-label" for="applicantName">Applicant Name</label>
+    <div class="controls">
+      <input id="applicantName" class="form-control" type="text"
+             ng-model="application.applicantName" required/>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" for="amount">Loan Amount (USD)</label>
+    <div class="controls">
+      <input id="amount" class="form-control" type="number"
+             ng-model="application.amount" required/>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" for="termMonths">Term (months)</label>
+    <div class="controls">
+      <input id="termMonths" class="form-control" type="number"
+             ng-model="application.termMonths" required/>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" for="purpose">Purpose</label>
+    <div class="controls">
+      <input id="purpose" class="form-control" type="text"
+             ng-model="application.purpose"/>
+    </div>
+  </div>
+
+</form>

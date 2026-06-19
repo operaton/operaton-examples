@@ -89,7 +89,6 @@ jobs:
       fail-fast: false
       matrix:
         example: ${{ fromJson(needs.discover.outputs.gradle-examples) }}
-    name: ${{ matrix.example }} (gradle)
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5

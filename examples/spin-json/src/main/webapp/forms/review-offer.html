@@ -1,0 +1,36 @@
+<form role="form" class="form-horizontal">
+
+  <script cam-script type="text/form-script">
+    $scope.annualInterestRate = null;
+    $scope.monthlyPayment = null;
+
+    camForm.on('form-loaded', function() {
+      camForm.variableManager.fetchVariable('annualInterestRate');
+      camForm.variableManager.fetchVariable('monthlyPayment');
+    });
+
+    camForm.on('variables-fetched', function() {
+      $scope.annualInterestRate = camForm.variableManager.variableValue('annualInterestRate');
+      $scope.monthlyPayment = camForm.variableManager.variableValue('monthlyPayment');
+    });
+  </script>
+
+  <div class="alert alert-info">
+    Review the loan offer below and click <strong>Complete</strong> to accept.
+  </div>
+
+  <div class="control-group">
+    <label class="control-label">Annual Interest Rate</label>
+    <div class="controls">
+      <p class="form-control-static">{{annualInterestRate | number:2}}%</p>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label">Monthly Payment</label>
+    <div class="controls">
+      <p class="form-control-static">USD {{monthlyPayment | number:2}}</p>
+    </div>
+  </div>
+
+</form>

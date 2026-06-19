@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "contains": "Score the candidate" },
+      { "contains": "Bea Romano" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [
+        { "message": { "role": "assistant", "content": "{\"score\": 60, \"reasoning\": \"Partial match: relevant but limited senior experience.\"}" } }
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/freebusy"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "freeBusy": [
+        { "start": "2026-06-22T09:00:00", "end": "2026-06-22T09:30:00", "busy": true },
+        { "start": "2026-06-21T10:00:00", "end": "2026-06-21T10:30:00", "busy": false },
+        { "start": "2026-06-22T10:00:00", "end": "2026-06-22T10:30:00", "busy": false }
+      ]
+    }
+  }
+}

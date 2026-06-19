@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: candidate-screening
+  datasource:
+    url: jdbc:postgresql://localhost:5432/operaton
+    username: operaton
+    password: operaton
+
+operaton:
+  bpm:
+    process-engine-plugins:
+      - "org.operaton.connect.plugin.impl.ConnectProcessEnginePlugin"
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    filter:
+      create: All tasks
+
+llm:
+  # Defaults target the Ollama container in docker-compose.yml.
+  base-url: ${LLM_BASE_URL:http://localhost:11434}
+  api-key: ${LLM_API_KEY:ollama}
+  model: ${LLM_MODEL:llama3.2}
+
+calendar:
+  # Defaults target the bundled calendar stub in docker-compose.yml.
+  base-url: ${CALENDAR_BASE_URL:http://localhost:8090}
+  api-key: ${CALENDAR_API_KEY:dev}
