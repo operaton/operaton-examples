@@ -111,11 +111,17 @@
         </operaton:connector>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_calendar_invitemail</bpmn:incoming>
-      <bpmn:outgoing>Flow_invitemail_auto</bpmn:outgoing>
+      <bpmn:outgoing>Flow_invitemail_send</bpmn:outgoing>
     </bpmn:serviceTask>
 
+    <bpmn:sendTask id="SendTask_SendInvitation" name="Send invitation email"
+                   operaton:expression="${emailDispatcher.sendInvitation(candidateEmail, candidateName, position, invitationEmail, interviewSlot)}">
+      <bpmn:incoming>Flow_invitemail_send</bpmn:incoming>
+      <bpmn:outgoing>Flow_send_auto</bpmn:outgoing>
+    </bpmn:sendTask>
+
     <bpmn:exclusiveGateway id="Gateway_AutoInvited" name="Auto-invited?" default="Flow_reviewed">
-      <bpmn:incoming>Flow_invitemail_auto</bpmn:incoming>
+      <bpmn:incoming>Flow_send_auto</bpmn:incoming>
       <bpmn:outgoing>Flow_automatic</bpmn:outgoing>
       <bpmn:outgoing>Flow_reviewed</bpmn:outgoing>
     </bpmn:exclusiveGateway>
@@ -139,11 +145,17 @@
         </operaton:connector>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_automatic</bpmn:incoming>
-      <bpmn:outgoing>Flow_summary_end</bpmn:outgoing>
+      <bpmn:outgoing>Flow_summary_send</bpmn:outgoing>
     </bpmn:serviceTask>
 
+    <bpmn:sendTask id="SendTask_SendRecruiterSummary" name="Send recruiter summary email"
+                   operaton:expression="${emailDispatcher.sendRecruiterSummary(recruiterEmail, candidateName, position, recruiterSummaryEmail)}">
+      <bpmn:incoming>Flow_summary_send</bpmn:incoming>
+      <bpmn:outgoing>Flow_send_summary_end</bpmn:outgoing>
+    </bpmn:sendTask>
+
     <bpmn:endEvent id="EndEvent_Invited" name="Candidate invited">
-      <bpmn:incoming>Flow_summary_end</bpmn:incoming>
+      <bpmn:incoming>Flow_send_summary_end</bpmn:incoming>
       <bpmn:incoming>Flow_reviewed</bpmn:incoming>
     </bpmn:endEvent>
 
@@ -172,11 +184,17 @@
         </operaton:connector>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_reject_mail</bpmn:incoming>
-      <bpmn:outgoing>Flow_reject_end</bpmn:outgoing>
+      <bpmn:outgoing>Flow_reject_send</bpmn:outgoing>
     </bpmn:serviceTask>
 
+    <bpmn:sendTask id="SendTask_SendRejection" name="Send rejection email"
+                   operaton:expression="${emailDispatcher.sendRejection(candidateEmail, candidateName, position, rejectionEmail)}">
+      <bpmn:incoming>Flow_reject_send</bpmn:incoming>
+      <bpmn:outgoing>Flow_send_reject_end</bpmn:outgoing>
+    </bpmn:sendTask>
+
     <bpmn:endEvent id="EndEvent_Rejected" name="Candidate rejected">
-      <bpmn:incoming>Flow_reject_end</bpmn:incoming>
+      <bpmn:incoming>Flow_send_reject_end</bpmn:incoming>
     </bpmn:endEvent>
 
     <bpmn:sequenceFlow id="Flow_start_score" sourceRef="StartEvent_ApplicationReceived" targetRef="ServiceTask_ScoreApplication"/>
@@ -208,16 +226,19 @@
 
     <bpmn:sequenceFlow id="Flow_invite_calendar" sourceRef="Gateway_InviteMerge" targetRef="ServiceTask_QueryCalendar"/>
     <bpmn:sequenceFlow id="Flow_calendar_invitemail" sourceRef="ServiceTask_QueryCalendar" targetRef="ServiceTask_InvitationEmail"/>
-    <bpmn:sequenceFlow id="Flow_invitemail_auto" sourceRef="ServiceTask_InvitationEmail" targetRef="Gateway_AutoInvited"/>
+    <bpmn:sequenceFlow id="Flow_invitemail_send" sourceRef="ServiceTask_InvitationEmail" targetRef="SendTask_SendInvitation"/>
+    <bpmn:sequenceFlow id="Flow_send_auto" sourceRef="SendTask_SendInvitation" targetRef="Gateway_AutoInvited"/>
 
     <bpmn:sequenceFlow id="Flow_automatic" name="automatic" sourceRef="Gateway_AutoInvited" targetRef="ServiceTask_RecruiterSummaryEmail">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${autoInvite}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_reviewed" name="reviewed" sourceRef="Gateway_AutoInvited" targetRef="EndEvent_Invited"/>
-    <bpmn:sequenceFlow id="Flow_summary_end" sourceRef="ServiceTask_RecruiterSummaryEmail" targetRef="EndEvent_Invited"/>
+    <bpmn:sequenceFlow id="Flow_summary_send" sourceRef="ServiceTask_RecruiterSummaryEmail" targetRef="SendTask_SendRecruiterSummary"/>
+    <bpmn:sequenceFlow id="Flow_send_summary_end" sourceRef="SendTask_SendRecruiterSummary" targetRef="EndEvent_Invited"/>
 
     <bpmn:sequenceFlow id="Flow_reject_mail" sourceRef="Gateway_RejectMerge" targetRef="ServiceTask_RejectionEmail"/>
-    <bpmn:sequenceFlow id="Flow_reject_end" sourceRef="ServiceTask_RejectionEmail" targetRef="EndEvent_Rejected"/>
+    <bpmn:sequenceFlow id="Flow_reject_send" sourceRef="ServiceTask_RejectionEmail" targetRef="SendTask_SendRejection"/>
+    <bpmn:sequenceFlow id="Flow_send_reject_end" sourceRef="SendTask_SendRejection" targetRef="EndEvent_Rejected"/>
   </bpmn:process>
 
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -250,16 +271,22 @@
       <bpmndi:BPMNShape id="ServiceTask_InvitationEmail_di" bpmnElement="ServiceTask_InvitationEmail">
         <dc:Bounds x="1000" y="190" width="100" height="80"/>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask_SendInvitation_di" bpmnElement="SendTask_SendInvitation">
+        <dc:Bounds x="1130" y="190" width="100" height="80"/>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_AutoInvited_di" bpmnElement="Gateway_AutoInvited" isMarkerVisible="true">
-        <dc:Bounds x="1150" y="205" width="50" height="50"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1140" y="262" width="71" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1260" y="205" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1249" y="262" width="71" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_RecruiterSummaryEmail_di" bpmnElement="ServiceTask_RecruiterSummaryEmail">
-        <dc:Bounds x="1240" y="190" width="100" height="80"/>
+        <dc:Bounds x="1340" y="190" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask_SendRecruiterSummary_di" bpmnElement="SendTask_SendRecruiterSummary">
+        <dc:Bounds x="1470" y="190" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_Invited_di" bpmnElement="EndEvent_Invited">
-        <dc:Bounds x="1402" y="212" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1380" y="255" width="82" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1602" y="212" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1580" y="255" width="82" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_RejectMerge_di" bpmnElement="Gateway_RejectMerge" isMarkerVisible="true">
         <dc:Bounds x="760" y="375" width="50" height="50"/>
@@ -268,9 +295,12 @@
       <bpmndi:BPMNShape id="ServiceTask_RejectionEmail_di" bpmnElement="ServiceTask_RejectionEmail">
         <dc:Bounds x="850" y="360" width="100" height="80"/>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask_SendRejection_di" bpmnElement="SendTask_SendRejection">
+        <dc:Bounds x="980" y="360" width="100" height="80"/>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_Rejected_di" bpmnElement="EndEvent_Rejected">
-        <dc:Bounds x="1002" y="382" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="980" y="425" width="82" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1110" y="382" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1088" y="425" width="82" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNEdge id="Flow_start_score_di" bpmnElement="Flow_start_score">
@@ -303,23 +333,32 @@
       <bpmndi:BPMNEdge id="Flow_calendar_invitemail_di" bpmnElement="Flow_calendar_invitemail">
         <di:waypoint x="950" y="230"/><di:waypoint x="1000" y="230"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_invitemail_auto_di" bpmnElement="Flow_invitemail_auto">
-        <di:waypoint x="1100" y="230"/><di:waypoint x="1150" y="230"/>
+      <bpmndi:BPMNEdge id="Flow_invitemail_send_di" bpmnElement="Flow_invitemail_send">
+        <di:waypoint x="1100" y="230"/><di:waypoint x="1130" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_send_auto_di" bpmnElement="Flow_send_auto">
+        <di:waypoint x="1230" y="230"/><di:waypoint x="1260" y="230"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_automatic_di" bpmnElement="Flow_automatic">
-        <di:waypoint x="1200" y="230"/><di:waypoint x="1240" y="230"/>
+        <di:waypoint x="1310" y="230"/><di:waypoint x="1340" y="230"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_summary_end_di" bpmnElement="Flow_summary_end">
-        <di:waypoint x="1340" y="230"/><di:waypoint x="1402" y="230"/>
+      <bpmndi:BPMNEdge id="Flow_summary_send_di" bpmnElement="Flow_summary_send">
+        <di:waypoint x="1440" y="230"/><di:waypoint x="1470" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_send_summary_end_di" bpmnElement="Flow_send_summary_end">
+        <di:waypoint x="1570" y="230"/><di:waypoint x="1602" y="230"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_reviewed_di" bpmnElement="Flow_reviewed">
-        <di:waypoint x="1175" y="255"/><di:waypoint x="1175" y="310"/><di:waypoint x="1420" y="310"/><di:waypoint x="1420" y="248"/>
+        <di:waypoint x="1285" y="255"/><di:waypoint x="1285" y="330"/><di:waypoint x="1620" y="330"/><di:waypoint x="1620" y="248"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_reject_mail_di" bpmnElement="Flow_reject_mail">
         <di:waypoint x="810" y="400"/><di:waypoint x="850" y="400"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_reject_end_di" bpmnElement="Flow_reject_end">
-        <di:waypoint x="950" y="400"/><di:waypoint x="1002" y="400"/>
+      <bpmndi:BPMNEdge id="Flow_reject_send_di" bpmnElement="Flow_reject_send">
+        <di:waypoint x="950" y="400"/><di:waypoint x="980" y="400"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_send_reject_end_di" bpmnElement="Flow_send_reject_end">
+        <di:waypoint x="1080" y="400"/><di:waypoint x="1110" y="400"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

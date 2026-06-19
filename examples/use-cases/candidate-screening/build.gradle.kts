@@ -28,6 +28,7 @@ dependencies {
     implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-rest")
     implementation("org.operaton.bpm:operaton-engine-plugin-connect")
     implementation("org.operaton.connect:operaton-connect-http-client")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")

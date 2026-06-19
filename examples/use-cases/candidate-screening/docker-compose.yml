@@ -51,5 +51,17 @@ services:
       timeout: 5s
       retries: 10
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: candidate-screening-mailpit
+    ports:
+      - "1025:1025"   # SMTP — Spring Mail connects here
+      - "8025:8025"   # HTTP UI — http://localhost:8025
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8025/livez || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   ollama:

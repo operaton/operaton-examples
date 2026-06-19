@@ -5,6 +5,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/operaton
     username: operaton
     password: operaton
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
 
 operaton:
   bpm:
@@ -27,3 +30,6 @@ calendar:
   # Defaults target the bundled calendar stub in docker-compose.yml.
   base-url: ${CALENDAR_BASE_URL:http://localhost:8090}
   api-key: ${CALENDAR_API_KEY:dev}
+
+mail:
+  from: ${MAIL_FROM:screening@example.com}
