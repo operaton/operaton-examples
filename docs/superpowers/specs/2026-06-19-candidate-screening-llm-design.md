@@ -193,7 +193,7 @@ is not a connector uses `delegateExpression` per §4.
   `org.operaton.connect:operaton-connect-http-client` — register `http-connector`.
 - Jackson (transitive via Spring Boot) for `PromptBuilder`/`ResponseParser`.
 - Test: JUnit Jupiter, Testcontainers `postgresql`,
-  `org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-13`,
+  `org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-15`,
   AssertJ. (No Awaitility — connector calls are synchronous; instances reach
   the user task or an end event synchronously on start/complete.)
 - `maven-failsafe-plugin` with `integration-test` + `verify` goals.

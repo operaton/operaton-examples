@@ -64,7 +64,7 @@
       <bpmn:outgoing>Flow_decline</bpmn:outgoing>
     </bpmn:exclusiveGateway>
 
-    <bpmn:exclusiveGateway id="Gateway_InviteMerge">
+    <bpmn:exclusiveGateway id="Gateway_InviteMerge" name="Invite paths merge">
       <bpmn:incoming>Flow_strong</bpmn:incoming>
       <bpmn:incoming>Flow_approve</bpmn:incoming>
       <bpmn:outgoing>Flow_invite_calendar</bpmn:outgoing>
@@ -147,7 +147,7 @@
       <bpmn:incoming>Flow_reviewed</bpmn:incoming>
     </bpmn:endEvent>
 
-    <bpmn:exclusiveGateway id="Gateway_RejectMerge">
+    <bpmn:exclusiveGateway id="Gateway_RejectMerge" name="Reject paths merge">
       <bpmn:incoming>Flow_weak</bpmn:incoming>
       <bpmn:incoming>Flow_decline</bpmn:incoming>
       <bpmn:outgoing>Flow_reject_mail</bpmn:outgoing>
@@ -242,6 +242,7 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_InviteMerge_di" bpmnElement="Gateway_InviteMerge" isMarkerVisible="true">
         <dc:Bounds x="760" y="205" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="739" y="262" width="92" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_QueryCalendar_di" bpmnElement="ServiceTask_QueryCalendar">
         <dc:Bounds x="850" y="190" width="100" height="80"/>
@@ -262,6 +263,7 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_RejectMerge_di" bpmnElement="Gateway_RejectMerge" isMarkerVisible="true">
         <dc:Bounds x="760" y="375" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="744" y="432" width="82" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_RejectionEmail_di" bpmnElement="ServiceTask_RejectionEmail">
         <dc:Bounds x="850" y="360" width="100" height="80"/>
