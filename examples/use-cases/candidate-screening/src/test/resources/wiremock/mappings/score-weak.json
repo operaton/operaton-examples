@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "contains": "Score the candidate" },
+      { "contains": "Wes Park" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [
+        { "message": { "role": "assistant", "content": "{\"score\": 35, \"reasoning\": \"Weak match: little relevant experience.\"}" } }
+      ]
+    }
+  }
+}

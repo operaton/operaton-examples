@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [ { "contains": "internal summary email" } ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [
+        { "message": { "role": "assistant", "content": "Summary for recruiter: candidate auto-invited based on strong fit." } }
+      ]
+    }
+  }
+}

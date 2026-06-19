@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "contains": "Score the candidate" },
+      { "contains": "Ada Lindqvist" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [
+        { "message": { "role": "assistant", "content": "{\"score\": 88, \"reasoning\": \"Excellent match: deep Java and Spring experience.\"}" } }
+      ]
+    }
+  }
+}
