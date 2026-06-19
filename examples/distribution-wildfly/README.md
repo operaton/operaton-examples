@@ -86,17 +86,21 @@ A plain Spring web application can connect to the WildFly-managed engine
 **without** becoming a `ProcessApplication`. This is useful when the app wants
 Spring DI but does not own the BPMN deployment lifecycle.
 
-**Key files:**
+This pattern belongs in a **separate WAR** — a Spring client that bootstraps
+its own application context alongside a `JakartaServletProcessApplication` in
+the same WAR will conflict with the process-application lifecycle.
+
+**Key source files (illustrative — deploy as a standalone Spring WAR):**
 - [`client/SpringWildflyConfig.java`](src/main/java/org/operaton/examples/distributionwildfly/client/SpringWildflyConfig.java) —
   `@Configuration` that exposes a `ProcessEngine` bean by looking up
   `java:global/operaton-bpm-platform/process-engine/default` from WildFly's JNDI registry.
 - [`client/ProcessEngineClient.java`](src/main/java/org/operaton/examples/distributionwildfly/client/ProcessEngineClient.java) —
   `@Component` injected with the JNDI-sourced `ProcessEngine`; calls
   `repositoryService.createDeploymentQuery()`.
-- [`WEB-INF/applicationContext.xml`](src/main/webapp/WEB-INF/applicationContext.xml) —
-  XML alternative showing the same lookup via `<jee:jndi-lookup>`.
-- [`WEB-INF/web.xml`](src/main/webapp/WEB-INF/web.xml) —
-  wires `ContextLoaderListener` and declares the resource reference.
+
+A separate Spring WAR would wire these via `ContextLoaderListener` in its own
+`web.xml` pointing to a `contextConfigLocation` that enables component scanning
+of the `client` package.
 
 **When to use this pattern** rather than `JakartaServletProcessApplication`:
 
