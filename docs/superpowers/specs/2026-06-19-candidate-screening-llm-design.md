@@ -80,8 +80,14 @@ the beans (not `execution`) so the beans are trivially unit-testable.
 
 OpenAI-compatible Chat Completions shape (`POST {base-url}/v1/chat/completions`).
 `base-url`, `api-key`, `model` fully externalized. One code path works against
-OpenAI, Groq (free tier), OpenRouter, or local Ollama — config only. The
-calendar API likewise externalized. Both base-urls point at WireMock in the IT.
+**Ollama (the local default)**, OpenAI, Groq (free tier), or OpenRouter — config
+only. The calendar API is likewise externalized. The IT points both base-urls at
+WireMock; local `docker compose` points the LLM at a bundled Ollama container
+and the calendar at a bundled stub.
+
+`PromptBuilder` sets `response_format: {"type":"json_object"}` on the **scoring**
+request so the model reliably returns parseable JSON across providers (Ollama
+and OpenAI both honor it). Email-generation requests use plain text completions.
 
 ## Process model — `candidate-screening.bpmn`
 
@@ -157,13 +163,19 @@ recruiter-summary (calendar queried). Borderline-approved → invitation only
 
 ```yaml
 llm:
-  base-url: ${LLM_BASE_URL:https://api.openai.com}
-  api-key: ${LLM_API_KEY:}
-  model: ${LLM_MODEL:gpt-4o-mini}
+  # Defaults target the Ollama container in docker-compose.yml.
+  base-url: ${LLM_BASE_URL:http://localhost:11434}
+  api-key: ${LLM_API_KEY:ollama}   # Ollama ignores the value; any non-blank token
+  model: ${LLM_MODEL:llama3.2}
 calendar:
+  # Defaults target the bundled calendar stub in docker-compose.yml.
   base-url: ${CALENDAR_BASE_URL:http://localhost:8090}
-  api-key: ${CALENDAR_API_KEY:}
+  api-key: ${CALENDAR_API_KEY:dev}
 ```
+
+`chatCompletionsUrl` = `base-url` + `/v1/chat/completions` — Ollama's
+OpenAI-compatible endpoint (`http://localhost:11434/v1/chat/completions`) and
+OpenAI's (`https://api.openai.com/v1/chat/completions`) both match this shape.
 
 ## Error handling
 
@@ -188,9 +200,11 @@ is not a connector uses `delegateExpression` per §4.
 
 ## Testing — `CandidateScreeningIT`
 
-`@Testcontainers`: PostgreSQL (`@ServiceConnection`) + a WireMock container.
-`@DynamicPropertySource` points `llm.base-url` and `calendar.base-url` at the
-WireMock base URL. WireMock stubs:
+The IT does **not** use the docker-compose Ollama/calendar containers — it
+relies only on Testcontainers so CI needs no model downloads and stays
+deterministic. `@Testcontainers`: PostgreSQL (`@ServiceConnection`) + a WireMock
+container. `@DynamicPropertySource` points `llm.base-url` and `calendar.base-url`
+at the WireMock base URL. WireMock stubs:
 
 - `POST /v1/chat/completions` — matched by distinctive prompt content
   (system/user text) to return: a scoring completion whose `content` is
@@ -217,16 +231,29 @@ real Postgres):
 
 ## Local run
 
-- `docker-compose.yml`: **PostgreSQL only** (health-checked, host 5432). The LLM
-  and calendar are external services the user configures.
-- `docker compose up -d` then `./mvnw spring-boot:run` / `./gradlew bootRun`.
-  Cockpit/Tasklist at http://localhost:8080 (demo/demo).
-- README documents three ways to supply a real LLM via env vars, with links:
-  **OpenAI** (paid; platform.openai.com API keys), **Groq** (free tier,
-  OpenAI-compatible; console.groq.com), **Ollama** (fully local;
-  `base-url=http://localhost:11434`). The calendar API is documented as an
-  OpenAI-style free/busy stub the user can point at any compatible endpoint (or
-  the bundled WireMock mappings reused locally).
+`docker-compose.yml` brings up a **fully self-contained, account-free** stack —
+`docker compose up -d` then `./mvnw spring-boot:run` / `./gradlew bootRun` works
+with zero configuration (§6):
+
+| Service | Image | Host port | Notes |
+|---|---|---|---|
+| `postgres` | `postgres:16-alpine` | 5432 | engine datasource; healthcheck `pg_isready` |
+| `ollama` | `ollama/ollama` | 11434 | local OpenAI-compatible LLM; named volume for model cache; healthcheck on the API |
+| `ollama-pull` | `ollama/ollama` | — | one-shot sidecar: `ollama pull llama3.2`; `depends_on: ollama healthy`; `restart: "no"` |
+| `calendar-stub` | `wiremock/wiremock` | 8090 | serves the same free/busy mapping the IT uses (mounted from a compose-local mappings dir) |
+
+- Cockpit/Tasklist at http://localhost:8080 (demo/demo). First `docker compose
+  up` downloads the `llama3.2` model (~2 GB) via the `ollama-pull` sidecar; the
+  README states this and the smaller-model fallback (`LLM_MODEL=llama3.2:1b`).
+- **Switching to a hosted LLM** — README documents overriding env vars before
+  `spring-boot:run`, with links:
+  - **OpenAI** (paid): `LLM_BASE_URL=https://api.openai.com`,
+    `LLM_API_KEY=sk-…` (platform.openai.com/api-keys), `LLM_MODEL=gpt-4o-mini`.
+  - **Groq** (free tier, OpenAI-compatible):
+    `LLM_BASE_URL=https://api.groq.com/openai`, `LLM_API_KEY=…`
+    (console.groq.com/keys), `LLM_MODEL=llama-3.1-8b-instant`.
+  When using a hosted LLM the user can stop the `ollama`/`ollama-pull`
+  containers; the calendar stub stays.
 - Walk-through: `curl` to start the process with a strong vs borderline vs weak
   `applicationText`; Tasklist to complete the recruiter review on the borderline
   case.
