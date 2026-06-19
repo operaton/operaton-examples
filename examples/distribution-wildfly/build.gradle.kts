@@ -26,7 +26,7 @@ val testcontainersVersion = "2.0.5"
 dependencies {
     compileOnly(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
     compileOnly("org.operaton.bpm:operaton-engine")
-    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
 
     // Spring context for the non-ProcessApplication client variant
     implementation("org.springframework:spring-context:6.2.9")
@@ -35,14 +35,14 @@ dependencies {
 
     testImplementation(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testcontainersVersion"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.14.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("io.rest-assured:rest-assured:5.5.7")
     testImplementation("org.assertj:assertj-core:3.27.7")
-    testImplementation("org.slf4j:slf4j-simple:2.0.16")
+    testImplementation("org.slf4j:slf4j-simple:2.0.18")
 }
 
 tasks.test {
