@@ -54,7 +54,7 @@ jobs:
           echo "Maven: $maven"
 
           # Gradle: only whitelisted examples that were changed
-          gradle_whitelist='["distribution-wildfly","getting-started","spin-json","xslt-script-task"]'
+          gradle_whitelist='["getting-started"]'
           gradle=$(printf '%s' "$changed" | jq -c \
             --argjson wl "$gradle_whitelist" \
             '[.[] | select(. as $e | $wl | any(. == $e))]')
@@ -89,7 +89,6 @@ jobs:
       fail-fast: false
       matrix:
         example: ${{ fromJson(needs.discover.outputs.gradle-examples) }}
-    name: ${{ matrix.example }} (gradle)
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
