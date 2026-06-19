@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="Definitions_CandidateScreening"
+                  targetNamespace="http://operaton.org/examples">
+  <bpmn:process id="candidate-screening" name="Candidate Screening" isExecutable="true" operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received">
+      <bpmn:outgoing>Flow_start_score</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="ServiceTask_ScoreApplication" name="Score application">
+      <bpmn:extensionElements>
+        <operaton:connector>
+          <operaton:connectorId>http-connector</operaton:connectorId>
+          <operaton:inputOutput>
+            <operaton:inputParameter name="url">${llmProperties.chatCompletionsUrl}</operaton:inputParameter>
+            <operaton:inputParameter name="method">POST</operaton:inputParameter>
+            <operaton:inputParameter name="headers">
+              <operaton:map>
+                <operaton:entry key="Authorization">${llmProperties.authorizationHeader}</operaton:entry>
+                <operaton:entry key="Content-Type">application/json</operaton:entry>
+              </operaton:map>
+            </operaton:inputParameter>
+            <operaton:inputParameter name="payload">${promptBuilder.scoreRequest(candidateName, position, applicationText)}</operaton:inputParameter>
+            <operaton:outputParameter name="fitScore">${responseParser.score(response)}</operaton:outputParameter>
+            <operaton:outputParameter name="assessment">${responseParser.reasoning(response)}</operaton:outputParameter>
+          </operaton:inputOutput>
+        </operaton:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_start_score</bpmn:incoming>
+      <bpmn:outgoing>Flow_score_gateway</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:exclusiveGateway id="Gateway_FitScore" name="Fit score?" default="Flow_weak">
+      <bpmn:incoming>Flow_score_gateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_strong</bpmn:outgoing>
+      <bpmn:outgoing>Flow_borderline</bpmn:outgoing>
+      <bpmn:outgoing>Flow_weak</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:userTask id="UserTask_RecruiterReview" name="Recruiter reviews application" operaton:candidateGroups="recruiters">
+      <bpmn:extensionElements>
+        <operaton:formData>
+          <operaton:formField id="assessment" label="LLM assessment" type="string">
+            <operaton:properties>
+              <operaton:property id="readonly" value="true"/>
+            </operaton:properties>
+          </operaton:formField>
+          <operaton:formField id="approved" label="Approve invitation?" type="boolean"/>
+        </operaton:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_borderline</bpmn:incoming>
+      <bpmn:outgoing>Flow_review_decision</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:exclusiveGateway id="Gateway_RecruiterDecision" name="Recruiter decision?" default="Flow_decline">
+      <bpmn:incoming>Flow_review_decision</bpmn:incoming>
+      <bpmn:outgoing>Flow_approve</bpmn:outgoing>
+      <bpmn:outgoing>Flow_decline</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:exclusiveGateway id="Gateway_InviteMerge">
+      <bpmn:incoming>Flow_strong</bpmn:incoming>
+      <bpmn:incoming>Flow_approve</bpmn:incoming>
+      <bpmn:outgoing>Flow_invite_calendar</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:serviceTask id="ServiceTask_QueryCalendar" name="Query recruiter calendar">
+      <bpmn:extensionElements>
+        <operaton:connector>
+          <operaton:connectorId>http-connector</operaton:connectorId>
+          <operaton:inputOutput>
+            <operaton:inputParameter name="url">${calendarProperties.freeBusyUrl}</operaton:inputParameter>
+            <operaton:inputParameter name="method">POST</operaton:inputParameter>
+            <operaton:inputParameter name="headers">
+              <operaton:map>
+                <operaton:entry key="Authorization">${calendarProperties.authorizationHeader}</operaton:entry>
+                <operaton:entry key="Content-Type">application/json</operaton:entry>
+              </operaton:map>
+            </operaton:inputParameter>
+            <operaton:inputParameter name="payload">${calendarRequestBuilder.freeBusyRequest(recruiterEmail)}</operaton:inputParameter>
+            <operaton:outputParameter name="interviewSlot">${slotFinder.firstFreeWorkingDaySlot(response)}</operaton:outputParameter>
+          </operaton:inputOutput>
+        </operaton:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_invite_calendar</bpmn:incoming>
+      <bpmn:outgoing>Flow_calendar_invitemail</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="ServiceTask_InvitationEmail" name="Draft invitation email">
+      <bpmn:extensionElements>
+        <operaton:connector>
+          <operaton:connectorId>http-connector</operaton:connectorId>
+          <operaton:inputOutput>
+            <operaton:inputParameter name="url">${llmProperties.chatCompletionsUrl}</operaton:inputParameter>
+            <operaton:inputParameter name="method">POST</operaton:inputParameter>
+            <operaton:inputParameter name="headers">
+              <operaton:map>
+                <operaton:entry key="Authorization">${llmProperties.authorizationHeader}</operaton:entry>
+                <operaton:entry key="Content-Type">application/json</operaton:entry>
+              </operaton:map>
+            </operaton:inputParameter>
+            <operaton:inputParameter name="payload">${promptBuilder.invitationRequest(candidateName, position, interviewSlot)}</operaton:inputParameter>
+            <operaton:outputParameter name="invitationEmail">${responseParser.content(response)}</operaton:outputParameter>
+          </operaton:inputOutput>
+        </operaton:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_calendar_invitemail</bpmn:incoming>
+      <bpmn:outgoing>Flow_invitemail_auto</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:exclusiveGateway id="Gateway_AutoInvited" name="Auto-invited?" default="Flow_reviewed">
+      <bpmn:incoming>Flow_invitemail_auto</bpmn:incoming>
+      <bpmn:outgoing>Flow_automatic</bpmn:outgoing>
+      <bpmn:outgoing>Flow_reviewed</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:serviceTask id="ServiceTask_RecruiterSummaryEmail" name="Draft recruiter summary email">
+      <bpmn:extensionElements>
+        <operaton:connector>
+          <operaton:connectorId>http-connector</operaton:connectorId>
+          <operaton:inputOutput>
+            <operaton:inputParameter name="url">${llmProperties.chatCompletionsUrl}</operaton:inputParameter>
+            <operaton:inputParameter name="method">POST</operaton:inputParameter>
+            <operaton:inputParameter name="headers">
+              <operaton:map>
+                <operaton:entry key="Authorization">${llmProperties.authorizationHeader}</operaton:entry>
+                <operaton:entry key="Content-Type">application/json</operaton:entry>
+              </operaton:map>
+            </operaton:inputParameter>
+            <operaton:inputParameter name="payload">${promptBuilder.recruiterSummaryRequest(candidateName, position, fitScore, assessment)}</operaton:inputParameter>
+            <operaton:outputParameter name="recruiterSummaryEmail">${responseParser.content(response)}</operaton:outputParameter>
+          </operaton:inputOutput>
+        </operaton:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_automatic</bpmn:incoming>
+      <bpmn:outgoing>Flow_summary_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_Invited" name="Candidate invited">
+      <bpmn:incoming>Flow_summary_end</bpmn:incoming>
+      <bpmn:incoming>Flow_reviewed</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:exclusiveGateway id="Gateway_RejectMerge">
+      <bpmn:incoming>Flow_weak</bpmn:incoming>
+      <bpmn:incoming>Flow_decline</bpmn:incoming>
+      <bpmn:outgoing>Flow_reject_mail</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:serviceTask id="ServiceTask_RejectionEmail" name="Draft rejection email">
+      <bpmn:extensionElements>
+        <operaton:connector>
+          <operaton:connectorId>http-connector</operaton:connectorId>
+          <operaton:inputOutput>
+            <operaton:inputParameter name="url">${llmProperties.chatCompletionsUrl}</operaton:inputParameter>
+            <operaton:inputParameter name="method">POST</operaton:inputParameter>
+            <operaton:inputParameter name="headers">
+              <operaton:map>
+                <operaton:entry key="Authorization">${llmProperties.authorizationHeader}</operaton:entry>
+                <operaton:entry key="Content-Type">application/json</operaton:entry>
+              </operaton:map>
+            </operaton:inputParameter>
+            <operaton:inputParameter name="payload">${promptBuilder.rejectionRequest(candidateName, position)}</operaton:inputParameter>
+            <operaton:outputParameter name="rejectionEmail">${responseParser.content(response)}</operaton:outputParameter>
+          </operaton:inputOutput>
+        </operaton:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_reject_mail</bpmn:incoming>
+      <bpmn:outgoing>Flow_reject_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_Rejected" name="Candidate rejected">
+      <bpmn:incoming>Flow_reject_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_start_score" sourceRef="StartEvent_ApplicationReceived" targetRef="ServiceTask_ScoreApplication"/>
+    <bpmn:sequenceFlow id="Flow_score_gateway" sourceRef="ServiceTask_ScoreApplication" targetRef="Gateway_FitScore"/>
+
+    <bpmn:sequenceFlow id="Flow_strong" name="score &#8805; 70 (strong)" sourceRef="Gateway_FitScore" targetRef="Gateway_InviteMerge">
+      <bpmn:extensionElements>
+        <operaton:executionListener event="take" expression="${execution.setVariable('autoInvite', true)}"/>
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fitScore &gt;= 70}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_borderline" name="score 50&#8211;69 (review)" sourceRef="Gateway_FitScore" targetRef="UserTask_RecruiterReview">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fitScore &gt;= 50 &amp;&amp; fitScore &lt; 70}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_weak" name="score &lt; 50 (reject)" sourceRef="Gateway_FitScore" targetRef="Gateway_RejectMerge"/>
+
+    <bpmn:sequenceFlow id="Flow_review_decision" sourceRef="UserTask_RecruiterReview" targetRef="Gateway_RecruiterDecision"/>
+
+    <bpmn:sequenceFlow id="Flow_approve" name="approve" sourceRef="Gateway_RecruiterDecision" targetRef="Gateway_InviteMerge">
+      <bpmn:extensionElements>
+        <operaton:executionListener event="take" expression="${execution.setVariable('autoInvite', false)}"/>
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${approved}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_decline" name="decline" sourceRef="Gateway_RecruiterDecision" targetRef="Gateway_RejectMerge"/>
+
+    <bpmn:sequenceFlow id="Flow_invite_calendar" sourceRef="Gateway_InviteMerge" targetRef="ServiceTask_QueryCalendar"/>
+    <bpmn:sequenceFlow id="Flow_calendar_invitemail" sourceRef="ServiceTask_QueryCalendar" targetRef="ServiceTask_InvitationEmail"/>
+    <bpmn:sequenceFlow id="Flow_invitemail_auto" sourceRef="ServiceTask_InvitationEmail" targetRef="Gateway_AutoInvited"/>
+
+    <bpmn:sequenceFlow id="Flow_automatic" name="automatic" sourceRef="Gateway_AutoInvited" targetRef="ServiceTask_RecruiterSummaryEmail">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${autoInvite}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_reviewed" name="reviewed" sourceRef="Gateway_AutoInvited" targetRef="EndEvent_Invited"/>
+    <bpmn:sequenceFlow id="Flow_summary_end" sourceRef="ServiceTask_RecruiterSummaryEmail" targetRef="EndEvent_Invited"/>
+
+    <bpmn:sequenceFlow id="Flow_reject_mail" sourceRef="Gateway_RejectMerge" targetRef="ServiceTask_RejectionEmail"/>
+    <bpmn:sequenceFlow id="Flow_reject_end" sourceRef="ServiceTask_RejectionEmail" targetRef="EndEvent_Rejected"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="candidate-screening">
+      <bpmndi:BPMNShape id="StartEvent_ApplicationReceived_di" bpmnElement="StartEvent_ApplicationReceived">
+        <dc:Bounds x="162" y="212" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="140" y="255" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_ScoreApplication_di" bpmnElement="ServiceTask_ScoreApplication">
+        <dc:Bounds x="250" y="190" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_FitScore_di" bpmnElement="Gateway_FitScore" isMarkerVisible="true">
+        <dc:Bounds x="400" y="205" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="394" y="262" width="62" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_RecruiterReview_di" bpmnElement="UserTask_RecruiterReview">
+        <dc:Bounds x="510" y="190" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_RecruiterDecision_di" bpmnElement="Gateway_RecruiterDecision" isMarkerVisible="true">
+        <dc:Bounds x="660" y="205" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="648" y="262" width="74" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_InviteMerge_di" bpmnElement="Gateway_InviteMerge" isMarkerVisible="true">
+        <dc:Bounds x="760" y="205" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_QueryCalendar_di" bpmnElement="ServiceTask_QueryCalendar">
+        <dc:Bounds x="850" y="190" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_InvitationEmail_di" bpmnElement="ServiceTask_InvitationEmail">
+        <dc:Bounds x="1000" y="190" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_AutoInvited_di" bpmnElement="Gateway_AutoInvited" isMarkerVisible="true">
+        <dc:Bounds x="1150" y="205" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1140" y="262" width="71" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_RecruiterSummaryEmail_di" bpmnElement="ServiceTask_RecruiterSummaryEmail">
+        <dc:Bounds x="1240" y="190" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Invited_di" bpmnElement="EndEvent_Invited">
+        <dc:Bounds x="1402" y="212" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1380" y="255" width="82" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_RejectMerge_di" bpmnElement="Gateway_RejectMerge" isMarkerVisible="true">
+        <dc:Bounds x="760" y="375" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_RejectionEmail_di" bpmnElement="ServiceTask_RejectionEmail">
+        <dc:Bounds x="850" y="360" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Rejected_di" bpmnElement="EndEvent_Rejected">
+        <dc:Bounds x="1002" y="382" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="980" y="425" width="82" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_start_score_di" bpmnElement="Flow_start_score">
+        <di:waypoint x="198" y="230"/><di:waypoint x="250" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_score_gateway_di" bpmnElement="Flow_score_gateway">
+        <di:waypoint x="350" y="230"/><di:waypoint x="400" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_strong_di" bpmnElement="Flow_strong">
+        <di:waypoint x="425" y="205"/><di:waypoint x="425" y="120"/><di:waypoint x="785" y="120"/><di:waypoint x="785" y="205"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_borderline_di" bpmnElement="Flow_borderline">
+        <di:waypoint x="450" y="230"/><di:waypoint x="510" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_weak_di" bpmnElement="Flow_weak">
+        <di:waypoint x="425" y="255"/><di:waypoint x="425" y="400"/><di:waypoint x="760" y="400"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_review_decision_di" bpmnElement="Flow_review_decision">
+        <di:waypoint x="610" y="230"/><di:waypoint x="660" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_approve_di" bpmnElement="Flow_approve">
+        <di:waypoint x="710" y="230"/><di:waypoint x="760" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_decline_di" bpmnElement="Flow_decline">
+        <di:waypoint x="685" y="255"/><di:waypoint x="685" y="400"/><di:waypoint x="760" y="400"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_invite_calendar_di" bpmnElement="Flow_invite_calendar">
+        <di:waypoint x="810" y="230"/><di:waypoint x="850" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_calendar_invitemail_di" bpmnElement="Flow_calendar_invitemail">
+        <di:waypoint x="950" y="230"/><di:waypoint x="1000" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_invitemail_auto_di" bpmnElement="Flow_invitemail_auto">
+        <di:waypoint x="1100" y="230"/><di:waypoint x="1150" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_automatic_di" bpmnElement="Flow_automatic">
+        <di:waypoint x="1200" y="230"/><di:waypoint x="1240" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_summary_end_di" bpmnElement="Flow_summary_end">
+        <di:waypoint x="1340" y="230"/><di:waypoint x="1402" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_reviewed_di" bpmnElement="Flow_reviewed">
+        <di:waypoint x="1175" y="255"/><di:waypoint x="1175" y="310"/><di:waypoint x="1420" y="310"/><di:waypoint x="1420" y="248"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_reject_mail_di" bpmnElement="Flow_reject_mail">
+        <di:waypoint x="810" y="400"/><di:waypoint x="850" y="400"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_reject_end_di" bpmnElement="Flow_reject_end">
+        <di:waypoint x="950" y="400"/><di:waypoint x="1002" y="400"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
