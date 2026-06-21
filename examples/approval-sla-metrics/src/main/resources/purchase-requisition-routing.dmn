@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:operaton="http://operaton.org/schema/1.0/dmn"
+             id="purchase-requisition-routing-definitions"
+             name="Purchase Requisition Routing"
+             namespace="http://operaton.org/examples/approval-sla-metrics">
+
+  <decision id="purchase-requisition-routing" name="Purchase Requisition Routing" operaton:historyTimeToLive="30">
+    <decisionTable id="decisionTable_routing" hitPolicy="FIRST">
+      <input id="input_amount" label="Amount">
+        <inputExpression id="inputExpression_amount" typeRef="double">
+          <text>amount</text>
+        </inputExpression>
+      </input>
+      <output id="output_tier" label="Approval Tier" name="approvalTier" typeRef="string"/>
+      <output id="output_sla" label="SLA Duration" name="slaDuration" typeRef="string"/>
+      <output id="output_group" label="Approver Group" name="approverGroup" typeRef="string"/>
+
+      <!-- Rule 1: small amounts auto-approve, no human step -->
+      <rule id="rule_auto">
+        <inputEntry id="ie_auto"><text>&lt; 1000</text></inputEntry>
+        <outputEntry id="oe_auto_tier"><text>"auto"</text></outputEntry>
+        <outputEntry id="oe_auto_sla"><text>"PT0S"</text></outputEntry>
+        <outputEntry id="oe_auto_group"><text>""</text></outputEntry>
+      </rule>
+
+      <!-- Rule 2: mid amounts → manager, 5s SLA (compressed for demo) -->
+      <rule id="rule_manager">
+        <inputEntry id="ie_manager"><text>&lt; 10000</text></inputEntry>
+        <outputEntry id="oe_manager_tier"><text>"manager"</text></outputEntry>
+        <outputEntry id="oe_manager_sla"><text>"PT5S"</text></outputEntry>
+        <outputEntry id="oe_manager_group"><text>"managers"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 3: large amounts → director, tighter 2s SLA -->
+      <rule id="rule_director">
+        <inputEntry id="ie_director"><text></text></inputEntry>
+        <outputEntry id="oe_director_tier"><text>"director"</text></outputEntry>
+        <outputEntry id="oe_director_sla"><text>"PT2S"</text></outputEntry>
+        <outputEntry id="oe_director_group"><text>"directors"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

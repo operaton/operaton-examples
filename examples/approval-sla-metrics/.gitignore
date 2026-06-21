@@ -1,0 +1,4 @@
+
+# generated TLS material
+nginx/certs/*.key
+nginx/certs/*.crt
