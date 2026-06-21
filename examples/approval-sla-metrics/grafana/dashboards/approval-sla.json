@@ -1,0 +1,104 @@
+{
+  "uid": "approval-sla",
+  "title": "Approval SLA Metrics",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "refresh": "5s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "SLA breaches / min by tier",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "sum by (tier) (rate(approval_sla_breaches_total[1m]) * 60)",
+          "legendFormat": "{{tier}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Approval wait p50 / p95 (seconds)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (le, tier) (rate(approval_wait_seconds_seconds_bucket[5m])))",
+          "legendFormat": "p50 {{tier}}"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, tier) (rate(approval_wait_seconds_seconds_bucket[5m])))",
+          "legendFormat": "p95 {{tier}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Throughput / min by outcome",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (outcome) (rate(requisitions_total[1m]) * 60)",
+          "legendFormat": "{{outcome}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Approvals in progress",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (tier) (approvals_in_progress)",
+          "legendFormat": "{{tier}}"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": []
+  }
+}
