@@ -14,7 +14,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.time.Duration;
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -41,9 +40,102 @@ class ProcurementCollaborationIT {
             .processDefinitionKey("quote-handling").count()).isEqualTo(1);
     }
 
-    // Helper: find the completed quote-handling instance with the given requestId.
+    @Test
+    void withinBudget_orderIsPlaced_supplierReservesStock() {
+        var pi = runtimeService.startProcessInstanceByKey("purchase-request",
+            Variables.createVariables()
+                .putValue("requestId", "REQ-OK")
+                .putValue("item", "widget")
+                .putValue("quantity", 10)
+                .putValue("maxBudget", 5000));
+
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            var buyer = historyService.createHistoricProcessInstanceQuery()
+                .processInstanceId(pi.getId()).singleResult();
+            assertThat(buyer.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+            assertThat(buyer.getEndActivityId()).isEqualTo("EndEvent_DecisionSent");
+        });
+
+        var accepted = historyService.createHistoricVariableInstanceQuery()
+            .processInstanceId(pi.getId()).variableName("accepted").singleResult().getValue();
+        assertThat(accepted).isEqualTo(true);
+
+        var supplier = findSupplierInstance("REQ-OK");
+        assertThat(supplier.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+        assertThat(supplier.getEndActivityId()).isEqualTo("EndEvent_OrderFulfilled");
+
+        var reserved = historyService.createHistoricVariableInstanceQuery()
+            .processInstanceId(supplier.getId()).variableName("reserved").singleResult().getValue();
+        assertThat(reserved).isEqualTo(true);
+    }
+
+    @Test
+    void overBudget_orderDeclined_supplierReleasesQuote() {
+        var pi = runtimeService.startProcessInstanceByKey("purchase-request",
+            Variables.createVariables()
+                .putValue("requestId", "REQ-OVER")
+                .putValue("item", "widget")
+                .putValue("quantity", 10)
+                .putValue("maxBudget", 500));
+
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            var buyer = historyService.createHistoricProcessInstanceQuery()
+                .processInstanceId(pi.getId()).singleResult();
+            assertThat(buyer.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+        });
+
+        var accepted = historyService.createHistoricVariableInstanceQuery()
+            .processInstanceId(pi.getId()).variableName("accepted").singleResult().getValue();
+        assertThat(accepted).isEqualTo(false);
+
+        var supplier = findSupplierInstance("REQ-OVER");
+        assertThat(supplier.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+        assertThat(supplier.getEndActivityId()).isEqualTo("EndEvent_QuoteReleased");
+
+        var reservedVar = historyService.createHistoricVariableInstanceQuery()
+            .processInstanceId(supplier.getId()).variableName("reserved").singleResult();
+        assertThat(reservedVar).isNull();
+    }
+
+    @Test
+    void correlation_linksResponseToOriginatingBuyer() {
+        var piA = runtimeService.startProcessInstanceByKey("purchase-request",
+            Variables.createVariables()
+                .putValue("requestId", "REQ-A")
+                .putValue("item", "widget")
+                .putValue("quantity", 1)
+                .putValue("maxBudget", 5000));
+        var piB = runtimeService.startProcessInstanceByKey("purchase-request",
+            Variables.createVariables()
+                .putValue("requestId", "REQ-B")
+                .putValue("item", "widget")
+                .putValue("quantity", 5)
+                .putValue("maxBudget", 5000));
+
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            var buyerA = historyService.createHistoricProcessInstanceQuery()
+                .processInstanceId(piA.getId()).singleResult();
+            var buyerB = historyService.createHistoricProcessInstanceQuery()
+                .processInstanceId(piB.getId()).singleResult();
+            assertThat(buyerA.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+            assertThat(buyerB.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+        });
+
+        // Each buyer received its OWN totalPrice — messages did not cross
+        var totalPriceA = (Integer) historyService.createHistoricVariableInstanceQuery()
+            .processInstanceId(piA.getId()).variableName("totalPrice").singleResult().getValue();
+        var totalPriceB = (Integer) historyService.createHistoricVariableInstanceQuery()
+            .processInstanceId(piB.getId()).variableName("totalPrice").singleResult().getValue();
+        assertThat(totalPriceA).isEqualTo(100);  // 1 × 100
+        assertThat(totalPriceB).isEqualTo(500);  // 5 × 100
+
+        // Two separate supplier instances ran for this test's requestIds
+        assertThat(findSupplierInstance("REQ-A")).isNotNull();
+        assertThat(findSupplierInstance("REQ-B")).isNotNull();
+    }
+
     // The two processes are not parent/child (no call activity), so there is no
-    // superProcessInstanceId link; we locate by variable value.
+    // superProcessInstanceId link; locate by the requestId variable stored on each supplier instance.
     private HistoricProcessInstance findSupplierInstance(String requestId) {
         var supplierInstances = historyService.createHistoricProcessInstanceQuery()
             .processDefinitionKey("quote-handling")

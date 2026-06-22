@@ -29,7 +29,7 @@
     </bpmn:sendTask>
 
     <bpmn:intermediateCatchEvent id="IntermediateCatch_QuoteReceived" name="Quote received"
-                                  operaton:asyncBefore="true">
+                                  operaton:asyncAfter="true">
       <bpmn:incoming>Flow_SendQuote_WaitResponse</bpmn:incoming>
       <bpmn:outgoing>Flow_QuoteReceived_Evaluate</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDef_QuoteResponse"

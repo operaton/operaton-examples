@@ -34,10 +34,7 @@
       <bpmn:outgoing>Flow_SendQuote_WaitDecision</bpmn:outgoing>
     </bpmn:sendTask>
 
-    <!-- asyncBefore: when the buyer's sendQuoteResponseDelegate correlates QuoteResponse,
-         the buyer's continuation runs as a job, not inline in this transaction. -->
-    <bpmn:intermediateCatchEvent id="IntermediateCatch_OrderDecision" name="Order decision received"
-                                  operaton:asyncBefore="true">
+    <bpmn:intermediateCatchEvent id="IntermediateCatch_OrderDecision" name="Order decision received">
       <bpmn:incoming>Flow_SendQuote_WaitDecision</bpmn:incoming>
       <bpmn:outgoing>Flow_OrderDecision_Gateway</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDef_OrderDecision"
