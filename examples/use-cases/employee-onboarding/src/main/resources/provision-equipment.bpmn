@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_ProvisionEquipment"
+                  targetNamespace="http://operaton.org/examples">
+
+  <bpmn:process id="provision-equipment" name="Provision Equipment" isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_EquipmentOrder" name="Equipment order">
+      <bpmn:outgoing>Flow_Start_Provision</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="Task_OrderItem" name="Order equipment item"
+                      operaton:delegateExpression="${provisionItemDelegate}">
+      <bpmn:incoming>Flow_Start_Provision</bpmn:incoming>
+      <bpmn:outgoing>Flow_Provision_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_EquipmentProvisioned" name="Equipment provisioned">
+      <bpmn:incoming>Flow_Provision_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Start_Provision"
+                       sourceRef="StartEvent_EquipmentOrder"
+                       targetRef="Task_OrderItem"/>
+    <bpmn:sequenceFlow id="Flow_Provision_End"
+                       sourceRef="Task_OrderItem"
+                       targetRef="EndEvent_EquipmentProvisioned"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ProvisionEquipment">
+    <bpmndi:BPMNPlane id="BPMNPlane_ProvisionEquipment" bpmnElement="provision-equipment">
+      <bpmndi:BPMNShape id="Shape_StartEvent_EquipmentOrder" bpmnElement="StartEvent_EquipmentOrder">
+        <dc:Bounds x="152" y="72" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="130" y="115" width="80" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_OrderItem" bpmnElement="Task_OrderItem">
+        <dc:Bounds x="240" y="50" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndEvent_EquipmentProvisioned" bpmnElement="EndEvent_EquipmentProvisioned">
+        <dc:Bounds x="402" y="72" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="380" y="115" width="80" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Start_Provision" bpmnElement="Flow_Start_Provision">
+        <di:waypoint x="188" y="90"/><di:waypoint x="240" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Provision_End" bpmnElement="Flow_Provision_End">
+        <di:waypoint x="340" y="90"/><di:waypoint x="402" y="90"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
