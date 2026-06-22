@@ -86,6 +86,7 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | [order-fulfillment](examples/use-cases/order-fulfillment) | E-commerce order | Error boundary on payment, async continuation, compensation, WireMock inventory/payment stubs |
 | [candidate-screening](examples/use-cases/candidate-screening) | AI recruiting screening | LLM scoring + email generation via HTTP connector, LLM-driven confidence gateway, human-in-the-loop on borderline, calendar slot query, WireMock IT |
 | [insurance-claim](examples/use-cases/insurance-claim) | Insurance damage claim | Event-based gateway (message vs timer race), parallel fraud check and damage appraisal, DMN settlement with FIRST hit policy |
+| [travel-booking](examples/use-cases/travel-booking) | Travel booking SAGA | BPMN transaction subprocess, cancel end event, cancel boundary event, automatic compensation rollback |
 
 ## Anatomy of every example
 
@@ -138,7 +139,9 @@ Quick lookup: which example demonstrates each BPMN construct.
 | Timer intermediate catch | timer-events, insurance-claim | ISO-8601 duration variable |
 | Signal intermediate catch/throw | signal-events | Broadcast signal |
 | Error boundary event | error-compensation | Interrupting and non-interrupting |
-| Compensation | error-compensation | Compensation boundary + handler |
+| Compensation | error-compensation, travel-booking | Manual throw (error-compensation) vs. transaction-driven (travel-booking) |
+| **Transaction subprocess** | **travel-booking** | All-or-nothing SAGA; cancel end event triggers auto-compensation |
+| **Cancel event (end + boundary)** | **travel-booking** | Cancel end event inside transaction + cancel boundary on transaction |
 | Multi-instance | multi-instance | Sequential and parallel sub-tasks |
 | Call activity | call-activity | Sub-process reuse across definitions |
 | Event sub-process | event-subprocess | Error- and message-triggered |
