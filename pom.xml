@@ -47,6 +47,7 @@
     <module>examples/use-cases/order-fulfillment</module>
     <module>examples/use-cases/insurance-claim</module>
     <module>examples/use-cases/travel-booking</module>
+    <module>examples/use-cases/complaint-resolution</module>
     <module>examples/use-cases/candidate-screening</module>
     <module>examples/xslt-script-task</module>
     <module>examples/approval-sla-metrics</module>

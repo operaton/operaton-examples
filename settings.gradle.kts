@@ -37,6 +37,7 @@ include(
   "examples:use-cases:order-fulfillment",
   "examples:use-cases:insurance-claim",
   "examples:use-cases:travel-booking",
+  "examples:use-cases:complaint-resolution",
   "examples:approval-sla-metrics"
 )
 
@@ -76,4 +77,5 @@ project(":examples:use-cases:incident-management").projectDir = file("examples/u
 project(":examples:use-cases:order-fulfillment").projectDir = file("examples/use-cases/order-fulfillment")
 project(":examples:use-cases:insurance-claim").projectDir = file("examples/use-cases/insurance-claim")
 project(":examples:use-cases:travel-booking").projectDir = file("examples/use-cases/travel-booking")
+project(":examples:use-cases:complaint-resolution").projectDir = file("examples/use-cases/complaint-resolution")
 project(":examples:approval-sla-metrics").projectDir = file("examples/approval-sla-metrics")
