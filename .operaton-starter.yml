@@ -1458,3 +1458,13 @@ examples:
       - examples/use-cases/travel-booking/src/main/resources/travel-booking.png
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/travel-booking/README.md"
     lastUpdated: "2026-06-22"
+
+- id: uc-08-complaint-resolution
+  name: Customer Complaint Resolution
+  description: >
+    Escalation events — non-interrupting escalation throw and boundary for
+    parallel manager approval, interrupting escalation end event and boundary
+    for high-severity specialist reroute. First escalationEventDefinition in
+    the catalog.
+  path: examples/use-cases/complaint-resolution
+  tags: [use-case, escalation, subprocess, spring-boot]
