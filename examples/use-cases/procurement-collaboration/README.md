@@ -7,7 +7,7 @@ Two-pool BPMN collaboration between a Buyer process and a Supplier process, comm
 - How to model BPMN message flow between two pools and realize it with the Operaton Correlation API
 - How `correlateStartMessage()` starts a new process instance by message name
 - How `processInstanceVariableEquals()` routes a message to the correct counterpart instance using a correlation key
-- Why `asyncBefore="true"` on message catch events prevents re-entrancy and keeps each process in its own transaction
+- Why `asyncBefore` on the supplier start event and `asyncAfter` on the buyer intermediate catch event prevent correlation timing races by ensuring each process registers its subscription before the counterpart's job fires
 
 ## Process model
 
@@ -62,11 +62,11 @@ To test the over-budget path, set `maxBudget` to `100` (total `200 > 100`). The 
 
 ## How it works
 
-- [`purchase-request.bpmn`](src/main/resources/purchase-request.bpmn) — Buyer: linear flow with a send task, an intermediate message catch event (`asyncBefore`), and a second send task.
-- [`quote-handling.bpmn`](src/main/resources/quote-handling.bpmn) — Supplier: message start event (`asyncBefore`), send task, intermediate message catch event (`asyncBefore`), and an exclusive gateway routing on `${accepted}`.
+- [`purchase-request.bpmn`](src/main/resources/purchase-request.bpmn) — Buyer: linear flow with a send task, an intermediate message catch event (`asyncAfter`), and a second send task.
+- [`quote-handling.bpmn`](src/main/resources/quote-handling.bpmn) — Supplier: message start event (`asyncBefore`), send task, intermediate message catch event (no additional async attribute), and an exclusive gateway routing on `${accepted}`.
 - [`SendQuoteRequestDelegate`](src/main/java/org/operaton/examples/procurementcollaboration/SendQuoteRequestDelegate.java) calls `runtimeService.createMessageCorrelation("QuoteRequest").setVariable(...).correlateStartMessage()`.
 - [`SendQuoteResponseDelegate`](src/main/java/org/operaton/examples/procurementcollaboration/SendQuoteResponseDelegate.java) and [`SendOrderDecisionDelegate`](src/main/java/org/operaton/examples/procurementcollaboration/SendOrderDecisionDelegate.java) both call `.processInstanceVariableEquals("requestId", requestId).correlate()`.
-- The `asyncBefore` on the supplier start event and the two intermediate catch events is the decoupling mechanism: each send delegate commits and returns; the recipient's continuation is a job executed by the job executor in a separate transaction. Without this, the delegates would drive the counterpart synchronously, causing re-entrancy.
+- The two async boundaries are: `asyncBefore` on the supplier start event (so `correlateStartMessage()` returns before the supplier runs) and `asyncAfter` on the buyer intermediate catch event (the buyer subscribes synchronously but exits via a job after receiving the QuoteResponse — this ensures the buyer's EvaluateQuote + SendOrderDecision runs as a separate job, after the supplier has already registered its OrderDecision subscription). The supplier intermediate catch event has no additional async attribute because the supplier registers its subscription synchronously in the SendQuote transaction, before the buyer's async job fires.
 - This example correlates within one engine. Cross-system messaging over a broker (Kafka/JMS) requires a different architecture; that is out of scope here.
 
 ## Run the tests

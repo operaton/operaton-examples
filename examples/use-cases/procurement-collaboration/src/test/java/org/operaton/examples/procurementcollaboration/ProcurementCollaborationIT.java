@@ -60,13 +60,15 @@ class ProcurementCollaborationIT {
             .processInstanceId(pi.getId()).variableName("accepted").singleResult().getValue();
         assertThat(accepted).isEqualTo(true);
 
-        var supplier = findSupplierInstance("REQ-OK");
-        assertThat(supplier.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
-        assertThat(supplier.getEndActivityId()).isEqualTo("EndEvent_OrderFulfilled");
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            var supplier = findSupplierInstance("REQ-OK");
+            assertThat(supplier.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+            assertThat(supplier.getEndActivityId()).isEqualTo("EndEvent_OrderFulfilled");
 
-        var reserved = historyService.createHistoricVariableInstanceQuery()
-            .processInstanceId(supplier.getId()).variableName("reserved").singleResult().getValue();
-        assertThat(reserved).isEqualTo(true);
+            var reserved = historyService.createHistoricVariableInstanceQuery()
+                .processInstanceId(supplier.getId()).variableName("reserved").singleResult().getValue();
+            assertThat(reserved).isEqualTo(true);
+        });
     }
 
     @Test
@@ -88,13 +90,15 @@ class ProcurementCollaborationIT {
             .processInstanceId(pi.getId()).variableName("accepted").singleResult().getValue();
         assertThat(accepted).isEqualTo(false);
 
-        var supplier = findSupplierInstance("REQ-OVER");
-        assertThat(supplier.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
-        assertThat(supplier.getEndActivityId()).isEqualTo("EndEvent_QuoteReleased");
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            var supplier = findSupplierInstance("REQ-OVER");
+            assertThat(supplier.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+            assertThat(supplier.getEndActivityId()).isEqualTo("EndEvent_QuoteReleased");
 
-        var reservedVar = historyService.createHistoricVariableInstanceQuery()
-            .processInstanceId(supplier.getId()).variableName("reserved").singleResult();
-        assertThat(reservedVar).isNull();
+            var reservedVar = historyService.createHistoricVariableInstanceQuery()
+                .processInstanceId(supplier.getId()).variableName("reserved").singleResult();
+            assertThat(reservedVar).isNull();
+        });
     }
 
     @Test
