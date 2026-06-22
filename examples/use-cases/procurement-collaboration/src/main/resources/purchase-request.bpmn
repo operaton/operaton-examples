@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_PurchaseRequest"
+                  targetNamespace="http://operaton.org/examples">
+
+  <bpmn:message id="Message_QuoteResponse" name="QuoteResponse"/>
+
+  <bpmn:process id="purchase-request" name="Purchase Request" isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_PurchaseNeed" name="Purchase need identified">
+      <bpmn:outgoing>Flow_Start_Prepare</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="Task_PrepareRequest" name="Prepare request"
+                      operaton:delegateExpression="${prepareRequestDelegate}">
+      <bpmn:incoming>Flow_Start_Prepare</bpmn:incoming>
+      <bpmn:outgoing>Flow_Prepare_SendQuote</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:sendTask id="Task_SendQuoteRequest" name="Send quote request"
+                   operaton:delegateExpression="${sendQuoteRequestDelegate}">
+      <bpmn:incoming>Flow_Prepare_SendQuote</bpmn:incoming>
+      <bpmn:outgoing>Flow_SendQuote_WaitResponse</bpmn:outgoing>
+    </bpmn:sendTask>
+
+    <bpmn:intermediateCatchEvent id="IntermediateCatch_QuoteReceived" name="Quote received"
+                                  operaton:asyncAfter="true">
+      <bpmn:incoming>Flow_SendQuote_WaitResponse</bpmn:incoming>
+      <bpmn:outgoing>Flow_QuoteReceived_Evaluate</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDef_QuoteResponse"
+                                    messageRef="Message_QuoteResponse"/>
+    </bpmn:intermediateCatchEvent>
+
+    <bpmn:serviceTask id="Task_EvaluateQuote" name="Evaluate quote"
+                      operaton:delegateExpression="${evaluateQuoteDelegate}">
+      <bpmn:incoming>Flow_QuoteReceived_Evaluate</bpmn:incoming>
+      <bpmn:outgoing>Flow_Evaluate_SendDecision</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:sendTask id="Task_SendOrderDecision" name="Send order decision"
+                   operaton:delegateExpression="${sendOrderDecisionDelegate}">
+      <bpmn:incoming>Flow_Evaluate_SendDecision</bpmn:incoming>
+      <bpmn:outgoing>Flow_SendDecision_End</bpmn:outgoing>
+    </bpmn:sendTask>
+
+    <bpmn:endEvent id="EndEvent_DecisionSent" name="Decision sent">
+      <bpmn:incoming>Flow_SendDecision_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Start_Prepare"
+                       sourceRef="StartEvent_PurchaseNeed" targetRef="Task_PrepareRequest"/>
+    <bpmn:sequenceFlow id="Flow_Prepare_SendQuote"
+                       sourceRef="Task_PrepareRequest" targetRef="Task_SendQuoteRequest"/>
+    <bpmn:sequenceFlow id="Flow_SendQuote_WaitResponse"
+                       sourceRef="Task_SendQuoteRequest" targetRef="IntermediateCatch_QuoteReceived"/>
+    <bpmn:sequenceFlow id="Flow_QuoteReceived_Evaluate"
+                       sourceRef="IntermediateCatch_QuoteReceived" targetRef="Task_EvaluateQuote"/>
+    <bpmn:sequenceFlow id="Flow_Evaluate_SendDecision"
+                       sourceRef="Task_EvaluateQuote" targetRef="Task_SendOrderDecision"/>
+    <bpmn:sequenceFlow id="Flow_SendDecision_End"
+                       sourceRef="Task_SendOrderDecision" targetRef="EndEvent_DecisionSent"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_PurchaseRequest">
+    <bpmndi:BPMNPlane id="BPMNPlane_PurchaseRequest" bpmnElement="purchase-request">
+      <bpmndi:BPMNShape id="Shape_StartEvent_PurchaseNeed" bpmnElement="StartEvent_PurchaseNeed">
+        <dc:Bounds x="152" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="126" y="125" width="89" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_PrepareRequest" bpmnElement="Task_PrepareRequest">
+        <dc:Bounds x="240" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_SendQuoteRequest" bpmnElement="Task_SendQuoteRequest">
+        <dc:Bounds x="390" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_IntermediateCatch_QuoteReceived" bpmnElement="IntermediateCatch_QuoteReceived">
+        <dc:Bounds x="542" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="519" y="125" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_EvaluateQuote" bpmnElement="Task_EvaluateQuote">
+        <dc:Bounds x="630" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_SendOrderDecision" bpmnElement="Task_SendOrderDecision">
+        <dc:Bounds x="780" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndEvent_DecisionSent" bpmnElement="EndEvent_DecisionSent">
+        <dc:Bounds x="932" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="910" y="125" width="79" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Start_Prepare" bpmnElement="Flow_Start_Prepare">
+        <di:waypoint x="188" y="100"/><di:waypoint x="240" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Prepare_SendQuote" bpmnElement="Flow_Prepare_SendQuote">
+        <di:waypoint x="340" y="100"/><di:waypoint x="390" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SendQuote_WaitResponse" bpmnElement="Flow_SendQuote_WaitResponse">
+        <di:waypoint x="490" y="100"/><di:waypoint x="542" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_QuoteReceived_Evaluate" bpmnElement="Flow_QuoteReceived_Evaluate">
+        <di:waypoint x="578" y="100"/><di:waypoint x="630" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Evaluate_SendDecision" bpmnElement="Flow_Evaluate_SendDecision">
+        <di:waypoint x="730" y="100"/><di:waypoint x="780" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SendDecision_End" bpmnElement="Flow_SendDecision_End">
+        <di:waypoint x="880" y="100"/><di:waypoint x="932" y="100"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

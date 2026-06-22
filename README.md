@@ -89,6 +89,7 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | [travel-booking](examples/use-cases/travel-booking) | Travel booking SAGA | BPMN transaction subprocess, cancel end event, cancel boundary event, automatic compensation rollback |
 | [complaint-resolution](examples/use-cases/complaint-resolution) | Customer complaint | Escalation events: non-interrupting throw + boundary (parallel approval), interrupting end event + boundary (specialist reroute) |
 | [employee-onboarding](examples/use-cases/employee-onboarding) | Employee HR onboarding | Call activity orchestration: parallel MI for equipment provisioning, single call activity for system access, in/out variable mapping |
+| [procurement-collaboration](examples/use-cases/procurement-collaboration) | Buyer ↔ Supplier procurement | Two-pool collaboration, three correlated messages, async continuation decoupling |
 
 ## Anatomy of every example
 
@@ -135,9 +136,9 @@ Quick lookup: which example demonstrates each BPMN construct.
 | **Parallel gateway (AND)** | **[insurance-claim](examples/use-cases/insurance-claim)** | AND-split / AND-join, concurrent branches |
 | **Event-based gateway** | **[insurance-claim](examples/use-cases/insurance-claim)** | Race between message and timer |
 | Inclusive gateway (OR) | [inclusive-gateway](examples/inclusive-gateway) | OR-split / OR-join |
-| Message start event | [message-events](examples/message-events) | Start by message correlation |
+| Message start event | <ul><li>[message-events](examples/message-events)</li><li>[procurement-collaboration](examples/use-cases/procurement-collaboration)</li></ul> | Start by message correlation |
 | Timer start event | [timer-events](examples/timer-events) | Cron, cycle, duration |
-| Message intermediate catch | <ul><li>[message-events](examples/message-events)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul> | Correlation by business key |
+| Message intermediate catch | <ul><li>[message-events](examples/message-events)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li><li>[procurement-collaboration](examples/use-cases/procurement-collaboration)</li></ul> | Correlation by business key |
 | Timer intermediate catch | <ul><li>[timer-events](examples/timer-events)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul> | ISO-8601 duration variable |
 | Signal intermediate catch/throw | [signal-events](examples/signal-events) | Broadcast signal |
 | Error boundary event | [error-compensation](examples/error-compensation) | Interrupting and non-interrupting |
@@ -148,8 +149,10 @@ Quick lookup: which example demonstrates each BPMN construct.
 | **Call activity** | <ul><li>[call-activity](examples/call-activity)</li><li>[employee-onboarding](examples/use-cases/employee-onboarding)</li></ul> | Sub-process reuse, in/out variable mapping, parallel multi-instance over collection |
 | Event sub-process | [event-subprocess](examples/event-subprocess) | Error- and message-triggered |
 | External task | [external-task-worker](examples/external-task-worker) | Worker API, long polling |
-| Async continuation | [async-continuation](examples/async-continuation) | `asyncBefore`, exclusive job lock |
+| Async continuation | <ul><li>[async-continuation](examples/async-continuation)</li><li>[procurement-collaboration](examples/use-cases/procurement-collaboration)</li></ul> | `asyncBefore`, exclusive job lock |
 | **Escalation events** | **[complaint-resolution](examples/use-cases/complaint-resolution)** | Non-interrupting throw + boundary (parallel), interrupting end event + boundary (cancel) |
+| **Collaboration / message flow (two pools)** | **[procurement-collaboration](examples/use-cases/procurement-collaboration)** | Two process definitions communicating via message correlation within one engine |
+| **Cross-instance correlation key** | **[procurement-collaboration](examples/use-cases/procurement-collaboration)** | `processInstanceVariableEquals()` routes messages to the correct instance by `requestId` |
 
 ### Integrations
 

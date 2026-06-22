@@ -39,6 +39,7 @@ include(
   "examples:use-cases:travel-booking",
   "examples:use-cases:complaint-resolution",
   "examples:use-cases:employee-onboarding",
+  "examples:use-cases:procurement-collaboration",
   "examples:approval-sla-metrics"
 )
 
@@ -80,4 +81,5 @@ project(":examples:use-cases:insurance-claim").projectDir = file("examples/use-c
 project(":examples:use-cases:travel-booking").projectDir = file("examples/use-cases/travel-booking")
 project(":examples:use-cases:complaint-resolution").projectDir = file("examples/use-cases/complaint-resolution")
 project(":examples:use-cases:employee-onboarding").projectDir = file("examples/use-cases/employee-onboarding")
+project(":examples:use-cases:procurement-collaboration").projectDir = file("examples/use-cases/procurement-collaboration")
 project(":examples:approval-sla-metrics").projectDir = file("examples/approval-sla-metrics")
