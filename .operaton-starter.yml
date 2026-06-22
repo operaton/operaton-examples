@@ -1541,3 +1541,48 @@ examples:
       - examples/use-cases/employee-onboarding/src/main/resources/employee-onboarding.png
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/employee-onboarding/README.md"
     lastUpdated: "2026-06-22"
+
+  - id: procurement-collaboration
+    title: "Use Case — Procurement Collaboration (Buyer ↔ Supplier)"
+    icon: "🤝"
+    path: examples/use-cases/procurement-collaboration
+    shortDescription: >
+      Two-pool BPMN collaboration: Buyer and Supplier communicate via three correlated messages
+      (QuoteRequest, QuoteResponse, OrderDecision) within one engine. Demonstrates the message
+      Correlation API and async continuation decoupling.
+    longDescription: |
+      The first collaboration / message-flow example in the catalog.
+
+      - **Two executable process definitions** — `purchase-request` (Buyer) and `quote-handling` (Supplier)
+        deployed in one Spring Boot application
+      - **correlateStartMessage()** — starts a supplier instance from the buyer's send task
+      - **processInstanceVariableEquals()** — routes QuoteResponse and OrderDecision to the correct
+        counterpart using `requestId` as the correlation key
+      - **asyncBefore on three events** — decouples each message hop so neither process drives the
+        other synchronously (avoids re-entrancy in the job executor)
+      - **Exclusive gateway** — supplier routes on `${accepted}` to either reserve stock or release the quote
+
+      Four integration tests prove: deployment, within-budget (order placed + stock reserved),
+      over-budget (order declined + quote released), and cross-correlation correctness with two
+      concurrent buyer instances.
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: intermediate
+    tags:
+      - { label: "Message Correlation", category: concept }
+      - { label: "Collaboration", category: concept }
+      - { label: "Two Pools", category: concept }
+      - { label: "Async Continuation", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [message-start-event, message-intermediate-catch, message-send-task, async-continuation, exclusive-gateway]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    screenshots:
+      - examples/use-cases/procurement-collaboration/src/main/resources/purchase-request.png
+      - examples/use-cases/procurement-collaboration/src/main/resources/quote-handling.png
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/procurement-collaboration/README.md"
+    lastUpdated: "2026-06-22"
