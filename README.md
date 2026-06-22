@@ -88,6 +88,7 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | [insurance-claim](examples/use-cases/insurance-claim) | Insurance damage claim | Event-based gateway (message vs timer race), parallel fraud check and damage appraisal, DMN settlement with FIRST hit policy |
 | [travel-booking](examples/use-cases/travel-booking) | Travel booking SAGA | BPMN transaction subprocess, cancel end event, cancel boundary event, automatic compensation rollback |
 | [complaint-resolution](examples/use-cases/complaint-resolution) | Customer complaint | Escalation events: non-interrupting throw + boundary (parallel approval), interrupting end event + boundary (specialist reroute) |
+| [employee-onboarding](examples/use-cases/employee-onboarding) | Employee HR onboarding | Call activity orchestration: parallel MI for equipment provisioning, single call activity for system access, in/out variable mapping |
 
 ## Anatomy of every example
 
@@ -143,8 +144,8 @@ Quick lookup: which example demonstrates each BPMN construct.
 | Compensation | <ul><li>[error-compensation](examples/error-compensation)</li><li>[travel-booking](examples/use-cases/travel-booking)</li></ul> | Manual throw (error-compensation) vs. transaction-driven (travel-booking) |
 | **Transaction subprocess** | **[travel-booking](examples/use-cases/travel-booking)** | All-or-nothing SAGA; cancel end event triggers auto-compensation |
 | **Cancel event (end + boundary)** | **[travel-booking](examples/use-cases/travel-booking)** | Cancel end event inside transaction + cancel boundary on transaction |
-| Multi-instance | [multi-instance](examples/multi-instance) | Sequential and parallel sub-tasks |
-| Call activity | [call-activity](examples/call-activity) | Sub-process reuse across definitions |
+| Multi-instance | <ul><li>[multi-instance](examples/multi-instance)</li><li>[employee-onboarding](examples/use-cases/employee-onboarding)</li></ul> | Sequential and parallel sub-tasks; collection-driven parallel MI call activity |
+| **Call activity** | <ul><li>[call-activity](examples/call-activity)</li><li>[employee-onboarding](examples/use-cases/employee-onboarding)</li></ul> | Sub-process reuse, in/out variable mapping, parallel multi-instance over collection |
 | Event sub-process | [event-subprocess](examples/event-subprocess) | Error- and message-triggered |
 | External task | [external-task-worker](examples/external-task-worker) | Worker API, long polling |
 | Async continuation | [async-continuation](examples/async-continuation) | `asyncBefore`, exclusive job lock |

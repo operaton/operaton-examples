@@ -1499,3 +1499,45 @@ examples:
       - examples/use-cases/complaint-resolution/src/main/resources/complaint-resolution.png
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/complaint-resolution/README.md"
     lastUpdated: "2026-06-22"
+
+  - id: employee-onboarding
+    title: "Use Case — Employee Onboarding"
+    icon: "🧑‍💼"
+    path: examples/use-cases/employee-onboarding
+    shortDescription: >
+      Call activity process composition: a parent orchestrates two reusable child definitions,
+      including a parallel multi-instance call activity for concurrent equipment provisioning.
+    longDescription: |
+      A new hire triggers the employee-onboarding parent process. Three BPMN process definitions
+      collaborate:
+
+      - **employee-onboarding** (parent) — orchestrates via two call activities
+      - **provision-equipment** (child 1, parallel multi-instance) — runs once per equipment item
+      - **grant-system-access** (child 2, single) — grants or denies access based on role
+
+      Two execution paths:
+      - **Happy path** — equipment provisioned and access granted: ends at "Onboarded"
+      - **Restricted role** — access denied: ends at "Manual remediation", `itReviewRequired = true`
+
+      Demonstrates: `calledElement` by key, `operaton:in` / `operaton:out` variable mapping,
+      `multiInstanceLoopCharacteristics` with `operaton:collection` / `operaton:elementVariable`,
+      and `superProcessInstanceId` history queries to verify child invocation count.
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: intermediate
+    tags:
+      - { label: "Call Activity", category: concept }
+      - { label: "Multi-Instance", category: concept }
+      - { label: "Process Composition", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [call-activity, multi-instance-parallel, exclusive-gateway]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    screenshots:
+      - examples/use-cases/employee-onboarding/src/main/resources/employee-onboarding.png
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/employee-onboarding/README.md"
+    lastUpdated: "2026-06-22"
