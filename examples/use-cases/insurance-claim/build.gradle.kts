@@ -23,7 +23,7 @@ val operatonVersion = "2.1.1"
 dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
     implementation(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
-    implementation(platform("org.testcontainers:testcontainers-bom:2.0.5"))
+    testImplementation(platform("org.testcontainers:testcontainers-bom:2.0.5"))
 
     implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-webapp")
     implementation("org.springframework.boot:spring-boot-starter-web")
