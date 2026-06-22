@@ -26,6 +26,12 @@ jobs:
       - name: Install bpmn-to-image
         run: npm install -g bpmn-to-image
 
+      # Ubuntu 24.04 (ubuntu-latest) restricts unprivileged user namespaces via
+      # AppArmor, which breaks Chromium's sandbox used by bpmn-to-image/Puppeteer.
+      # Lift the restriction so the sandbox launches normally.
+      - name: Allow unprivileged user namespaces (Chromium sandbox)
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
       - name: Render BPMN files to PNG
         run: bash scripts/render-bpmn.sh
 
