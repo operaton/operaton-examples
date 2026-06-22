@@ -103,10 +103,10 @@
       <bpmn:sequenceFlow id="Flow_Hotel_Car" sourceRef="Task_ReserveHotel" targetRef="Task_ReserveCar"/>
       <bpmn:sequenceFlow id="Flow_Car_Payment" sourceRef="Task_ReserveCar" targetRef="Task_ChargePayment"/>
       <bpmn:sequenceFlow id="Flow_Payment_GW" sourceRef="Task_ChargePayment" targetRef="Gateway_PaymentApproved"/>
-      <bpmn:sequenceFlow id="Flow_GW_Approved" sourceRef="Gateway_PaymentApproved" targetRef="EndEvent_TxSuccess">
+      <bpmn:sequenceFlow id="Flow_GW_Approved" name="within budget" sourceRef="Gateway_PaymentApproved" targetRef="EndEvent_TxSuccess">
         <bpmn:conditionExpression>${paymentApproved}</bpmn:conditionExpression>
       </bpmn:sequenceFlow>
-      <bpmn:sequenceFlow id="Flow_GW_Declined" sourceRef="Gateway_PaymentApproved" targetRef="EndEvent_TxCancelled"/>
+      <bpmn:sequenceFlow id="Flow_GW_Declined" name="over budget" sourceRef="Gateway_PaymentApproved" targetRef="EndEvent_TxCancelled"/>
 
       <!-- Compensation associations -->
       <bpmn:association id="Assoc_Flight" sourceRef="Boundary_CompFlight" targetRef="Task_CancelFlight" associationDirection="One"/>
