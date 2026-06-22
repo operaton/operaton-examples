@@ -125,47 +125,47 @@ Quick lookup: which example demonstrates each BPMN construct.
 
 | BPMN Concept | Example(s) | Notes |
 |---|---|---|
-| Service task | getting-started, service-tasks | Java delegate, Spring bean, expression |
-| User task | user-task-forms | Forms, candidate groups |
-| Script task | service-tasks | JavaScript / Groovy inline |
-| Business rule task (DMN) | dmn-decision, insurance-claim | FEEL expressions, hit policies |
-| Exclusive gateway (XOR) | getting-started, dmn-decision | Default flow, condition expressions |
-| **Parallel gateway (AND)** | **insurance-claim** | AND-split / AND-join, concurrent branches |
-| **Event-based gateway** | **insurance-claim** | Race between message and timer |
-| Inclusive gateway (OR) | inclusive-gateway | OR-split / OR-join |
-| Message start event | message-events | Start by message correlation |
-| Timer start event | timer-events | Cron, cycle, duration |
-| Message intermediate catch | message-events, insurance-claim | Correlation by business key |
-| Timer intermediate catch | timer-events, insurance-claim | ISO-8601 duration variable |
-| Signal intermediate catch/throw | signal-events | Broadcast signal |
-| Error boundary event | error-compensation | Interrupting and non-interrupting |
-| Compensation | error-compensation, travel-booking | Manual throw (error-compensation) vs. transaction-driven (travel-booking) |
-| **Transaction subprocess** | **travel-booking** | All-or-nothing SAGA; cancel end event triggers auto-compensation |
-| **Cancel event (end + boundary)** | **travel-booking** | Cancel end event inside transaction + cancel boundary on transaction |
-| Multi-instance | multi-instance | Sequential and parallel sub-tasks |
-| Call activity | call-activity | Sub-process reuse across definitions |
-| Event sub-process | event-subprocess | Error- and message-triggered |
-| External task | external-task-worker | Worker API, long polling |
-| Async continuation | async-continuation | `asyncBefore`, exclusive job lock |
+| Service task | <ul><li>[getting-started](examples/getting-started)</li><li>[service-tasks](examples/service-tasks)</li></ul> | Java delegate, Spring bean, expression |
+| User task | [user-task-forms](examples/user-task-forms) | Forms, candidate groups |
+| Script task | [service-tasks](examples/service-tasks) | JavaScript / Groovy inline |
+| Business rule task (DMN) | <ul><li>[dmn-decision](examples/dmn-decision)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul> | FEEL expressions, hit policies |
+| Exclusive gateway (XOR) | <ul><li>[getting-started](examples/getting-started)</li><li>[dmn-decision](examples/dmn-decision)</li></ul> | Default flow, condition expressions |
+| **Parallel gateway (AND)** | **[insurance-claim](examples/use-cases/insurance-claim)** | AND-split / AND-join, concurrent branches |
+| **Event-based gateway** | **[insurance-claim](examples/use-cases/insurance-claim)** | Race between message and timer |
+| Inclusive gateway (OR) | [inclusive-gateway](examples/inclusive-gateway) | OR-split / OR-join |
+| Message start event | [message-events](examples/message-events) | Start by message correlation |
+| Timer start event | [timer-events](examples/timer-events) | Cron, cycle, duration |
+| Message intermediate catch | <ul><li>[message-events](examples/message-events)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul> | Correlation by business key |
+| Timer intermediate catch | <ul><li>[timer-events](examples/timer-events)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul> | ISO-8601 duration variable |
+| Signal intermediate catch/throw | [signal-events](examples/signal-events) | Broadcast signal |
+| Error boundary event | [error-compensation](examples/error-compensation) | Interrupting and non-interrupting |
+| Compensation | <ul><li>[error-compensation](examples/error-compensation)</li><li>[travel-booking](examples/use-cases/travel-booking)</li></ul> | Manual throw (error-compensation) vs. transaction-driven (travel-booking) |
+| **Transaction subprocess** | **[travel-booking](examples/use-cases/travel-booking)** | All-or-nothing SAGA; cancel end event triggers auto-compensation |
+| **Cancel event (end + boundary)** | **[travel-booking](examples/use-cases/travel-booking)** | Cancel end event inside transaction + cancel boundary on transaction |
+| Multi-instance | [multi-instance](examples/multi-instance) | Sequential and parallel sub-tasks |
+| Call activity | [call-activity](examples/call-activity) | Sub-process reuse across definitions |
+| Event sub-process | [event-subprocess](examples/event-subprocess) | Error- and message-triggered |
+| External task | [external-task-worker](examples/external-task-worker) | Worker API, long polling |
+| Async continuation | [async-continuation](examples/async-continuation) | `asyncBefore`, exclusive job lock |
 
 ### Integrations
 
 | Integration | Example(s) |
 |---|---|
-| REST (Spring WebClient) | integration-rest |
-| Mail (Jakarta Mail) | integration-mail |
-| Kafka | integration-kafka |
-| Operaton Connectors | integration-connectors |
-| Micrometer / Prometheus | approval-sla-metrics |
+| REST (Spring WebClient) | [integration-rest](examples/integration-rest) |
+| Mail (Jakarta Mail) | [integration-mail](examples/integration-mail) |
+| Kafka | [integration-kafka](examples/integration-kafka) |
+| Operaton Connectors | [integration-connectors](examples/integration-connectors) |
+| Micrometer / Prometheus | [approval-sla-metrics](examples/approval-sla-metrics) |
 
 ### Platforms / Runtimes
 
 | Platform | Example(s) |
 |---|---|
-| Spring Boot (embedded) | getting-started, all use-cases, approval-sla-metrics, … |
-| Quarkus (embedded) | runtime-quarkus |
-| Tomcat (shared engine) | distribution-tomcat |
-| WildFly (shared engine) | distribution-wildfly |
+| Spring Boot (embedded) | <ul><li>[getting-started](examples/getting-started)</li><li>all [use-cases](examples/use-cases)</li><li>[approval-sla-metrics](examples/approval-sla-metrics)</li><li>…</li></ul> |
+| Quarkus (embedded) | [runtime-quarkus](examples/runtime-quarkus) |
+| Tomcat (shared engine) | [distribution-tomcat](examples/distribution-tomcat) |
+| WildFly (shared engine) | [distribution-wildfly](examples/distribution-wildfly) |
 | Flowset Control + SSO (Keycloak) | operaton-example-projects / operaton-flowset-sso |
 
 ## License
