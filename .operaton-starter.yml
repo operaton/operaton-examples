@@ -1558,8 +1558,10 @@ examples:
       - **correlateStartMessage()** — starts a supplier instance from the buyer's send task
       - **processInstanceVariableEquals()** — routes QuoteResponse and OrderDecision to the correct
         counterpart using `requestId` as the correlation key
-      - **asyncBefore on three events** — decouples each message hop so neither process drives the
-        other synchronously (avoids re-entrancy in the job executor)
+      - **asyncBefore on supplier start event** — `correlateStartMessage()` returns before the supplier
+        runs; **asyncAfter on buyer catch event** — buyer's EvaluateQuote+SendOrderDecision runs as a
+        separate job after the supplier has already registered its OrderDecision subscription (eliminates
+        the correlation timing race)
       - **Exclusive gateway** — supplier routes on `${accepted}` to either reserve stock or release the quote
 
       Four integration tests prove: deployment, within-budget (order placed + stock reserved),
