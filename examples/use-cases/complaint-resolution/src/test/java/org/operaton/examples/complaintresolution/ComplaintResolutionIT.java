@@ -90,6 +90,14 @@ class ComplaintResolutionIT {
             assertThat(historic.getEndActivityId()).isEqualTo("EndEvent_RefundApproved");
         });
 
+        // also verify that the normal subprocess completion path ran concurrently
+        org.operaton.bpm.engine.history.HistoricActivityInstance closedEnd = historyService
+            .createHistoricActivityInstanceQuery()
+            .processInstanceId(pi.getId())
+            .activityId("EndEvent_ComplaintResolved")
+            .singleResult();
+        assertThat(closedEnd).as("EndEvent_ComplaintResolved should have been reached (non-interrupting: subprocess runs to completion)").isNotNull();
+
         // Manager-approval path must have run
         var refundApproved = historyService.createHistoricVariableInstanceQuery()
             .processInstanceId(pi.getId()).variableName("refundApproved").singleResult();

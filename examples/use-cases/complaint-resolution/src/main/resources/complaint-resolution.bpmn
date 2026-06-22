@@ -37,7 +37,7 @@
         <bpmn:outgoing>Flow_Assess_GW_Severity</bpmn:outgoing>
       </bpmn:serviceTask>
 
-      <bpmn:exclusiveGateway id="Gateway_Severity" name="Severity?">
+      <bpmn:exclusiveGateway id="Gateway_Severity" name="Severity?" default="Flow_GW_LowSeverity">
         <bpmn:incoming>Flow_Assess_GW_Severity</bpmn:incoming>
         <bpmn:outgoing>Flow_GW_HighSeverity</bpmn:outgoing>
         <bpmn:outgoing>Flow_GW_LowSeverity</bpmn:outgoing>
@@ -48,7 +48,7 @@
         <bpmn:escalationEventDefinition escalationRef="Escalation_HighSeverity" />
       </bpmn:endEvent>
 
-      <bpmn:exclusiveGateway id="Gateway_RefundAuthority" name="Refund within authority?">
+      <bpmn:exclusiveGateway id="Gateway_RefundAuthority" name="Refund within authority?" default="Flow_GW_WithinAuthority">
         <bpmn:incoming>Flow_GW_LowSeverity</bpmn:incoming>
         <bpmn:outgoing>Flow_GW_WithinAuthority</bpmn:outgoing>
         <bpmn:outgoing>Flow_GW_ExceedsAuthority</bpmn:outgoing>
@@ -85,14 +85,10 @@
       </bpmn:sequenceFlow>
       <bpmn:sequenceFlow id="Flow_GW_LowSeverity" name="low / medium"
                          sourceRef="Gateway_Severity"
-                         targetRef="Gateway_RefundAuthority">
-        <bpmn:conditionExpression>${severity != "high"}</bpmn:conditionExpression>
-      </bpmn:sequenceFlow>
+                         targetRef="Gateway_RefundAuthority" />
       <bpmn:sequenceFlow id="Flow_GW_WithinAuthority" name="within authority"
                          sourceRef="Gateway_RefundAuthority"
-                         targetRef="Task_ResolveComplaint">
-        <bpmn:conditionExpression>${refundWithinAuthority == true}</bpmn:conditionExpression>
-      </bpmn:sequenceFlow>
+                         targetRef="Task_ResolveComplaint" />
       <bpmn:sequenceFlow id="Flow_GW_ExceedsAuthority" name="exceeds authority"
                          sourceRef="Gateway_RefundAuthority"
                          targetRef="ThrowEscalation_RefundApproval">
