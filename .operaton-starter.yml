@@ -1374,3 +1374,87 @@ examples:
     license: "Apache-2.0"
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/order-fulfillment/README.md"
     lastUpdated: "2026-06-15"
+
+  - id: insurance-claim
+    title: "Use Case — Insurance Claim"
+    icon: "🏥"
+    path: examples/use-cases/insurance-claim
+    shortDescription: >
+      Insurance damage claim with event-based gateway racing message vs timer,
+      parallel fraud check and damage appraisal, and DMN settlement decision.
+    longDescription: |
+      An insurance company processes a damage claim: requests supporting documents,
+      then races a message event (documents received) against a timer (submission deadline)
+      via an event-based gateway.
+
+      If documents arrive in time, two parallel service tasks run concurrently — a fraud
+      check and a damage appraisal — before a DMN table determines settlement.
+
+      - **Event-based gateway** — first coverage in the catalog; models a race between a
+        message correlation and a timer expiry
+      - **Parallel gateway (AND-split / AND-join)** — concurrent fraud check and damage
+        appraisal; also first in the catalog
+      - **Message correlation by business key** — `correlateMessage("documentsReceived", claimNumber)`
+      - **DMN FIRST hit policy with FEEL outputs** — `appraisedAmount * 0.8` in output entries
+      - **ISO-8601 timer from process variable** — `${documentDeadline}` in `timeDuration`
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: intermediate
+    tags:
+      - { label: "Insurance", category: concept }
+      - { label: "Event-Based GW", category: concept }
+      - { label: "Parallel GW", category: concept }
+      - { label: "DMN FIRST", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [event-based-gateway, parallel-gateway, message-intermediate-catch, timer-intermediate-catch, business-rule-task, exclusive-gateway]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    screenshots:
+      - examples/use-cases/insurance-claim/src/main/resources/insurance-claim.png
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/insurance-claim/README.md"
+    lastUpdated: "2026-06-22"
+
+  - id: travel-booking
+    title: "Use Case — Travel Booking SAGA"
+    icon: "✈️"
+    path: examples/use-cases/travel-booking
+    shortDescription: >
+      BPMN transaction subprocess with cancel end event and cancel boundary event —
+      all-or-nothing flight, hotel, and car booking with automatic compensation rollback.
+    longDescription: |
+      A customer books a trip as a BPMN transaction subprocess: flight → hotel → car are
+      reserved sequentially, then payment is charged. If the total exceeds the customer's
+      budget, a cancel end event fires — the engine automatically compensates every
+      completed reservation (flight, hotel, car all cancelled) and routes to a "Trip
+      cancelled" outcome via the cancel boundary event.
+
+      - **Transaction subprocess** — first coverage in the catalog; models an all-or-nothing SAGA
+      - **Cancel end event** — fires when payment is declined; implicitly triggers transaction cancellation
+      - **Cancel boundary event** — attached to the outer transaction; routes the cancelled outcome
+      - **Compensation boundary events** — auto-fired by the cancel; no manual throw needed
+      - Distinct from `error-compensation`: that example uses a flat process with a manual
+        intermediate compensation throw; this example uses the BPMN transaction construct itself
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: intermediate
+    tags:
+      - { label: "SAGA", category: concept }
+      - { label: "Transaction", category: concept }
+      - { label: "Cancel Event", category: concept }
+      - { label: "Compensation", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [transaction-subprocess, cancel-end-event, cancel-boundary-event, compensation-boundary-event, exclusive-gateway]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    screenshots:
+      - examples/use-cases/travel-booking/src/main/resources/travel-booking.png
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/travel-booking/README.md"
+    lastUpdated: "2026-06-22"

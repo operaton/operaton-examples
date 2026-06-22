@@ -17,12 +17,17 @@ fi
 pattern="${1:-}"
 root="$(cd "$(dirname "$0")/.." && pwd)"
 count=0
+# Ubuntu 24.04+ (GitHub Actions ubuntu-latest) disables unprivileged user namespaces via AppArmor,
+# which breaks Chromium's sandbox. Pass --no-sandbox when running in CI.
+sandbox_flag=""
+[[ "${CI:-}" == "true" ]] && sandbox_flag="--no-sandbox"
 
 while IFS= read -r bpmn; do
   [[ -n "$pattern" && "$bpmn" != *"$pattern"* ]] && continue
   png="${bpmn%.bpmn}.png"
   echo "  → ${bpmn#"$root/"}"
-  bpmn-to-image "$bpmn:$png"
+  # shellcheck disable=SC2086
+  bpmn-to-image $sandbox_flag "$bpmn:$png"
   count=$((count + 1))
 done < <(find "$root" \
   -name "*.bpmn" \

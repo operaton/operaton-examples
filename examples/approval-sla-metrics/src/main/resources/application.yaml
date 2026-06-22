@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: approval-sla-metrics
+  datasource:
+    url: jdbc:postgresql://localhost:5432/operaton
+    username: operaton
+    password: operaton
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    tags:
+      application: approval-sla-metrics
+    distribution:
+      percentiles-histogram:
+        approval_wait_seconds: true
+
+operaton:
+  bpm:
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    filter:
+      create: All tasks
+
+demo:
+  load-generator:
+    enabled: true

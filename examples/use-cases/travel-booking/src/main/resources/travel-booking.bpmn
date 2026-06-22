@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_TravelBooking"
+                  targetNamespace="http://operaton.org/examples/travel-booking">
+
+  <bpmn:process id="travel-booking"
+                name="Travel Booking"
+                isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <!-- ── Outer process start ── -->
+    <bpmn:startEvent id="StartEvent_TripRequested" name="Trip requested">
+      <bpmn:outgoing>Flow_Start_Transaction</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- ── Transaction subprocess ── -->
+    <bpmn:transaction id="Transaction_BookTrip" name="Book trip">
+      <bpmn:incoming>Flow_Start_Transaction</bpmn:incoming>
+      <bpmn:outgoing>Flow_Transaction_Confirm</bpmn:outgoing>
+
+      <!-- Inner start -->
+      <bpmn:startEvent id="StartEvent_TxBegin" name="Booking started">
+        <bpmn:outgoing>Flow_TxStart_Flight</bpmn:outgoing>
+      </bpmn:startEvent>
+
+      <!-- Reserve flight -->
+      <bpmn:serviceTask id="Task_ReserveFlight" name="Reserve flight"
+                        operaton:delegateExpression="${reserveFlightDelegate}">
+        <bpmn:incoming>Flow_TxStart_Flight</bpmn:incoming>
+        <bpmn:outgoing>Flow_Flight_Hotel</bpmn:outgoing>
+      </bpmn:serviceTask>
+
+      <bpmn:boundaryEvent id="Boundary_CompFlight" attachedToRef="Task_ReserveFlight" cancelActivity="false">
+        <bpmn:compensateEventDefinition id="CompDef_Flight" waitForCompletion="true"/>
+      </bpmn:boundaryEvent>
+
+      <bpmn:serviceTask id="Task_CancelFlight" name="Cancel flight"
+                        isForCompensation="true"
+                        operaton:delegateExpression="${cancelFlightDelegate}"/>
+
+      <!-- Reserve hotel -->
+      <bpmn:serviceTask id="Task_ReserveHotel" name="Reserve hotel"
+                        operaton:delegateExpression="${reserveHotelDelegate}">
+        <bpmn:incoming>Flow_Flight_Hotel</bpmn:incoming>
+        <bpmn:outgoing>Flow_Hotel_Car</bpmn:outgoing>
+      </bpmn:serviceTask>
+
+      <bpmn:boundaryEvent id="Boundary_CompHotel" attachedToRef="Task_ReserveHotel" cancelActivity="false">
+        <bpmn:compensateEventDefinition id="CompDef_Hotel" waitForCompletion="true"/>
+      </bpmn:boundaryEvent>
+
+      <bpmn:serviceTask id="Task_CancelHotel" name="Cancel hotel"
+                        isForCompensation="true"
+                        operaton:delegateExpression="${cancelHotelDelegate}"/>
+
+      <!-- Reserve car -->
+      <bpmn:serviceTask id="Task_ReserveCar" name="Reserve car"
+                        operaton:delegateExpression="${reserveCarDelegate}">
+        <bpmn:incoming>Flow_Hotel_Car</bpmn:incoming>
+        <bpmn:outgoing>Flow_Car_Payment</bpmn:outgoing>
+      </bpmn:serviceTask>
+
+      <bpmn:boundaryEvent id="Boundary_CompCar" attachedToRef="Task_ReserveCar" cancelActivity="false">
+        <bpmn:compensateEventDefinition id="CompDef_Car" waitForCompletion="true"/>
+      </bpmn:boundaryEvent>
+
+      <bpmn:serviceTask id="Task_CancelCar" name="Cancel car"
+                        isForCompensation="true"
+                        operaton:delegateExpression="${cancelCarDelegate}"/>
+
+      <!-- Charge payment -->
+      <bpmn:serviceTask id="Task_ChargePayment" name="Charge payment"
+                        operaton:delegateExpression="${chargePaymentDelegate}">
+        <bpmn:incoming>Flow_Car_Payment</bpmn:incoming>
+        <bpmn:outgoing>Flow_Payment_GW</bpmn:outgoing>
+      </bpmn:serviceTask>
+
+      <!-- Payment gateway -->
+      <bpmn:exclusiveGateway id="Gateway_PaymentApproved" name="Payment approved?" default="Flow_GW_Declined">
+        <bpmn:incoming>Flow_Payment_GW</bpmn:incoming>
+        <bpmn:outgoing>Flow_GW_Approved</bpmn:outgoing>
+        <bpmn:outgoing>Flow_GW_Declined</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+
+      <!-- Normal end (transaction succeeds) -->
+      <bpmn:endEvent id="EndEvent_TxSuccess" name="Payment approved">
+        <bpmn:incoming>Flow_GW_Approved</bpmn:incoming>
+      </bpmn:endEvent>
+
+      <!-- Cancel end event (triggers transaction cancellation + auto-compensation) -->
+      <bpmn:endEvent id="EndEvent_TxCancelled" name="Payment declined">
+        <bpmn:incoming>Flow_GW_Declined</bpmn:incoming>
+        <bpmn:cancelEventDefinition id="CancelEventDef_End"/>
+      </bpmn:endEvent>
+
+      <!-- Inner sequence flows -->
+      <bpmn:sequenceFlow id="Flow_TxStart_Flight" sourceRef="StartEvent_TxBegin" targetRef="Task_ReserveFlight"/>
+      <bpmn:sequenceFlow id="Flow_Flight_Hotel" sourceRef="Task_ReserveFlight" targetRef="Task_ReserveHotel"/>
+      <bpmn:sequenceFlow id="Flow_Hotel_Car" sourceRef="Task_ReserveHotel" targetRef="Task_ReserveCar"/>
+      <bpmn:sequenceFlow id="Flow_Car_Payment" sourceRef="Task_ReserveCar" targetRef="Task_ChargePayment"/>
+      <bpmn:sequenceFlow id="Flow_Payment_GW" sourceRef="Task_ChargePayment" targetRef="Gateway_PaymentApproved"/>
+      <bpmn:sequenceFlow id="Flow_GW_Approved" name="within budget" sourceRef="Gateway_PaymentApproved" targetRef="EndEvent_TxSuccess">
+        <bpmn:conditionExpression>${paymentApproved}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+      <bpmn:sequenceFlow id="Flow_GW_Declined" name="over budget" sourceRef="Gateway_PaymentApproved" targetRef="EndEvent_TxCancelled"/>
+
+      <!-- Compensation associations -->
+      <bpmn:association id="Assoc_Flight" sourceRef="Boundary_CompFlight" targetRef="Task_CancelFlight" associationDirection="One"/>
+      <bpmn:association id="Assoc_Hotel" sourceRef="Boundary_CompHotel" targetRef="Task_CancelHotel" associationDirection="One"/>
+      <bpmn:association id="Assoc_Car" sourceRef="Boundary_CompCar" targetRef="Task_CancelCar" associationDirection="One"/>
+    </bpmn:transaction>
+
+    <!-- ── Cancel boundary event on the transaction (outside) ── -->
+    <bpmn:boundaryEvent id="Boundary_TransactionCancelled"
+                        attachedToRef="Transaction_BookTrip"
+                        cancelActivity="true">
+      <bpmn:outgoing>Flow_Cancel_Notify</bpmn:outgoing>
+      <bpmn:cancelEventDefinition id="CancelEventDef_Boundary"/>
+    </bpmn:boundaryEvent>
+
+    <!-- ── Happy path: confirmation ── -->
+    <bpmn:serviceTask id="Task_SendConfirmation" name="Send confirmation"
+                      operaton:delegateExpression="${sendConfirmationDelegate}">
+      <bpmn:incoming>Flow_Transaction_Confirm</bpmn:incoming>
+      <bpmn:outgoing>Flow_Confirm_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- ── Cancel path: notification ── -->
+    <bpmn:serviceTask id="Task_NotifyCancellation" name="Notify cancellation"
+                      operaton:delegateExpression="${notifyCancellationDelegate}">
+      <bpmn:incoming>Flow_Cancel_Notify</bpmn:incoming>
+      <bpmn:outgoing>Flow_Notify_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- ── End events ── -->
+    <bpmn:endEvent id="EndEvent_TripBooked" name="Trip booked">
+      <bpmn:incoming>Flow_Confirm_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_TripCancelled" name="Trip cancelled">
+      <bpmn:incoming>Flow_Notify_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- ── Outer sequence flows ── -->
+    <bpmn:sequenceFlow id="Flow_Start_Transaction" sourceRef="StartEvent_TripRequested" targetRef="Transaction_BookTrip"/>
+    <bpmn:sequenceFlow id="Flow_Transaction_Confirm" sourceRef="Transaction_BookTrip" targetRef="Task_SendConfirmation"/>
+    <bpmn:sequenceFlow id="Flow_Cancel_Notify" sourceRef="Boundary_TransactionCancelled" targetRef="Task_NotifyCancellation"/>
+    <bpmn:sequenceFlow id="Flow_Confirm_End" sourceRef="Task_SendConfirmation" targetRef="EndEvent_TripBooked"/>
+    <bpmn:sequenceFlow id="Flow_Notify_End" sourceRef="Task_NotifyCancellation" targetRef="EndEvent_TripCancelled"/>
+
+  </bpmn:process>
+
+  <!-- ── BPMN DI ── -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="travel-booking">
+
+      <!-- Outer start -->
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_TripRequested">
+        <dc:Bounds x="152" y="300" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="131" y="343" width="78" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Transaction subprocess (expanded) -->
+      <bpmndi:BPMNShape id="Shape_Transaction" bpmnElement="Transaction_BookTrip" isExpanded="true">
+        <dc:Bounds x="250" y="140" width="1000" height="420"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="690" y="152" width="120" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Inner start event -->
+      <bpmndi:BPMNShape id="Shape_TxStart" bpmnElement="StartEvent_TxBegin">
+        <dc:Bounds x="292" y="300" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="271" y="343" width="79" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Reserve flight -->
+      <bpmndi:BPMNShape id="Shape_ReserveFlight" bpmnElement="Task_ReserveFlight">
+        <dc:Bounds x="390" y="278" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_CompBoundaryFlight" bpmnElement="Boundary_CompFlight">
+        <dc:Bounds x="422" y="340" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_CancelFlight" bpmnElement="Task_CancelFlight">
+        <dc:Bounds x="390" y="430" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Reserve hotel -->
+      <bpmndi:BPMNShape id="Shape_ReserveHotel" bpmnElement="Task_ReserveHotel">
+        <dc:Bounds x="550" y="278" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_CompBoundaryHotel" bpmnElement="Boundary_CompHotel">
+        <dc:Bounds x="582" y="340" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_CancelHotel" bpmnElement="Task_CancelHotel">
+        <dc:Bounds x="550" y="430" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Reserve car -->
+      <bpmndi:BPMNShape id="Shape_ReserveCar" bpmnElement="Task_ReserveCar">
+        <dc:Bounds x="710" y="278" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_CompBoundaryCar" bpmnElement="Boundary_CompCar">
+        <dc:Bounds x="742" y="340" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_CancelCar" bpmnElement="Task_CancelCar">
+        <dc:Bounds x="710" y="430" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Charge payment -->
+      <bpmndi:BPMNShape id="Shape_ChargePayment" bpmnElement="Task_ChargePayment">
+        <dc:Bounds x="870" y="278" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Payment gateway -->
+      <bpmndi:BPMNShape id="Shape_GWPayment" bpmnElement="Gateway_PaymentApproved" isMarkerVisible="true">
+        <dc:Bounds x="1030" y="295" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1010" y="265" width="90" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Inner end events -->
+      <bpmndi:BPMNShape id="Shape_EndTxSuccess" bpmnElement="EndEvent_TxSuccess">
+        <dc:Bounds x="1152" y="302" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1126" y="345" width="88" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndTxCancelled" bpmnElement="EndEvent_TxCancelled">
+        <dc:Bounds x="1152" y="448" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1130" y="491" width="80" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Cancel boundary on transaction (outer) -->
+      <bpmndi:BPMNShape id="Shape_BoundaryTxCancelled" bpmnElement="Boundary_TransactionCancelled">
+        <dc:Bounds x="712" y="542" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="744" y="556" width="90" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Post-transaction: confirmation path -->
+      <bpmndi:BPMNShape id="Shape_SendConfirmation" bpmnElement="Task_SendConfirmation">
+        <dc:Bounds x="1320" y="278" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndTripBooked" bpmnElement="EndEvent_TripBooked">
+        <dc:Bounds x="1482" y="300" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1460" y="343" width="80" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Post-transaction: cancellation path -->
+      <bpmndi:BPMNShape id="Shape_NotifyCancellation" bpmnElement="Task_NotifyCancellation">
+        <dc:Bounds x="1320" y="500" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndTripCancelled" bpmnElement="EndEvent_TripCancelled">
+        <dc:Bounds x="1482" y="522" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1457" y="565" width="86" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Sequence flow edges (outer) -->
+      <bpmndi:BPMNEdge id="Edge_Start_Transaction" bpmnElement="Flow_Start_Transaction">
+        <di:waypoint x="188" y="318"/>
+        <di:waypoint x="250" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Transaction_Confirm" bpmnElement="Flow_Transaction_Confirm">
+        <di:waypoint x="1250" y="318"/>
+        <di:waypoint x="1320" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Cancel_Notify" bpmnElement="Flow_Cancel_Notify">
+        <di:waypoint x="748" y="560"/>
+        <di:waypoint x="1370" y="560"/>
+        <di:waypoint x="1370" y="580"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Confirm_End" bpmnElement="Flow_Confirm_End">
+        <di:waypoint x="1420" y="318"/>
+        <di:waypoint x="1482" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Notify_End" bpmnElement="Flow_Notify_End">
+        <di:waypoint x="1420" y="540"/>
+        <di:waypoint x="1482" y="540"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- Sequence flow edges (inner, inside transaction) -->
+      <bpmndi:BPMNEdge id="Edge_TxStart_Flight" bpmnElement="Flow_TxStart_Flight">
+        <di:waypoint x="328" y="318"/>
+        <di:waypoint x="390" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flight_Hotel" bpmnElement="Flow_Flight_Hotel">
+        <di:waypoint x="490" y="318"/>
+        <di:waypoint x="550" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Hotel_Car" bpmnElement="Flow_Hotel_Car">
+        <di:waypoint x="650" y="318"/>
+        <di:waypoint x="710" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Car_Payment" bpmnElement="Flow_Car_Payment">
+        <di:waypoint x="810" y="318"/>
+        <di:waypoint x="870" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Payment_GW" bpmnElement="Flow_Payment_GW">
+        <di:waypoint x="970" y="318"/>
+        <di:waypoint x="1030" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_GW_Approved" bpmnElement="Flow_GW_Approved">
+        <di:waypoint x="1080" y="320"/>
+        <di:waypoint x="1152" y="320"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1090" y="302" width="50" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_GW_Declined" bpmnElement="Flow_GW_Declined">
+        <di:waypoint x="1055" y="345"/>
+        <di:waypoint x="1055" y="466"/>
+        <di:waypoint x="1152" y="466"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1060" y="398" width="50" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+
+      <!-- Compensation associations (no edge waypoints needed — just define the association edge) -->
+      <bpmndi:BPMNEdge id="Edge_Assoc_Flight" bpmnElement="Assoc_Flight">
+        <di:waypoint x="440" y="376"/>
+        <di:waypoint x="440" y="430"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Hotel" bpmnElement="Assoc_Hotel">
+        <di:waypoint x="600" y="376"/>
+        <di:waypoint x="600" y="430"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Car" bpmnElement="Assoc_Car">
+        <di:waypoint x="760" y="376"/>
+        <di:waypoint x="760" y="430"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

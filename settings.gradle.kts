@@ -34,7 +34,10 @@ include(
   "examples:use-cases:leave-request",
   "examples:use-cases:loan-application",
   "examples:use-cases:incident-management",
-  "examples:use-cases:order-fulfillment"
+  "examples:use-cases:order-fulfillment",
+  "examples:use-cases:insurance-claim",
+  "examples:use-cases:travel-booking",
+  "examples:approval-sla-metrics"
 )
 
 project(":examples:getting-started").projectDir = file("examples/getting-started")
@@ -71,3 +74,6 @@ project(":examples:use-cases:leave-request").projectDir = file("examples/use-cas
 project(":examples:use-cases:loan-application").projectDir = file("examples/use-cases/loan-application")
 project(":examples:use-cases:incident-management").projectDir = file("examples/use-cases/incident-management")
 project(":examples:use-cases:order-fulfillment").projectDir = file("examples/use-cases/order-fulfillment")
+project(":examples:use-cases:insurance-claim").projectDir = file("examples/use-cases/insurance-claim")
+project(":examples:use-cases:travel-booking").projectDir = file("examples/use-cases/travel-booking")
+project(":examples:approval-sla-metrics").projectDir = file("examples/approval-sla-metrics")

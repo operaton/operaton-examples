@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="Definitions_InsuranceClaim"
+                  targetNamespace="http://operaton.org/examples/insurance-claim">
+
+  <bpmn:message id="Message_DocumentsReceived" name="documentsReceived"/>
+
+  <bpmn:process id="insurance-claim"
+                name="Insurance Claim"
+                isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <!-- ── Start ── -->
+    <bpmn:startEvent id="StartEvent_ClaimSubmitted" name="Claim submitted">
+      <bpmn:outgoing>Flow_Start_RequestDocs</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- ── Request supporting documents ── -->
+    <bpmn:serviceTask id="Task_RequestDocuments"
+                      name="Request supporting documents"
+                      operaton:delegateExpression="${requestDocumentsDelegate}">
+      <bpmn:incoming>Flow_Start_RequestDocs</bpmn:incoming>
+      <bpmn:outgoing>Flow_RequestDocs_Gateway</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- ── Event-based gateway ── -->
+    <bpmn:eventBasedGateway id="Gateway_AwaitDocuments" name="Await documents">
+      <bpmn:incoming>Flow_RequestDocs_Gateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_Gateway_Message</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Gateway_Timer</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+
+    <!-- ── Message: Documents received ── -->
+    <bpmn:intermediateCatchEvent id="Event_DocumentsReceived" name="Documents received">
+      <bpmn:incoming>Flow_Gateway_Message</bpmn:incoming>
+      <bpmn:outgoing>Flow_Message_Split</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageDef_DocumentsReceived"
+                                   messageRef="Message_DocumentsReceived"/>
+    </bpmn:intermediateCatchEvent>
+
+    <!-- ── Timer: Submission deadline ── -->
+    <bpmn:intermediateCatchEvent id="Event_DeadlineExpired" name="Submission deadline">
+      <bpmn:incoming>Flow_Gateway_Timer</bpmn:incoming>
+      <bpmn:outgoing>Flow_Timer_Close</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerDef_Deadline">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">${documentDeadline}</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+
+    <!-- ── Timeout path ── -->
+    <bpmn:serviceTask id="Task_CloseIncompleteClaim"
+                      name="Close incomplete claim"
+                      operaton:delegateExpression="${closeIncompleteClaimDelegate}">
+      <bpmn:incoming>Flow_Timer_Close</bpmn:incoming>
+      <bpmn:outgoing>Flow_Close_EndClosed</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_ClaimClosed" name="Claim closed — documents not received">
+      <bpmn:incoming>Flow_Close_EndClosed</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- ── Parallel gateway: AND-split ── -->
+    <bpmn:parallelGateway id="Gateway_AssessmentSplit" name="Run assessments">
+      <bpmn:incoming>Flow_Message_Split</bpmn:incoming>
+      <bpmn:outgoing>Flow_Split_Fraud</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Split_Appraise</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <!-- ── Fraud check (branch 1) ── -->
+    <bpmn:serviceTask id="Task_FraudCheck"
+                      name="Fraud check"
+                      operaton:delegateExpression="${fraudCheckDelegate}">
+      <bpmn:incoming>Flow_Split_Fraud</bpmn:incoming>
+      <bpmn:outgoing>Flow_Fraud_Join</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- ── Appraise damage (branch 2) ── -->
+    <bpmn:serviceTask id="Task_AppraiseDamage"
+                      name="Appraise damage"
+                      operaton:delegateExpression="${appraiseDamageDelegate}">
+      <bpmn:incoming>Flow_Split_Appraise</bpmn:incoming>
+      <bpmn:outgoing>Flow_Appraise_Join</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- ── Parallel gateway: AND-join ── -->
+    <bpmn:parallelGateway id="Gateway_AssessmentJoin">
+      <bpmn:incoming>Flow_Fraud_Join</bpmn:incoming>
+      <bpmn:incoming>Flow_Appraise_Join</bpmn:incoming>
+      <bpmn:outgoing>Flow_Join_Settlement</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <!-- ── Business rule task: DMN settlement ── -->
+    <bpmn:businessRuleTask id="Task_DetermineSettlement"
+                           name="Determine settlement"
+                           operaton:decisionRef="claim-settlement"
+                           operaton:resultVariable="claimDecision"
+                           operaton:mapDecisionResult="singleResult">
+      <bpmn:incoming>Flow_Join_Settlement</bpmn:incoming>
+      <bpmn:outgoing>Flow_Settlement_Approved</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+
+    <!-- ── Exclusive gateway ── -->
+    <bpmn:exclusiveGateway id="Gateway_Approved" name="Approved?" default="Flow_Approved_Rejected">
+      <bpmn:incoming>Flow_Settlement_Approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_Approved_Settled</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Approved_Rejected</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- ── End events ── -->
+    <bpmn:endEvent id="EndEvent_ClaimSettled" name="Claim settled">
+      <bpmn:incoming>Flow_Approved_Settled</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_ClaimRejected" name="Claim rejected">
+      <bpmn:incoming>Flow_Approved_Rejected</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- ── Sequence flows ── -->
+    <bpmn:sequenceFlow id="Flow_Start_RequestDocs"
+                       sourceRef="StartEvent_ClaimSubmitted"
+                       targetRef="Task_RequestDocuments"/>
+    <bpmn:sequenceFlow id="Flow_RequestDocs_Gateway"
+                       sourceRef="Task_RequestDocuments"
+                       targetRef="Gateway_AwaitDocuments"/>
+    <bpmn:sequenceFlow id="Flow_Gateway_Message"
+                       name="Documents received"
+                       sourceRef="Gateway_AwaitDocuments"
+                       targetRef="Event_DocumentsReceived"/>
+    <bpmn:sequenceFlow id="Flow_Gateway_Timer"
+                       name="Submission deadline"
+                       sourceRef="Gateway_AwaitDocuments"
+                       targetRef="Event_DeadlineExpired"/>
+    <bpmn:sequenceFlow id="Flow_Message_Split"
+                       sourceRef="Event_DocumentsReceived"
+                       targetRef="Gateway_AssessmentSplit"/>
+    <bpmn:sequenceFlow id="Flow_Timer_Close"
+                       sourceRef="Event_DeadlineExpired"
+                       targetRef="Task_CloseIncompleteClaim"/>
+    <bpmn:sequenceFlow id="Flow_Close_EndClosed"
+                       sourceRef="Task_CloseIncompleteClaim"
+                       targetRef="EndEvent_ClaimClosed"/>
+    <bpmn:sequenceFlow id="Flow_Split_Fraud"
+                       sourceRef="Gateway_AssessmentSplit"
+                       targetRef="Task_FraudCheck"/>
+    <bpmn:sequenceFlow id="Flow_Split_Appraise"
+                       sourceRef="Gateway_AssessmentSplit"
+                       targetRef="Task_AppraiseDamage"/>
+    <bpmn:sequenceFlow id="Flow_Fraud_Join"
+                       sourceRef="Task_FraudCheck"
+                       targetRef="Gateway_AssessmentJoin"/>
+    <bpmn:sequenceFlow id="Flow_Appraise_Join"
+                       sourceRef="Task_AppraiseDamage"
+                       targetRef="Gateway_AssessmentJoin"/>
+    <bpmn:sequenceFlow id="Flow_Join_Settlement"
+                       sourceRef="Gateway_AssessmentJoin"
+                       targetRef="Task_DetermineSettlement"/>
+    <bpmn:sequenceFlow id="Flow_Settlement_Approved"
+                       sourceRef="Task_DetermineSettlement"
+                       targetRef="Gateway_Approved"/>
+    <bpmn:sequenceFlow id="Flow_Approved_Settled"
+                       name="approve"
+                       sourceRef="Gateway_Approved"
+                       targetRef="EndEvent_ClaimSettled">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${claimDecision.settlementDecision == "approve"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Approved_Rejected"
+                       name="otherwise"
+                       sourceRef="Gateway_Approved"
+                       targetRef="EndEvent_ClaimRejected"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="insurance-claim">
+
+      <!-- Start -->
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_ClaimSubmitted">
+        <dc:Bounds x="152" y="92" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="134" y="135" width="73" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Request documents -->
+      <bpmndi:BPMNShape id="Shape_RequestDocs" bpmnElement="Task_RequestDocuments">
+        <dc:Bounds x="240" y="70" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Event-based gateway -->
+      <bpmndi:BPMNShape id="Shape_EBG" bpmnElement="Gateway_AwaitDocuments" isMarkerVisible="true">
+        <dc:Bounds x="395" y="85" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="378" y="142" width="85" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Message catch -->
+      <bpmndi:BPMNShape id="Shape_MsgCatch" bpmnElement="Event_DocumentsReceived">
+        <dc:Bounds x="502" y="52" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="480" y="95" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Timer catch -->
+      <bpmndi:BPMNShape id="Shape_TimerCatch" bpmnElement="Event_DeadlineExpired">
+        <dc:Bounds x="502" y="152" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="478" y="195" width="86" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Parallel split -->
+      <bpmndi:BPMNShape id="Shape_Split" bpmnElement="Gateway_AssessmentSplit">
+        <dc:Bounds x="595" y="45" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="575" y="102" width="92" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- FraudCheck -->
+      <bpmndi:BPMNShape id="Shape_FraudCheck" bpmnElement="Task_FraudCheck">
+        <dc:Bounds x="710" y="20" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- AppraiseDamage -->
+      <bpmndi:BPMNShape id="Shape_Appraise" bpmnElement="Task_AppraiseDamage">
+        <dc:Bounds x="710" y="120" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Parallel join -->
+      <bpmndi:BPMNShape id="Shape_Join" bpmnElement="Gateway_AssessmentJoin">
+        <dc:Bounds x="875" y="45" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Business rule task -->
+      <bpmndi:BPMNShape id="Shape_BRT" bpmnElement="Task_DetermineSettlement">
+        <dc:Bounds x="990" y="30" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Exclusive gateway -->
+      <bpmndi:BPMNShape id="Shape_XOR" bpmnElement="Gateway_Approved" isMarkerVisible="true">
+        <dc:Bounds x="1155" y="45" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1153" y="102" width="55" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- End: Claim settled -->
+      <bpmndi:BPMNShape id="Shape_EndSettled" bpmnElement="EndEvent_ClaimSettled">
+        <dc:Bounds x="1272" y="22" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1254" y="65" width="72" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- End: Claim rejected -->
+      <bpmndi:BPMNShape id="Shape_EndRejected" bpmnElement="EndEvent_ClaimRejected">
+        <dc:Bounds x="1272" y="122" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1254" y="165" width="73" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Close claim -->
+      <bpmndi:BPMNShape id="Shape_Close" bpmnElement="Task_CloseIncompleteClaim">
+        <dc:Bounds x="595" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- End: Claim closed -->
+      <bpmndi:BPMNShape id="Shape_EndClosed" bpmnElement="EndEvent_ClaimClosed">
+        <dc:Bounds x="757" y="282" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="730" y="325" width="91" height="40"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Edges -->
+      <bpmndi:BPMNEdge id="Edge_Start_Request" bpmnElement="Flow_Start_RequestDocs">
+        <di:waypoint x="188" y="110"/><di:waypoint x="240" y="110"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Request_GW" bpmnElement="Flow_RequestDocs_Gateway">
+        <di:waypoint x="340" y="110"/><di:waypoint x="395" y="110"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_GW_Msg" bpmnElement="Flow_Gateway_Message">
+        <di:waypoint x="420" y="85"/><di:waypoint x="420" y="70"/><di:waypoint x="502" y="70"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_GW_Timer" bpmnElement="Flow_Gateway_Timer">
+        <di:waypoint x="420" y="135"/><di:waypoint x="420" y="170"/><di:waypoint x="502" y="170"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Msg_Split" bpmnElement="Flow_Message_Split">
+        <di:waypoint x="538" y="70"/><di:waypoint x="620" y="70"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Timer_Close" bpmnElement="Flow_Timer_Close">
+        <di:waypoint x="520" y="188"/><di:waypoint x="520" y="300"/><di:waypoint x="595" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Close_EndClosed" bpmnElement="Flow_Close_EndClosed">
+        <di:waypoint x="695" y="300"/><di:waypoint x="757" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Split_Fraud" bpmnElement="Flow_Split_Fraud">
+        <di:waypoint x="620" y="45"/><di:waypoint x="620" y="30"/><di:waypoint x="710" y="60"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Split_Appraise" bpmnElement="Flow_Split_Appraise">
+        <di:waypoint x="620" y="95"/><di:waypoint x="620" y="160"/><di:waypoint x="710" y="160"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Fraud_Join" bpmnElement="Flow_Fraud_Join">
+        <di:waypoint x="810" y="60"/><di:waypoint x="875" y="70"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Appraise_Join" bpmnElement="Flow_Appraise_Join">
+        <di:waypoint x="810" y="160"/><di:waypoint x="875" y="70"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Join_Settlement" bpmnElement="Flow_Join_Settlement">
+        <di:waypoint x="925" y="70"/><di:waypoint x="990" y="70"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Settlement_XOR" bpmnElement="Flow_Settlement_Approved">
+        <di:waypoint x="1090" y="70"/><di:waypoint x="1155" y="70"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_XOR_Settled" bpmnElement="Flow_Approved_Settled">
+        <di:waypoint x="1180" y="45"/><di:waypoint x="1180" y="40"/><di:waypoint x="1272" y="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1202" y="22" width="40" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_XOR_Rejected" bpmnElement="Flow_Approved_Rejected">
+        <di:waypoint x="1180" y="95"/><di:waypoint x="1180" y="140"/><di:waypoint x="1272" y="140"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1197" y="115" width="56" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

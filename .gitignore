@@ -20,7 +20,7 @@ out/
 # Local env overrides
 .env
 
-docs/superpowers/plans
+docs/superpowers/
 
 # Git worktrees
 .worktrees/
