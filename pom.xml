@@ -45,6 +45,7 @@
     <module>examples/use-cases/loan-application</module>
     <module>examples/use-cases/incident-management</module>
     <module>examples/use-cases/order-fulfillment</module>
+    <module>examples/use-cases/insurance-claim</module>
     <module>examples/use-cases/candidate-screening</module>
     <module>examples/xslt-script-task</module>
     <module>examples/approval-sla-metrics</module>

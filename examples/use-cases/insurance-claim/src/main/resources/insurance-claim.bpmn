@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="Definitions_InsuranceClaim"
+                  targetNamespace="http://operaton.org/examples/insurance-claim">
+
+  <bpmn:process id="insurance-claim"
+                name="Insurance Claim"
+                isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_ClaimSubmitted" name="Claim submitted">
+      <bpmn:outgoing>Flow_Start_To_End</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:endEvent id="EndEvent_ClaimSettled" name="Claim settled">
+      <bpmn:incoming>Flow_Start_To_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Start_To_End"
+                       sourceRef="StartEvent_ClaimSubmitted"
+                       targetRef="EndEvent_ClaimSettled"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="insurance-claim">
+      <bpmndi:BPMNShape id="Shape_StartEvent" bpmnElement="StartEvent_ClaimSubmitted">
+        <dc:Bounds x="152" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="135" y="125" width="72" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndSettled" bpmnElement="EndEvent_ClaimSettled">
+        <dc:Bounds x="252" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="237" y="125" width="66" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Start_End" bpmnElement="Flow_Start_To_End">
+        <di:waypoint x="188" y="100"/>
+        <di:waypoint x="252" y="100"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
