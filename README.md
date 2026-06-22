@@ -85,6 +85,7 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | [incident-management](examples/use-cases/incident-management) | IT support ticket | Signal escalation boundary, timer SLA boundary, 4-swimlane BPMN, REST integration |
 | [order-fulfillment](examples/use-cases/order-fulfillment) | E-commerce order | Error boundary on payment, async continuation, compensation, WireMock inventory/payment stubs |
 | [candidate-screening](examples/use-cases/candidate-screening) | AI recruiting screening | LLM scoring + email generation via HTTP connector, LLM-driven confidence gateway, human-in-the-loop on borderline, calendar slot query, WireMock IT |
+| [insurance-claim](examples/use-cases/insurance-claim) | Insurance damage claim | Event-based gateway (message vs timer race), parallel fraud check and damage appraisal, DMN settlement with FIRST hit policy |
 
 ## Anatomy of every example
 
@@ -114,6 +115,55 @@ builds. CI builds every example with both build systems on every push.
 AI agents: start with [AGENTS.md](AGENTS.md).
 Humans: same rules — see the review checklist in
 [docs/EXAMPLE_STANDARDS.md](docs/EXAMPLE_STANDARDS.md#10-review-checklist-copy-into-every-example-pr).
+
+## BPMN Concept Reference
+
+Quick lookup: which example demonstrates each BPMN construct.
+
+### BPMN Concepts
+
+| BPMN Concept | Example(s) | Notes |
+|---|---|---|
+| Service task | getting-started, service-tasks | Java delegate, Spring bean, expression |
+| User task | user-task-forms | Forms, candidate groups |
+| Script task | service-tasks | JavaScript / Groovy inline |
+| Business rule task (DMN) | dmn-decision, insurance-claim | FEEL expressions, hit policies |
+| Exclusive gateway (XOR) | getting-started, dmn-decision | Default flow, condition expressions |
+| **Parallel gateway (AND)** | **insurance-claim** | AND-split / AND-join, concurrent branches |
+| **Event-based gateway** | **insurance-claim** | Race between message and timer |
+| Inclusive gateway (OR) | inclusive-gateway | OR-split / OR-join |
+| Message start event | message-events | Start by message correlation |
+| Timer start event | timer-events | Cron, cycle, duration |
+| Message intermediate catch | message-events, insurance-claim | Correlation by business key |
+| Timer intermediate catch | timer-events, insurance-claim | ISO-8601 duration variable |
+| Signal intermediate catch/throw | signal-events | Broadcast signal |
+| Error boundary event | error-compensation | Interrupting and non-interrupting |
+| Compensation | error-compensation | Compensation boundary + handler |
+| Multi-instance | multi-instance | Sequential and parallel sub-tasks |
+| Call activity | call-activity | Sub-process reuse across definitions |
+| Event sub-process | event-subprocess | Error- and message-triggered |
+| External task | external-task-worker | Worker API, long polling |
+| Async continuation | async-continuation | `asyncBefore`, exclusive job lock |
+
+### Integrations
+
+| Integration | Example(s) |
+|---|---|
+| REST (Spring WebClient) | integration-rest |
+| Mail (Jakarta Mail) | integration-mail |
+| Kafka | integration-kafka |
+| Operaton Connectors | integration-connectors |
+| Micrometer / Prometheus | approval-sla-metrics |
+
+### Platforms / Runtimes
+
+| Platform | Example(s) |
+|---|---|
+| Spring Boot (embedded) | getting-started, all use-cases, approval-sla-metrics, … |
+| Quarkus (embedded) | runtime-quarkus |
+| Tomcat (shared engine) | distribution-tomcat |
+| WildFly (shared engine) | distribution-wildfly |
+| Flowset Control + SSO (Keycloak) | operaton-example-projects / operaton-flowset-sso |
 
 ## License
 
