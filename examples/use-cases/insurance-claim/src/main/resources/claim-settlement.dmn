@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:operaton="http://operaton.org/schema/1.0/dmn"
+             id="claim-settlement-definitions"
+             name="Claim Settlement"
+             namespace="http://operaton.org/examples/insurance-claim">
+
+  <decision id="claim-settlement" name="Claim Settlement" operaton:historyTimeToLive="30">
+    <decisionTable id="decisionTable_settlement" hitPolicy="FIRST">
+
+      <input id="input_fraud" label="Fraud suspected">
+        <inputExpression id="ie_fraud" typeRef="boolean">
+          <text>fraudSuspected</text>
+        </inputExpression>
+      </input>
+      <input id="input_type" label="Claim type">
+        <inputExpression id="ie_type" typeRef="string">
+          <text>claimType</text>
+        </inputExpression>
+      </input>
+      <input id="input_amount" label="Appraised amount">
+        <inputExpression id="ie_amount" typeRef="double">
+          <text>appraisedAmount</text>
+        </inputExpression>
+      </input>
+
+      <output id="output_decision" label="Settlement decision"
+              name="settlementDecision" typeRef="string"/>
+      <output id="output_amount" label="Approved amount"
+              name="approvedAmount" typeRef="double"/>
+
+      <!-- Rule 1: fraud suspected → reject regardless -->
+      <rule id="rule_fraud">
+        <inputEntry id="ie_fraud_1"><text>true</text></inputEntry>
+        <inputEntry id="ie_type_1"><text></text></inputEntry>
+        <inputEntry id="ie_amount_1"><text></text></inputEntry>
+        <outputEntry id="oe_decision_1"><text>"reject"</text></outputEntry>
+        <outputEntry id="oe_amount_1"><text>0</text></outputEntry>
+      </rule>
+
+      <!-- Rule 2: flood → reject regardless -->
+      <rule id="rule_flood">
+        <inputEntry id="ie_fraud_2"><text></text></inputEntry>
+        <inputEntry id="ie_type_2"><text>"flood"</text></inputEntry>
+        <inputEntry id="ie_amount_2"><text></text></inputEntry>
+        <outputEntry id="oe_decision_2"><text>"reject"</text></outputEntry>
+        <outputEntry id="oe_amount_2"><text>0</text></outputEntry>
+      </rule>
+
+      <!-- Rule 3: small amount (<=1000) → approve full appraised -->
+      <rule id="rule_small">
+        <inputEntry id="ie_fraud_3"><text></text></inputEntry>
+        <inputEntry id="ie_type_3"><text></text></inputEntry>
+        <inputEntry id="ie_amount_3"><text>&lt;= 1000</text></inputEntry>
+        <outputEntry id="oe_decision_3"><text>"approve"</text></outputEntry>
+        <outputEntry id="oe_amount_3"><text>appraisedAmount</text></outputEntry>
+      </rule>
+
+      <!-- Rule 4: medium amount (<=50000) → approve at 80% -->
+      <rule id="rule_medium">
+        <inputEntry id="ie_fraud_4"><text></text></inputEntry>
+        <inputEntry id="ie_type_4"><text></text></inputEntry>
+        <inputEntry id="ie_amount_4"><text>&lt;= 50000</text></inputEntry>
+        <outputEntry id="oe_decision_4"><text>"approve"</text></outputEntry>
+        <outputEntry id="oe_amount_4"><text>appraisedAmount * 0.8</text></outputEntry>
+      </rule>
+
+      <!-- Rule 5: large amount → reject -->
+      <rule id="rule_large">
+        <inputEntry id="ie_fraud_5"><text></text></inputEntry>
+        <inputEntry id="ie_type_5"><text></text></inputEntry>
+        <inputEntry id="ie_amount_5"><text></text></inputEntry>
+        <outputEntry id="oe_decision_5"><text>"reject"</text></outputEntry>
+        <outputEntry id="oe_amount_5"><text>0</text></outputEntry>
+      </rule>
+
+    </decisionTable>
+  </decision>
+</definitions>
