@@ -1459,12 +1459,43 @@ examples:
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/travel-booking/README.md"
     lastUpdated: "2026-06-22"
 
-- id: uc-08-complaint-resolution
-  name: Customer Complaint Resolution
-  description: >
-    Escalation events — non-interrupting escalation throw and boundary for
-    parallel manager approval, interrupting escalation end event and boundary
-    for high-severity specialist reroute. First escalationEventDefinition in
-    the catalog.
-  path: examples/use-cases/complaint-resolution
-  tags: [use-case, escalation, subprocess, spring-boot]
+  - id: complaint-resolution
+    title: "Use Case — Customer Complaint Resolution"
+    icon: "🆘"
+    path: examples/use-cases/complaint-resolution
+    shortDescription: >
+      All four BPMN escalation event types: non-interrupting throw and boundary
+      (parallel manager approval), interrupting end event and boundary (specialist reroute).
+    longDescription: |
+      A customer complaint is processed inside an embedded subprocess. The agent assesses
+      severity and refund amount. Three escalation paths:
+
+      - **Happy path** — low severity, refund ≤ €500: subprocess resolves directly, ends at "Complaint resolved"
+      - **Non-interrupting escalation** — refund > €500: escalation throw fires inside the subprocess,
+        non-interrupting boundary spawns a parallel manager-approval token; both paths complete —
+        "Refund approved" and "Complaint resolved"
+      - **Interrupting escalation** — high severity: escalation end event fires, interrupting boundary
+        cancels the subprocess, routes exclusively to "Escalated to specialist"
+
+      First `escalationEventDefinition` in the catalog. Distinct from error events (which always
+      interrupt) and signals (which broadcast to all subscribers).
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: intermediate
+    tags:
+      - { label: "Escalation", category: concept }
+      - { label: "Subprocess", category: concept }
+      - { label: "Non-Interrupting", category: concept }
+      - { label: "Interrupting", category: concept }
+    integrations: [postgres]
+    bpmnConcepts: [escalation-intermediate-throw, escalation-end-event, escalation-boundary-non-interrupting, escalation-boundary-interrupting, subprocess, exclusive-gateway]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    screenshots:
+      - examples/use-cases/complaint-resolution/src/main/resources/complaint-resolution.png
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/complaint-resolution/README.md"
+    lastUpdated: "2026-06-22"

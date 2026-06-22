@@ -1,115 +1,116 @@
 # Customer Complaint Resolution
 
-Demonstrates all four BPMN **escalation event** types in a single process:
-non-interrupting escalation throw, escalation end event, non-interrupting
-escalation boundary, and interrupting escalation boundary.
+Demonstrates all four BPMN **escalation event** flavors in a single process: non-interrupting escalation throw, escalation end event, non-interrupting escalation boundary, and interrupting escalation boundary.
 
-> **Note:** User tasks are modelled as service tasks so the integration tests
-> run without human interaction. A production process would use user tasks with
-> form bindings for complaint assessment and manager approval.
+> **Note:** User tasks are modelled as service tasks so integration tests run without human interaction. A production process would use user tasks with form bindings.
 
-## BPMN Concepts
+## What you will learn
 
-| Element | Purpose in this process |
+- How a **non-interrupting escalation throw** inside a subprocess fires a parallel token without cancelling the subprocess
+- How a **non-interrupting escalation boundary** on a subprocess catches the throw and runs a parallel manager-approval path concurrently
+- How an **escalation end event** inside a subprocess signals a high-severity condition to the parent scope
+- How an **interrupting escalation boundary** cancels the subprocess and reroutes to a specialist-handoff path
+- The difference between escalation (non-fatal, parallel) and error (fatal, interrupting) events
+
+## Process model
+
+![Customer complaint resolution process](src/main/resources/complaint-resolution.png)
+
+The "Handle complaint" embedded subprocess assesses the complaint. Low-severity complaints with a refund within the €500 authority threshold resolve directly. Refunds exceeding the threshold fire a non-interrupting escalation, spawning a parallel manager-approval token while the subprocess continues. High-severity complaints fire an escalation end event that triggers the interrupting boundary, cancelling the subprocess and routing to a specialist handoff.
+
+## Prerequisites
+
+- JDK 21
+- Docker (for local run and integration tests)
+
+## Run it
+
+```bash
+docker compose up -d
+./mvnw spring-boot:run   # or: ./gradlew bootRun
+```
+
+Cockpit: http://localhost:8080 — login `demo` / `demo`
+
+## Walk through it
+
+**Happy path — low severity, within authority:**
+
+```bash
+curl -X POST http://localhost:8080/engine-rest/process-definition/key/complaint-resolution/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "businessKey": "COMP-HAPPY",
+    "variables": {
+      "complaintId":     { "value": "COMP-HAPPY", "type": "String" },
+      "customer":        { "value": "Alice",      "type": "String" },
+      "category":        { "value": "billing",    "type": "String" },
+      "severity":        { "value": "low",        "type": "String" },
+      "requestedRefund": { "value": 200.0,        "type": "Double" }
+    }
+  }'
+```
+
+Open Cockpit → History → completed instances. The instance ends at **"Complaint resolved"**. No `refundApproved` or `specialistHandoff` variable is set.
+
+**Non-interrupting escalation — refund exceeds authority:**
+
+```bash
+curl -X POST http://localhost:8080/engine-rest/process-definition/key/complaint-resolution/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "businessKey": "COMP-REFUND",
+    "variables": {
+      "complaintId":     { "value": "COMP-REFUND", "type": "String" },
+      "customer":        { "value": "Bob",         "type": "String" },
+      "category":        { "value": "service",     "type": "String" },
+      "severity":        { "value": "low",         "type": "String" },
+      "requestedRefund": { "value": 800.0,         "type": "Double" }
+    }
+  }'
+```
+
+In Cockpit you will see the process instance touch both **"Refund approved"** and **"Complaint resolved"** end events. Variable `refundApproved = true` is set by the parallel manager-approval path.
+
+**Interrupting escalation — high severity:**
+
+```bash
+curl -X POST http://localhost:8080/engine-rest/process-definition/key/complaint-resolution/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "businessKey": "COMP-HIGH",
+    "variables": {
+      "complaintId":     { "value": "COMP-HIGH", "type": "String" },
+      "customer":        { "value": "Carol",     "type": "String" },
+      "category":        { "value": "safety",    "type": "String" },
+      "severity":        { "value": "high",      "type": "String" },
+      "requestedRefund": { "value": 1500.0,      "type": "Double" }
+    }
+  }'
+```
+
+The instance ends at **"Escalated to specialist"**. Variable `specialistHandoff = true`. The subprocess was cancelled by the interrupting boundary — the normal close path did not run.
+
+## How it works
+
+The BPMN ([`complaint-resolution.bpmn`](src/main/resources/complaint-resolution.bpmn)) contains two escalation definitions used across all four event types:
+
+| Escalation code | Used by |
 |---|---|
-| Non-interrupting escalation throw | Inside subprocess: refund exceeds agent authority → spawns parallel manager-approval token while subprocess continues |
-| Escalation end event | Inside subprocess: high-severity complaint → raises `HIGH_SEVERITY` escalation, caught by interrupting boundary |
-| Non-interrupting escalation boundary | On subprocess: catches `REFUND_APPROVAL`, fires parallel token to manager-approval path without cancelling subprocess |
-| Interrupting escalation boundary | On subprocess: catches `HIGH_SEVERITY`, cancels subprocess, routes to specialist-handoff path |
+| `REFUND_APPROVAL` | `ThrowEscalation_RefundApproval` (throw, non-interrupting) + `BoundaryEvent_RefundApproval` (boundary, non-interrupting) |
+| `HIGH_SEVERITY` | `EndEvent_SP_HighSeverity` (escalation end event) + `BoundaryEvent_HighSeverity` (boundary, interrupting) |
 
-Two escalation codes are defined at the process level:
-- `REFUND_APPROVAL` — pairs the intermediate throw inside the subprocess with the non-interrupting boundary outside
-- `HIGH_SEVERITY` — pairs the escalation end event inside the subprocess with the interrupting boundary outside
+`AssessComplaintDelegate` reads `requestedRefund` and sets `refundWithinAuthority` (Boolean) against a hardcoded 500.0 threshold. The two XOR gateways inside the subprocess use this variable and the incoming `severity` variable to route.
 
-## Process Flow
+`ApproveRefundDelegate` sets `refundApproved = true` — it runs on the non-interrupting boundary path, concurrently with the subprocess's normal close path.
 
-```mermaid
-flowchart TD
-    Start([Complaint received]) --> SP
+`HandoffSpecialistDelegate` sets `specialistHandoff = true` — it runs after the interrupting boundary cancels the subprocess.
 
-    subgraph SP [Handle complaint subprocess]
-        A[Assess complaint] --> GS{Severity?}
-        GS -->|high| EH{{High severity raised\nescalation end event}}
-        GS -->|low / medium| GR{Refund within\nauthority?}
-        GR -->|within authority| RC[Resolve complaint]
-        GR -->|exceeds authority| TE{{Refund needs approval\nnon-interrupting throw}}
-        TE --> RC
-        RC --> SPE([Complaint handled])
-    end
-
-    SP -->|normal outgoing| CC[Close complaint] --> ER([Complaint resolved])
-    SP -. non-interrupting boundary .-> MA[Manager approves\nrefund] --> ERA([Refund approved])
-    SP -. interrupting boundary .-> HS[Hand off to\nspecialist] --> ESS([Escalated to\nspecialist])
-```
-
-**Happy path** (low severity, refund ≤ 500): subprocess resolves directly, no
-escalation fires, ends at *Complaint resolved*.
-
-**Parallel-approval path** (low severity, refund > 500): non-interrupting
-escalation throw fires, manager-approval token runs concurrently while the
-subprocess continues, ends at both *Refund approved* and *Complaint resolved*.
-
-**Specialist-reroute path** (high severity): escalation end event fires,
-interrupting boundary cancels the subprocess, ends exclusively at *Escalated
-to specialist*.
-
-## Running Locally
+## Run the tests
 
 ```bash
-# Start PostgreSQL
-docker compose up -d --wait
-
-# Run the application
-./mvnw spring-boot:run
-# or: ./gradlew bootRun
-
-# Open Cockpit/Tasklist at http://localhost:8080  (demo / demo)
+./mvnw verify      # runs 4 ITs via maven-failsafe-plugin
+./gradlew build    # same ITs via JUnit Platform
 ```
 
-## Running Tests
-
-```bash
-./mvnw verify
-# or: ./gradlew build
-```
-
-Tests use Testcontainers to start a real PostgreSQL instance. Docker must be
-running.
-
-## Configuration
-
-| Property | Default | Description |
-|---|---|---|
-| `spring.datasource.url` | `jdbc:postgresql://localhost:5432/operaton` | PostgreSQL JDBC URL |
-| `spring.datasource.username` | `operaton` | Database user |
-| `spring.datasource.password` | `operaton` | Database password |
-
-## Key Code
-
-**`AssessComplaintDelegate`** reads `requestedRefund` and sets
-`refundWithinAuthority` (Boolean). The authority threshold is `500.0` —
-hard-coded because there is no reason to externalise a constant that never
-changes at runtime.
-
-**`ApproveRefundDelegate`** sets `refundApproved = true`. It runs on the
-non-interrupting boundary path, concurrently with the subprocess's normal
-close path.
-
-**`HandoffSpecialistDelegate`** sets `specialistHandoff = true`. It runs after
-the interrupting boundary cancels the subprocess.
-
-The BPMN declares both escalation codes at the process level:
-```xml
-<bpmn:escalation id="Escalation_RefundApproval" name="Refund Approval"
-                 escalationCode="REFUND_APPROVAL" />
-<bpmn:escalation id="Escalation_HighSeverity" name="High Severity"
-                 escalationCode="HIGH_SEVERITY" />
-```
-
-The non-interrupting intermediate throw and boundary reference the same
-`escalationRef`; the interrupting end event and boundary reference the other.
-
-## Further Reading
-
-- [BPMN 2.0 Escalation Events (Operaton docs)](https://docs.operaton.org/manual/latest/reference/bpmn20/events/escalation-events/)
-- [EXAMPLE_STANDARDS.md](../../../docs/EXAMPLE_STANDARDS.md)
+The ITs start a PostgreSQL container via Testcontainers, deploy the BPMN, and assert all three paths: happy path (direct resolve), non-interrupting escalation (parallel approval), and interrupting escalation (specialist reroute).
