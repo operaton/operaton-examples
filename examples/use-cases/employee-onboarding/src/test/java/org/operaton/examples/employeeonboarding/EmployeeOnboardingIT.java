@@ -137,4 +137,30 @@ class EmployeeOnboardingIT {
             .count();
         assertThat(provisionCount).isEqualTo(2);
     }
+
+    @Test
+    void nullEquipmentList_defaultsToThreeItems_onboards() {
+        // No equipmentList provided — PrepareOnboardingDelegate sets the default 3-item list
+        var pi = runtimeService.startProcessInstanceByKey(
+            "employee-onboarding",
+            "EMP-004",
+            Variables.createVariables()
+                .putValue("employeeId", "EMP-004")
+                .putValue("role", "engineer"));
+
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            var historic = historyService.createHistoricProcessInstanceQuery()
+                .processInstanceId(pi.getId())
+                .singleResult();
+            assertThat(historic.getState()).isEqualTo(HistoricProcessInstance.STATE_COMPLETED);
+            assertThat(historic.getEndActivityId()).isEqualTo("EndEvent_Onboarded");
+        });
+
+        // Default list has 3 items → 3 provision-equipment children
+        long provisionCount = historyService.createHistoricProcessInstanceQuery()
+            .superProcessInstanceId(pi.getId())
+            .processDefinitionKey("provision-equipment")
+            .count();
+        assertThat(provisionCount).isEqualTo(3);
+    }
 }
