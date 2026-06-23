@@ -2,6 +2,7 @@ package org.operaton.examples.distributiontomcat;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.parsing.Parser;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -52,6 +53,7 @@ class DocumentApprovalIT {
     static void setup() {
         RestAssured.baseURI = "http://" + tomcat.getHost();
         RestAssured.port = tomcat.getMappedPort(8080);
+        RestAssured.defaultParser = Parser.JSON;
     }
 
     @Test
@@ -66,9 +68,8 @@ class DocumentApprovalIT {
             .body("ended", equalTo(true))
             .extract().path("id");
 
-        // The history/process-instance endpoint does not include endActivityId in Operaton 2.1.1;
-        // check the end event via history/activity-instance with activityType=noneEndEvent.
         given()
+            .accept(ContentType.JSON)
             .queryParam("processInstanceId", instanceId)
             .queryParam("activityType", "noneEndEvent")
         .when()
@@ -92,6 +93,7 @@ class DocumentApprovalIT {
             .extract().path("id");
 
         given()
+            .accept(ContentType.JSON)
             .queryParam("processInstanceId", instanceId)
             .queryParam("activityType", "noneEndEvent")
         .when()

@@ -2,6 +2,7 @@ package org.operaton.examples.distributionwildfly;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -12,11 +13,16 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.MountableFile;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 
 @Testcontainers
 class DocumentApprovalIT {
@@ -50,10 +56,13 @@ class DocumentApprovalIT {
         .waitingFor(Wait.forHttp("/engine-rest/process-definition/key/document-approval")
             .withStartupTimeout(Duration.ofSeconds(300)));
 
+    private static HttpClient httpClient;
+
     @BeforeAll
     static void setup() {
         RestAssured.baseURI = "http://" + wildfly.getHost();
         RestAssured.port = wildfly.getMappedPort(8080);
+        httpClient = HttpClient.newHttpClient();
     }
 
     @Test
@@ -68,17 +77,8 @@ class DocumentApprovalIT {
             .body("ended", equalTo(true))
             .extract().path("id");
 
-        // The history/process-instance endpoint does not include endActivityId in Operaton 2.1.1;
-        // check the end event via history/activity-instance with activityType=noneEndEvent.
-        given()
-            .queryParam("processInstanceId", instanceId)
-            .queryParam("activityType", "noneEndEvent")
-        .when()
-            .get("/engine-rest/history/activity-instance")
-        .then()
-            .statusCode(200)
-            .body("", hasSize(1))
-            .body("[0].activityId", equalTo("EndEvent_Approved"));
+        List<String> activityIds = historyActivityIds(instanceId, "noneEndEvent");
+        assertThat(activityIds).containsExactly("EndEvent_Approved");
     }
 
     @Test
@@ -93,14 +93,27 @@ class DocumentApprovalIT {
             .body("ended", equalTo(true))
             .extract().path("id");
 
-        given()
-            .queryParam("processInstanceId", instanceId)
-            .queryParam("activityType", "noneEndEvent")
-        .when()
-            .get("/engine-rest/history/activity-instance")
-        .then()
-            .statusCode(200)
-            .body("", hasSize(1))
-            .body("[0].activityId", equalTo("EndEvent_Review"));
+        List<String> activityIds = historyActivityIds(instanceId, "noneEndEvent");
+        assertThat(activityIds).containsExactly("EndEvent_Review");
+    }
+
+    private static List<String> historyActivityIds(String processInstanceId, String activityType) {
+        try {
+            HttpResponse<String> response = httpClient.send(
+                HttpRequest.newBuilder()
+                    .uri(URI.create(RestAssured.baseURI + ":" + RestAssured.port
+                        + "/engine-rest/history/activity-instance"
+                        + "?processInstanceId=" + processInstanceId
+                        + "&activityType=" + activityType))
+                    .header("Accept", "application/json")
+                    .GET()
+                    .build(),
+                HttpResponse.BodyHandlers.ofString()
+            );
+            assertThat(response.statusCode()).isEqualTo(200);
+            return JsonPath.from(response.body()).getList("activityId");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
