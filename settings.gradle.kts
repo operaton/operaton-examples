@@ -40,7 +40,8 @@ include(
   "examples:use-cases:complaint-resolution",
   "examples:use-cases:employee-onboarding",
   "examples:use-cases:procurement-collaboration",
-  "examples:approval-sla-metrics"
+  "examples:approval-sla-metrics",
+  "examples:integration-keycloak",
 )
 
 project(":examples:getting-started").projectDir = file("examples/getting-started")
@@ -83,3 +84,4 @@ project(":examples:use-cases:complaint-resolution").projectDir = file("examples/
 project(":examples:use-cases:employee-onboarding").projectDir = file("examples/use-cases/employee-onboarding")
 project(":examples:use-cases:procurement-collaboration").projectDir = file("examples/use-cases/procurement-collaboration")
 project(":examples:approval-sla-metrics").projectDir = file("examples/approval-sla-metrics")
+project(":examples:integration-keycloak").projectDir = file("examples/integration-keycloak")
