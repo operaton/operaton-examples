@@ -58,7 +58,7 @@ docker compose down
 
 ## Walk through it
 
-### Happy path — log in as Monica
+### Happy path — log in as admin
 
 1. Open http://localhost:8080 — the standard Operaton login dialog appears.
 2. Enter `admin` / `s3cr3t` and click **Sign In**.
