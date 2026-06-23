@@ -20,7 +20,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>21</maven.compiler.release>
-    <quarkus.version>3.33.2</quarkus.version>
+    <quarkus.version>3.33.2.1</quarkus.version>
     <operaton.version>2.1.2</operaton.version>
   </properties>
 
