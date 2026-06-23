@@ -1,6 +1,6 @@
 plugins {
     java
-    id("io.quarkus") version "3.33.2"
+    id("io.quarkus") version "3.33.2.1"
 }
 
 group = "org.operaton.examples"
@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
 }
 
-val quarkusVersion = "3.33.2"
+val quarkusVersion = "3.33.2.1"
 val operatonVersion = "2.1.1"
 
 dependencies {
