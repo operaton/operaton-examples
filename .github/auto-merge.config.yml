@@ -25,7 +25,7 @@ auto-merge-rules:
 
   # GitHub Actions from GitHub (actions/*) can be auto-merged
   - author: 'dependabot[bot]'
-    labels: ['dependencies']
+    labels: ['dependencies:github-action']
     includes:
       - 'actions/*'
 

@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "weekly"
     labels:
-      - "dependencies"
+      - "dependencies:github-action"
 
   - package-ecosystem: "maven"
     directory: "/"
