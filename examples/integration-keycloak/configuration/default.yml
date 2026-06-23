@@ -1,0 +1,28 @@
+operaton.bpm:
+  run:
+    cors:
+      enabled: true
+      allowed-origins: "*"
+  authorization:
+    enabled: true
+
+spring.datasource:
+  url: ${DB_URL:jdbc:postgresql://postgres:5432/operaton}
+  driver-class-name: org.postgresql.Driver
+  username: ${DB_USERNAME:operaton}
+  password: ${DB_PASSWORD:operaton}
+
+keycloak:
+  host: ${KEYCLOAK_HOST:http://keycloak:8080}
+  realm: ${KEYCLOAK_REALM:operaton}
+  client.id: ${KEYCLOAK_CLIENT_ID:operaton-identity-service}
+  client.secret: ${KEYCLOAK_CLIENT_SECRET:operaton-keycloak-secret}
+
+plugin.identity.keycloak:
+  keycloakIssuerUrl: ${keycloak.host}/auth/realms/${keycloak.realm}
+  keycloakAdminUrl: ${keycloak.host}/auth/admin/realms/${keycloak.realm}
+  clientId: ${keycloak.client.id}
+  clientSecret: ${keycloak.client.secret}
+  useUsernameAsOperatonUserId: true
+  useGroupPathAsOperatonGroupId: true
+  administratorGroupName: operaton-admin
