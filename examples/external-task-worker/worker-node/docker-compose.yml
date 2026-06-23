@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: external-task-worker-node-postgres
+    environment:
+      POSTGRES_DB: operaton
+      POSTGRES_USER: operaton
+      POSTGRES_PASSWORD: operaton
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U operaton -d operaton"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  operaton:
+    image: operaton/operaton:2.1.1
+    container_name: external-task-worker-node-engine
+    # Explicit flags enable REST + Webapps without the bundled invoice example
+    command: ["./operaton.sh", "--rest", "--webapps"]
+    environment:
+      DB_DRIVER: org.postgresql.Driver
+      DB_URL: jdbc:postgresql://postgres:5432/operaton
+      DB_USERNAME: operaton
+      DB_PASSWORD: operaton
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Auto-deploy the BPMN owned by the parent example on engine startup
+    volumes:
+      - ../src/main/resources/order-fulfillment.bpmn:/operaton/configuration/resources/order-fulfillment.bpmn:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/engine-rest/process-definition/key/order-fulfillment >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30

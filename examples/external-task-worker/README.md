@@ -91,3 +91,11 @@ The embedded worker starts automatically and polls `http://localhost:8080/engine
 boots the application on a random port with the production workers disabled, creates an inline
 test worker, and drives three paths: successful fulfillment, out-of-stock boundary event, and
 transient failure with automatic retry.
+
+## Other languages
+
+External task workers are not tied to Java — any language can poll the same `/engine-rest`.
+[worker-node/](worker-node/) is a Node.js worker built on
+[`camunda-external-task-client-js`](https://github.com/camunda/camunda-external-task-client-js)
+that drives this exact BPMN and the same three paths against a standalone `operaton/operaton`
+engine container.
