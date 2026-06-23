@@ -21,7 +21,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- WAR code must target JDK 17: the operaton/tomcat distribution image runs OpenJDK 17 -->
     <maven.compiler.release>17</maven.compiler.release>
-    <operaton.version>2.1.1</operaton.version>
+    <operaton.version>2.1.2</operaton.version>
     <testcontainers.version>2.0.5</testcontainers.version>
   </properties>
 

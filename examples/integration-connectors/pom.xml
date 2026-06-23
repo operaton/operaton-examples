@@ -21,7 +21,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>21</maven.compiler.release>
     <spring-boot.version>4.1.0</spring-boot.version>
-    <operaton.version>2.1.1</operaton.version>
+    <operaton.version>2.1.2</operaton.version>
   </properties>
 
   <dependencyManagement>
