@@ -1,152 +1,138 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_QuoteHandling"
-                  targetNamespace="http://operaton.org/examples">
-
-  <bpmn:message id="Message_QuoteRequest" name="QuoteRequest"/>
-  <bpmn:message id="Message_OrderDecision" name="OrderDecision"/>
-
-  <bpmn:process id="quote-handling" name="Quote Handling" isExecutable="true"
-                operaton:historyTimeToLive="P30D">
-
-    <!-- asyncBefore: correlateStartMessage() creates the instance + job and returns
-         without running any supplier delegate inline inside the buyer's transaction. -->
-    <bpmn:startEvent id="StartEvent_QuoteRequest" name="Quote request received"
-                     operaton:asyncBefore="true">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_QuoteHandling" targetNamespace="http://operaton.org/examples">
+  <bpmn:message id="Message_QuoteRequest" name="QuoteRequest" />
+  <bpmn:message id="Message_OrderDecision" name="OrderDecision" />
+  <bpmn:process id="quote-handling" name="Quote Handling" isExecutable="true" operaton:historyTimeToLive="P30D">
+    <bpmn:startEvent id="StartEvent_QuoteRequest" name="Quote request received" operaton:asyncBefore="true">
       <bpmn:outgoing>Flow_Start_Calculate</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MessageEventDef_QuoteRequest"
-                                    messageRef="Message_QuoteRequest"/>
+      <bpmn:messageEventDefinition id="MessageEventDef_QuoteRequest" messageRef="Message_QuoteRequest" />
     </bpmn:startEvent>
-
-    <bpmn:serviceTask id="Task_CalculateQuote" name="Calculate quote"
-                      operaton:delegateExpression="${calculateQuoteDelegate}">
+    <bpmn:serviceTask id="Task_CalculateQuote" name="Calculate quote" operaton:delegateExpression="${calculateQuoteDelegate}">
       <bpmn:incoming>Flow_Start_Calculate</bpmn:incoming>
       <bpmn:outgoing>Flow_Calculate_SendQuote</bpmn:outgoing>
     </bpmn:serviceTask>
-
-    <bpmn:sendTask id="Task_SendQuote" name="Send quote"
-                   operaton:delegateExpression="${sendQuoteResponseDelegate}">
+    <bpmn:sendTask id="Task_SendQuote" name="Send quote" operaton:delegateExpression="${sendQuoteResponseDelegate}">
       <bpmn:incoming>Flow_Calculate_SendQuote</bpmn:incoming>
       <bpmn:outgoing>Flow_SendQuote_WaitDecision</bpmn:outgoing>
     </bpmn:sendTask>
-
     <bpmn:intermediateCatchEvent id="IntermediateCatch_OrderDecision" name="Order decision received">
       <bpmn:incoming>Flow_SendQuote_WaitDecision</bpmn:incoming>
       <bpmn:outgoing>Flow_OrderDecision_Gateway</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MessageEventDef_OrderDecision"
-                                    messageRef="Message_OrderDecision"/>
+      <bpmn:messageEventDefinition id="MessageEventDef_OrderDecision" messageRef="Message_OrderDecision" />
     </bpmn:intermediateCatchEvent>
-
-    <bpmn:exclusiveGateway id="Gateway_OrderPlaced" name="Order placed?"
-                            default="Flow_Declined_Release">
+    <bpmn:exclusiveGateway id="Gateway_OrderPlaced" name="Order placed?" default="Flow_Declined_Release">
       <bpmn:incoming>Flow_OrderDecision_Gateway</bpmn:incoming>
       <bpmn:outgoing>Flow_Accepted_Reserve</bpmn:outgoing>
       <bpmn:outgoing>Flow_Declined_Release</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-
-    <bpmn:serviceTask id="Task_ReserveStock" name="Reserve stock"
-                      operaton:delegateExpression="${reserveStockDelegate}">
+    <bpmn:serviceTask id="Task_ReserveStock" name="Reserve stock" operaton:delegateExpression="${reserveStockDelegate}">
       <bpmn:incoming>Flow_Accepted_Reserve</bpmn:incoming>
       <bpmn:outgoing>Flow_Reserve_Fulfilled</bpmn:outgoing>
     </bpmn:serviceTask>
-
     <bpmn:endEvent id="EndEvent_OrderFulfilled" name="Order fulfilled">
       <bpmn:incoming>Flow_Reserve_Fulfilled</bpmn:incoming>
     </bpmn:endEvent>
-
-    <bpmn:serviceTask id="Task_ReleaseQuote" name="Release quote"
-                      operaton:delegateExpression="${releaseQuoteDelegate}">
+    <bpmn:serviceTask id="Task_ReleaseQuote" name="Release quote" operaton:delegateExpression="${releaseQuoteDelegate}">
       <bpmn:incoming>Flow_Declined_Release</bpmn:incoming>
       <bpmn:outgoing>Flow_Release_Released</bpmn:outgoing>
     </bpmn:serviceTask>
-
     <bpmn:endEvent id="EndEvent_QuoteReleased" name="Quote released">
       <bpmn:incoming>Flow_Release_Released</bpmn:incoming>
     </bpmn:endEvent>
-
-    <bpmn:sequenceFlow id="Flow_Start_Calculate"
-                       sourceRef="StartEvent_QuoteRequest" targetRef="Task_CalculateQuote"/>
-    <bpmn:sequenceFlow id="Flow_Calculate_SendQuote"
-                       sourceRef="Task_CalculateQuote" targetRef="Task_SendQuote"/>
-    <bpmn:sequenceFlow id="Flow_SendQuote_WaitDecision"
-                       sourceRef="Task_SendQuote" targetRef="IntermediateCatch_OrderDecision"/>
-    <bpmn:sequenceFlow id="Flow_OrderDecision_Gateway"
-                       sourceRef="IntermediateCatch_OrderDecision" targetRef="Gateway_OrderPlaced"/>
-    <bpmn:sequenceFlow id="Flow_Accepted_Reserve" name="accepted"
-                       sourceRef="Gateway_OrderPlaced" targetRef="Task_ReserveStock">
+    <bpmn:sequenceFlow id="Flow_Start_Calculate" sourceRef="StartEvent_QuoteRequest" targetRef="Task_CalculateQuote" />
+    <bpmn:sequenceFlow id="Flow_Calculate_SendQuote" sourceRef="Task_CalculateQuote" targetRef="Task_SendQuote" />
+    <bpmn:sequenceFlow id="Flow_SendQuote_WaitDecision" sourceRef="Task_SendQuote" targetRef="IntermediateCatch_OrderDecision" />
+    <bpmn:sequenceFlow id="Flow_OrderDecision_Gateway" sourceRef="IntermediateCatch_OrderDecision" targetRef="Gateway_OrderPlaced" />
+    <bpmn:sequenceFlow id="Flow_Accepted_Reserve" name="accepted" sourceRef="Gateway_OrderPlaced" targetRef="Task_ReserveStock">
       <bpmn:conditionExpression>${accepted}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_Declined_Release" name="declined"
-                       sourceRef="Gateway_OrderPlaced" targetRef="Task_ReleaseQuote"/>
-    <bpmn:sequenceFlow id="Flow_Reserve_Fulfilled"
-                       sourceRef="Task_ReserveStock" targetRef="EndEvent_OrderFulfilled"/>
-    <bpmn:sequenceFlow id="Flow_Release_Released"
-                       sourceRef="Task_ReleaseQuote" targetRef="EndEvent_QuoteReleased"/>
+    <bpmn:sequenceFlow id="Flow_Declined_Release" name="declined" sourceRef="Gateway_OrderPlaced" targetRef="Task_ReleaseQuote" />
+    <bpmn:sequenceFlow id="Flow_Reserve_Fulfilled" sourceRef="Task_ReserveStock" targetRef="EndEvent_OrderFulfilled" />
+    <bpmn:sequenceFlow id="Flow_Release_Released" sourceRef="Task_ReleaseQuote" targetRef="EndEvent_QuoteReleased" />
   </bpmn:process>
-
   <bpmndi:BPMNDiagram id="BPMNDiagram_QuoteHandling">
     <bpmndi:BPMNPlane id="BPMNPlane_QuoteHandling" bpmnElement="quote-handling">
       <bpmndi:BPMNShape id="Shape_StartEvent_QuoteRequest" bpmnElement="StartEvent_QuoteRequest">
-        <dc:Bounds x="152" y="192" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="127" y="235" width="87" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="152" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="127" y="235" width="87" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Task_CalculateQuote" bpmnElement="Task_CalculateQuote">
-        <dc:Bounds x="240" y="170" width="100" height="80"/>
+        <dc:Bounds x="240" y="170" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Task_SendQuote" bpmnElement="Task_SendQuote">
-        <dc:Bounds x="390" y="170" width="100" height="80"/>
+        <dc:Bounds x="390" y="170" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_IntermediateCatch_OrderDecision" bpmnElement="IntermediateCatch_OrderDecision">
-        <dc:Bounds x="542" y="192" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="516" y="235" width="89" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="542" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="516" y="235" width="89" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Gateway_OrderPlaced" bpmnElement="Gateway_OrderPlaced" isMarkerVisible="true">
-        <dc:Bounds x="635" y="185" width="50" height="50"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="623" y="242" width="75" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="635" y="185" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="685" y="213" width="70" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Task_ReserveStock" bpmnElement="Task_ReserveStock">
-        <dc:Bounds x="740" y="100" width="100" height="80"/>
+        <dc:Bounds x="740" y="100" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_EndEvent_OrderFulfilled" bpmnElement="EndEvent_OrderFulfilled">
-        <dc:Bounds x="892" y="122" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="868" y="165" width="84" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="892" y="122" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="868" y="165" width="84" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Task_ReleaseQuote" bpmnElement="Task_ReleaseQuote">
-        <dc:Bounds x="740" y="270" width="100" height="80"/>
+        <dc:Bounds x="740" y="270" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_EndEvent_QuoteReleased" bpmnElement="EndEvent_QuoteReleased">
-        <dc:Bounds x="892" y="292" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="869" y="335" width="82" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="892" y="292" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="869" y="335" width="82" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Start_Calculate" bpmnElement="Flow_Start_Calculate">
-        <di:waypoint x="188" y="210"/><di:waypoint x="240" y="210"/>
+        <di:waypoint x="188" y="210" />
+        <di:waypoint x="240" y="210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Calculate_SendQuote" bpmnElement="Flow_Calculate_SendQuote">
-        <di:waypoint x="340" y="210"/><di:waypoint x="390" y="210"/>
+        <di:waypoint x="340" y="210" />
+        <di:waypoint x="390" y="210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_SendQuote_WaitDecision" bpmnElement="Flow_SendQuote_WaitDecision">
-        <di:waypoint x="490" y="210"/><di:waypoint x="542" y="210"/>
+        <di:waypoint x="490" y="210" />
+        <di:waypoint x="542" y="210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_OrderDecision_Gateway" bpmnElement="Flow_OrderDecision_Gateway">
-        <di:waypoint x="578" y="210"/><di:waypoint x="635" y="210"/>
+        <di:waypoint x="578" y="210" />
+        <di:waypoint x="635" y="210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Accepted_Reserve" bpmnElement="Flow_Accepted_Reserve">
-        <di:waypoint x="660" y="185"/><di:waypoint x="660" y="140"/><di:waypoint x="740" y="140"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="668" y="157" width="48" height="14"/></bpmndi:BPMNLabel>
+        <di:waypoint x="660" y="185" />
+        <di:waypoint x="660" y="140" />
+        <di:waypoint x="740" y="140" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="668" y="157" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Declined_Release" bpmnElement="Flow_Declined_Release">
-        <di:waypoint x="660" y="235"/><di:waypoint x="660" y="310"/><di:waypoint x="740" y="310"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="668" y="270" width="43" height="14"/></bpmndi:BPMNLabel>
+        <di:waypoint x="660" y="235" />
+        <di:waypoint x="660" y="310" />
+        <di:waypoint x="740" y="310" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="668" y="270" width="43" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Reserve_Fulfilled" bpmnElement="Flow_Reserve_Fulfilled">
-        <di:waypoint x="840" y="140"/><di:waypoint x="892" y="140"/>
+        <di:waypoint x="840" y="140" />
+        <di:waypoint x="892" y="140" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Release_Released" bpmnElement="Flow_Release_Released">
-        <di:waypoint x="840" y="310"/><di:waypoint x="892" y="310"/>
+        <di:waypoint x="840" y="310" />
+        <di:waypoint x="892" y="310" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

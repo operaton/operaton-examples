@@ -1,167 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_LeaveRequest"
-                  targetNamespace="http://operaton.org/examples/leave-request">
-
-  <bpmn:process id="leave-request"
-                name="Leave Request"
-                isExecutable="true"
-                operaton:historyTimeToLive="P30D">
-
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_LeaveRequest" targetNamespace="http://operaton.org/examples/leave-request">
+  <bpmn:process id="leave-request" name="Leave Request" isExecutable="true" operaton:historyTimeToLive="P30D">
     <bpmn:startEvent id="StartEvent_RequestInitiated" name="Request initiated">
       <bpmn:outgoing>Flow_Start_To_Submit</bpmn:outgoing>
     </bpmn:startEvent>
-
-    <bpmn:sequenceFlow id="Flow_Start_To_Submit"
-                       sourceRef="StartEvent_RequestInitiated"
-                       targetRef="UserTask_SubmitRequest"/>
-
-    <bpmn:userTask id="UserTask_SubmitRequest"
-                   name="Submit leave request"
-                   operaton:candidateGroups="employees">
+    <bpmn:sequenceFlow id="Flow_Start_To_Submit" sourceRef="StartEvent_RequestInitiated" targetRef="UserTask_SubmitRequest" />
+    <bpmn:userTask id="UserTask_SubmitRequest" name="Submit leave request" operaton:candidateGroups="employees">
       <bpmn:extensionElements>
         <operaton:formData>
-          <operaton:formField id="employeeName" label="Employee name" type="string"/>
-          <operaton:formField id="startDate" label="Start date" type="date"/>
-          <operaton:formField id="endDate" label="End date" type="date"/>
+          <operaton:formField id="employeeName" label="Employee name" type="string" />
+          <operaton:formField id="startDate" label="Start date" type="date" />
+          <operaton:formField id="endDate" label="End date" type="date" />
           <operaton:formField id="leaveType" label="Leave type" type="enum">
-            <operaton:value id="annual" name="Annual leave"/>
-            <operaton:value id="sick" name="Sick leave"/>
-            <operaton:value id="unpaid" name="Unpaid leave"/>
+            <operaton:value id="annual" name="Annual leave" />
+            <operaton:value id="sick" name="Sick leave" />
+            <operaton:value id="unpaid" name="Unpaid leave" />
           </operaton:formField>
         </operaton:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_Start_To_Submit</bpmn:incoming>
       <bpmn:outgoing>Flow_Submit_To_Review</bpmn:outgoing>
     </bpmn:userTask>
-
-    <bpmn:sequenceFlow id="Flow_Submit_To_Review"
-                       sourceRef="UserTask_SubmitRequest"
-                       targetRef="UserTask_ReviewRequest"/>
-
-    <bpmn:userTask id="UserTask_ReviewRequest"
-                   name="Review leave request"
-                   operaton:candidateGroups="managers">
+    <bpmn:sequenceFlow id="Flow_Submit_To_Review" sourceRef="UserTask_SubmitRequest" targetRef="UserTask_ReviewRequest" />
+    <bpmn:userTask id="UserTask_ReviewRequest" name="Review leave request" operaton:candidateGroups="managers">
       <bpmn:extensionElements>
         <operaton:formData>
-          <operaton:formField id="approved" label="Approved" type="boolean"/>
-          <operaton:formField id="comments" label="Comments" type="string"/>
+          <operaton:formField id="approved" label="Approved" type="boolean" />
+          <operaton:formField id="comments" label="Comments" type="string" />
         </operaton:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_Submit_To_Review</bpmn:incoming>
       <bpmn:outgoing>Flow_Review_To_Gateway</bpmn:outgoing>
     </bpmn:userTask>
-
-    <bpmn:sequenceFlow id="Flow_Review_To_Gateway"
-                       sourceRef="UserTask_ReviewRequest"
-                       targetRef="Gateway_ApprovalDecision"/>
-
-    <bpmn:exclusiveGateway id="Gateway_ApprovalDecision"
-                           name="Leave approved?"
-                           default="Flow_Gateway_To_Rejected">
+    <bpmn:sequenceFlow id="Flow_Review_To_Gateway" sourceRef="UserTask_ReviewRequest" targetRef="Gateway_ApprovalDecision" />
+    <bpmn:exclusiveGateway id="Gateway_ApprovalDecision" name="Leave approved?" default="Flow_Gateway_To_Rejected">
       <bpmn:incoming>Flow_Review_To_Gateway</bpmn:incoming>
       <bpmn:outgoing>Flow_Gateway_To_Approved</bpmn:outgoing>
       <bpmn:outgoing>Flow_Gateway_To_Rejected</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-
-    <bpmn:sequenceFlow id="Flow_Gateway_To_Approved"
-                       name="approved"
-                       sourceRef="Gateway_ApprovalDecision"
-                       targetRef="EndEvent_LeaveApproved">
+    <bpmn:sequenceFlow id="Flow_Gateway_To_Approved" name="approved" sourceRef="Gateway_ApprovalDecision" targetRef="EndEvent_LeaveApproved">
       <bpmn:conditionExpression>${approved == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_Gateway_To_Rejected"
-                       name="rejected (default)"
-                       sourceRef="Gateway_ApprovalDecision"
-                       targetRef="EndEvent_LeaveRejected"/>
-
+    <bpmn:sequenceFlow id="Flow_Gateway_To_Rejected" name="rejected (default)" sourceRef="Gateway_ApprovalDecision" targetRef="EndEvent_LeaveRejected" />
     <bpmn:endEvent id="EndEvent_LeaveApproved" name="Leave approved">
       <bpmn:incoming>Flow_Gateway_To_Approved</bpmn:incoming>
     </bpmn:endEvent>
-
     <bpmn:endEvent id="EndEvent_LeaveRejected" name="Leave rejected">
       <bpmn:incoming>Flow_Gateway_To_Rejected</bpmn:incoming>
     </bpmn:endEvent>
   </bpmn:process>
-
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="leave-request">
-
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_RequestInitiated">
-        <dc:Bounds x="152" y="162" width="36" height="36"/>
+        <dc:Bounds x="152" y="162" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="129" y="205" width="83" height="14"/>
+          <dc:Bounds x="129" y="205" width="83" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_SubmitRequest" bpmnElement="UserTask_SubmitRequest">
-        <dc:Bounds x="240" y="140" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+        <dc:Bounds x="240" y="140" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_ReviewRequest" bpmnElement="UserTask_ReviewRequest">
-        <dc:Bounds x="400" y="140" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+        <dc:Bounds x="400" y="140" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Gateway" bpmnElement="Gateway_ApprovalDecision" isMarkerVisible="true">
-        <dc:Bounds x="555" y="155" width="50" height="50"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="538" y="212" width="84" height="14"/>
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_LeaveApproved" bpmnElement="EndEvent_LeaveApproved">
-        <dc:Bounds x="662" y="162" width="36" height="36"/>
+        <dc:Bounds x="712" y="162" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="640" y="205" width="81" height="14"/>
+          <dc:Bounds x="691" y="205" width="79" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_LeaveRejected" bpmnElement="EndEvent_LeaveRejected">
-        <dc:Bounds x="662" y="302" width="36" height="36"/>
+        <dc:Bounds x="712" y="302" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="641" y="345" width="78" height="14"/>
+          <dc:Bounds x="694" y="345" width="73" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
+      <bpmndi:BPMNShape id="Shape_Gateway" bpmnElement="Gateway_ApprovalDecision" isMarkerVisible="true">
+        <dc:Bounds x="595" y="155" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="517" y="205" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Start_To_Submit" bpmnElement="Flow_Start_To_Submit">
-        <di:waypoint x="188" y="180"/>
-        <di:waypoint x="240" y="180"/>
+        <di:waypoint x="188" y="180" />
+        <di:waypoint x="240" y="180" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Submit_To_Review" bpmnElement="Flow_Submit_To_Review">
-        <di:waypoint x="340" y="180"/>
-        <di:waypoint x="400" y="180"/>
+        <di:waypoint x="340" y="180" />
+        <di:waypoint x="400" y="180" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Review_To_Gateway" bpmnElement="Flow_Review_To_Gateway">
-        <di:waypoint x="500" y="180"/>
-        <di:waypoint x="555" y="180"/>
+        <di:waypoint x="500" y="180" />
+        <di:waypoint x="595" y="180" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Gateway_To_Approved" bpmnElement="Flow_Gateway_To_Approved">
-        <di:waypoint x="605" y="180"/>
-        <di:waypoint x="662" y="180"/>
+        <di:waypoint x="645" y="180" />
+        <di:waypoint x="712" y="180" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="617" y="162" width="44" height="14"/>
+          <dc:Bounds x="651" y="162" width="46" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Gateway_To_Rejected" bpmnElement="Flow_Gateway_To_Rejected">
-        <di:waypoint x="580" y="205"/>
-        <di:waypoint x="580" y="320"/>
-        <di:waypoint x="662" y="320"/>
+        <di:waypoint x="620" y="205" />
+        <di:waypoint x="620" y="320" />
+        <di:waypoint x="712" y="320" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="588" y="255" width="104" height="14"/>
+          <dc:Bounds x="632" y="293" width="83" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
