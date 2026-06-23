@@ -1,53 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_NotifyCustomer"
-                  targetNamespace="http://operaton.org/examples">
-
-  <bpmn:process id="notify-customer" name="Notify Customer" isExecutable="true"
-                operaton:historyTimeToLive="P30D">
-
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_NotifyCustomer" targetNamespace="http://operaton.org/examples">
+  <bpmn:process id="notify-customer" name="Notify Customer" isExecutable="true" operaton:historyTimeToLive="P30D">
     <bpmn:startEvent id="StartEvent_Notify" name="Start notification">
       <bpmn:outgoing>Flow_Start_NotifyTask</bpmn:outgoing>
     </bpmn:startEvent>
-
-    <bpmn:serviceTask id="Task_Notify" name="Send customer notification"
-                      operaton:delegateExpression="${notifyCustomerDelegate}">
+    <bpmn:serviceTask id="Task_Notify" name="Send customer notification" operaton:delegateExpression="${notifyCustomerDelegate}">
       <bpmn:incoming>Flow_Start_NotifyTask</bpmn:incoming>
       <bpmn:outgoing>Flow_NotifyTask_End</bpmn:outgoing>
     </bpmn:serviceTask>
-
     <bpmn:endEvent id="EndEvent_NotificationSent" name="Notification sent">
       <bpmn:incoming>Flow_NotifyTask_End</bpmn:incoming>
     </bpmn:endEvent>
-
-    <bpmn:sequenceFlow id="Flow_Start_NotifyTask"
-                       sourceRef="StartEvent_Notify"
-                       targetRef="Task_Notify"/>
-    <bpmn:sequenceFlow id="Flow_NotifyTask_End"
-                       sourceRef="Task_Notify"
-                       targetRef="EndEvent_NotificationSent"/>
+    <bpmn:sequenceFlow id="Flow_Start_NotifyTask" sourceRef="StartEvent_Notify" targetRef="Task_Notify" />
+    <bpmn:sequenceFlow id="Flow_NotifyTask_End" sourceRef="Task_Notify" targetRef="EndEvent_NotificationSent" />
   </bpmn:process>
-
   <bpmndi:BPMNDiagram id="BPMNDiagram_NotifyCustomer">
     <bpmndi:BPMNPlane id="BPMNPlane_NotifyCustomer" bpmnElement="notify-customer">
       <bpmndi:BPMNShape id="Shape_StartNotify" bpmnElement="StartEvent_Notify">
-        <dc:Bounds x="152" y="222" width="36" height="36"/>
+        <dc:Bounds x="152" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="130" y="263" width="79" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_TaskNotify" bpmnElement="Task_Notify">
-        <dc:Bounds x="240" y="200" width="100" height="80"/>
+        <dc:Bounds x="240" y="200" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_EndNotify" bpmnElement="EndEvent_NotificationSent">
-        <dc:Bounds x="392" y="222" width="36" height="36"/>
+        <dc:Bounds x="392" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="370" y="263" width="79" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Start_NotifyTask" bpmnElement="Flow_Start_NotifyTask">
-        <di:waypoint x="188" y="240"/><di:waypoint x="240" y="240"/>
+        <di:waypoint x="188" y="240" />
+        <di:waypoint x="240" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_NotifyTask_End" bpmnElement="Flow_NotifyTask_End">
-        <di:waypoint x="340" y="240"/><di:waypoint x="392" y="240"/>
+        <di:waypoint x="340" y="240" />
+        <di:waypoint x="392" y="240" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

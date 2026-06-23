@@ -1,216 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_InsuranceClaim"
-                  targetNamespace="http://operaton.org/examples">
-
-  <bpmn:process id="insurance-claim" name="Insurance Claim" isExecutable="true"
-                operaton:historyTimeToLive="P30D">
-
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_InsuranceClaim" targetNamespace="http://operaton.org/examples">
+  <bpmn:process id="insurance-claim" name="Insurance Claim" isExecutable="true" operaton:historyTimeToLive="P30D">
     <bpmn:startEvent id="StartEvent_ClaimSubmitted" name="Claim submitted">
       <bpmn:outgoing>Flow_Start_Route</bpmn:outgoing>
     </bpmn:startEvent>
-
-    <bpmn:inclusiveGateway id="Gateway_Route" name="Route claim"
-                           default="Flow_Default_Rejected">
+    <bpmn:inclusiveGateway id="Gateway_Route" name="Route claim" default="Flow_Default_Rejected">
       <bpmn:incoming>Flow_Start_Route</bpmn:incoming>
       <bpmn:outgoing>Flow_Medical</bpmn:outgoing>
       <bpmn:outgoing>Flow_Property</bpmn:outgoing>
       <bpmn:outgoing>Flow_Default_Rejected</bpmn:outgoing>
     </bpmn:inclusiveGateway>
-
-    <bpmn:userTask id="Task_ReviewMedical" name="Review medical claim"
-                   operaton:candidateGroups="medicalTeam">
+    <bpmn:userTask id="Task_ReviewMedical" name="Review medical claim" operaton:candidateGroups="medicalTeam">
       <bpmn:incoming>Flow_Medical</bpmn:incoming>
       <bpmn:outgoing>Flow_Medical_Join</bpmn:outgoing>
     </bpmn:userTask>
-
-    <bpmn:userTask id="Task_ReviewProperty" name="Review property claim"
-                   operaton:candidateGroups="propertyTeam">
+    <bpmn:userTask id="Task_ReviewProperty" name="Review property claim" operaton:candidateGroups="propertyTeam">
       <bpmn:incoming>Flow_Property</bpmn:incoming>
       <bpmn:outgoing>Flow_Property_Join</bpmn:outgoing>
     </bpmn:userTask>
-
     <bpmn:inclusiveGateway id="Gateway_Join" name="All reviews done">
       <bpmn:incoming>Flow_Medical_Join</bpmn:incoming>
       <bpmn:incoming>Flow_Property_Join</bpmn:incoming>
       <bpmn:outgoing>Flow_Join_Settle</bpmn:outgoing>
     </bpmn:inclusiveGateway>
-
-    <bpmn:serviceTask id="ServiceTask_SettleClaim" name="Settle claim"
-                      operaton:delegateExpression="${settleClaimDelegate}">
+    <bpmn:serviceTask id="ServiceTask_SettleClaim" name="Settle claim" operaton:delegateExpression="${settleClaimDelegate}">
       <bpmn:incoming>Flow_Join_Settle</bpmn:incoming>
       <bpmn:outgoing>Flow_Settle_End</bpmn:outgoing>
     </bpmn:serviceTask>
-
     <bpmn:endEvent id="EndEvent_ClaimSettled" name="Claim settled">
       <bpmn:incoming>Flow_Settle_End</bpmn:incoming>
     </bpmn:endEvent>
-
     <bpmn:endEvent id="EndEvent_Rejected" name="Claim rejected">
       <bpmn:incoming>Flow_Default_Rejected</bpmn:incoming>
     </bpmn:endEvent>
-
-    <bpmn:sequenceFlow id="Flow_Start_Route"
-                       sourceRef="StartEvent_ClaimSubmitted"
-                       targetRef="Gateway_Route"/>
-
-    <bpmn:sequenceFlow id="Flow_Medical" name="medical or both"
-                       sourceRef="Gateway_Route"
-                       targetRef="Task_ReviewMedical">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${claimType == 'medical' || claimType == 'both'}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_Start_Route" sourceRef="StartEvent_ClaimSubmitted" targetRef="Gateway_Route" />
+    <bpmn:sequenceFlow id="Flow_Medical" name="medical or both" sourceRef="Gateway_Route" targetRef="Task_ReviewMedical">
+      <bpmn:conditionExpression xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="bpmn:tFormalExpression">${claimType == 'medical' || claimType == 'both'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_Property" name="property or both"
-                       sourceRef="Gateway_Route"
-                       targetRef="Task_ReviewProperty">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${claimType == 'property' || claimType == 'both'}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_Property" name="property or both" sourceRef="Gateway_Route" targetRef="Task_ReviewProperty">
+      <bpmn:conditionExpression xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="bpmn:tFormalExpression">${claimType == 'property' || claimType == 'both'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_Default_Rejected" name="no match"
-                       sourceRef="Gateway_Route"
-                       targetRef="EndEvent_Rejected"/>
-
-    <bpmn:sequenceFlow id="Flow_Medical_Join"
-                       sourceRef="Task_ReviewMedical"
-                       targetRef="Gateway_Join"/>
-
-    <bpmn:sequenceFlow id="Flow_Property_Join"
-                       sourceRef="Task_ReviewProperty"
-                       targetRef="Gateway_Join"/>
-
-    <bpmn:sequenceFlow id="Flow_Join_Settle"
-                       sourceRef="Gateway_Join"
-                       targetRef="ServiceTask_SettleClaim"/>
-
-    <bpmn:sequenceFlow id="Flow_Settle_End"
-                       sourceRef="ServiceTask_SettleClaim"
-                       targetRef="EndEvent_ClaimSettled"/>
-
+    <bpmn:sequenceFlow id="Flow_Default_Rejected" name="no match" sourceRef="Gateway_Route" targetRef="EndEvent_Rejected" />
+    <bpmn:sequenceFlow id="Flow_Medical_Join" sourceRef="Task_ReviewMedical" targetRef="Gateway_Join" />
+    <bpmn:sequenceFlow id="Flow_Property_Join" sourceRef="Task_ReviewProperty" targetRef="Gateway_Join" />
+    <bpmn:sequenceFlow id="Flow_Join_Settle" sourceRef="Gateway_Join" targetRef="ServiceTask_SettleClaim" />
+    <bpmn:sequenceFlow id="Flow_Settle_End" sourceRef="ServiceTask_SettleClaim" targetRef="EndEvent_ClaimSettled" />
   </bpmn:process>
-
   <bpmndi:BPMNDiagram id="BPMNDiagram_InsuranceClaim">
     <bpmndi:BPMNPlane id="BPMNPlane_InsuranceClaim" bpmnElement="insurance-claim">
-
-      <!-- Start event -->
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_ClaimSubmitted">
-        <dc:Bounds x="152" y="272" width="36" height="36"/>
+        <dc:Bounds x="152" y="272" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="131" y="315" width="79" height="14"/>
+          <dc:Bounds x="131" y="315" width="79" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <!-- Inclusive gateway (split) -->
       <bpmndi:BPMNShape id="Shape_GwRoute" bpmnElement="Gateway_Route" isMarkerVisible="true">
-        <dc:Bounds x="265" y="265" width="50" height="50"/>
+        <dc:Bounds x="265" y="265" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="255" y="322" width="71" height="14"/>
+          <dc:Bounds x="330" y="283" width="59" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <!-- Medical user task -->
       <bpmndi:BPMNShape id="Shape_ReviewMedical" bpmnElement="Task_ReviewMedical">
-        <dc:Bounds x="390" y="160" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+        <dc:Bounds x="390" y="160" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-
-      <!-- Property user task -->
       <bpmndi:BPMNShape id="Shape_ReviewProperty" bpmnElement="Task_ReviewProperty">
-        <dc:Bounds x="390" y="340" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+        <dc:Bounds x="390" y="340" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-
-      <!-- Inclusive gateway (join) -->
       <bpmndi:BPMNShape id="Shape_GwJoin" bpmnElement="Gateway_Join" isMarkerVisible="true">
-        <dc:Bounds x="565" y="265" width="50" height="50"/>
+        <dc:Bounds x="565" y="265" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="547" y="322" width="87" height="14"/>
+          <dc:Bounds x="479" y="283" width="81" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <!-- Settle service task -->
       <bpmndi:BPMNShape id="Shape_Settle" bpmnElement="ServiceTask_SettleClaim">
-        <dc:Bounds x="690" y="250" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+        <dc:Bounds x="690" y="250" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-
-      <!-- End event: settled -->
       <bpmndi:BPMNShape id="Shape_EndSettled" bpmnElement="EndEvent_ClaimSettled">
-        <dc:Bounds x="862" y="272" width="36" height="36"/>
+        <dc:Bounds x="862" y="272" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="844" y="315" width="72" height="14"/>
+          <dc:Bounds x="844" y="315" width="72" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <!-- End event: rejected -->
       <bpmndi:BPMNShape id="Shape_EndRejected" bpmnElement="EndEvent_Rejected">
-        <dc:Bounds x="282" y="462" width="36" height="36"/>
+        <dc:Bounds x="862" y="462" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="258" y="505" width="84" height="14"/>
+          <dc:Bounds x="845" y="505" width="71" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <!-- Sequence flows -->
       <bpmndi:BPMNEdge id="Edge_Start_Route" bpmnElement="Flow_Start_Route">
-        <di:waypoint x="188" y="290"/>
-        <di:waypoint x="265" y="290"/>
+        <di:waypoint x="188" y="290" />
+        <di:waypoint x="265" y="290" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Medical" bpmnElement="Flow_Medical">
-        <di:waypoint x="290" y="265"/>
-        <di:waypoint x="290" y="200"/>
-        <di:waypoint x="390" y="200"/>
+        <di:waypoint x="290" y="265" />
+        <di:waypoint x="290" y="200" />
+        <di:waypoint x="390" y="200" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="297" y="225" width="88" height="14"/>
+          <dc:Bounds x="292" y="183" width="76" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Property" bpmnElement="Flow_Property">
-        <di:waypoint x="290" y="315"/>
-        <di:waypoint x="290" y="380"/>
-        <di:waypoint x="390" y="380"/>
+        <di:waypoint x="290" y="315" />
+        <di:waypoint x="290" y="380" />
+        <di:waypoint x="390" y="380" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="297" y="340" width="88" height="14"/>
+          <dc:Bounds x="302" y="353" width="78" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Default_Rejected" bpmnElement="Flow_Default_Rejected">
-        <di:waypoint x="290" y="315"/>
-        <di:waypoint x="290" y="480"/>
-        <di:waypoint x="282" y="480"/>
+        <di:waypoint x="290" y="315" />
+        <di:waypoint x="290" y="480" />
+        <di:waypoint x="862" y="480" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="295" y="390" width="50" height="14"/>
+          <dc:Bounds x="307" y="453" width="46" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Medical_Join" bpmnElement="Flow_Medical_Join">
-        <di:waypoint x="490" y="200"/>
-        <di:waypoint x="590" y="200"/>
-        <di:waypoint x="590" y="265"/>
+        <di:waypoint x="490" y="200" />
+        <di:waypoint x="590" y="200" />
+        <di:waypoint x="590" y="265" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Property_Join" bpmnElement="Flow_Property_Join">
-        <di:waypoint x="490" y="380"/>
-        <di:waypoint x="590" y="380"/>
-        <di:waypoint x="590" y="315"/>
+        <di:waypoint x="490" y="380" />
+        <di:waypoint x="590" y="380" />
+        <di:waypoint x="590" y="315" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Join_Settle" bpmnElement="Flow_Join_Settle">
-        <di:waypoint x="615" y="290"/>
-        <di:waypoint x="690" y="290"/>
+        <di:waypoint x="615" y="290" />
+        <di:waypoint x="690" y="290" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Settle_End" bpmnElement="Flow_Settle_End">
-        <di:waypoint x="790" y="290"/>
-        <di:waypoint x="862" y="290"/>
+        <di:waypoint x="790" y="290" />
+        <di:waypoint x="862" y="290" />
       </bpmndi:BPMNEdge>
-
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
-
 </bpmn:definitions>

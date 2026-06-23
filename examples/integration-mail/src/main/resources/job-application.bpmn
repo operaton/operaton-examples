@@ -1,129 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_JobApplication"
-                  targetNamespace="http://operaton.org/examples/job-application">
-
-  <bpmn:process id="job-application"
-                name="Job Application"
-                isExecutable="true"
-                operaton:historyTimeToLive="P30D">
-
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_JobApplication" targetNamespace="http://operaton.org/examples/job-application">
+  <bpmn:process id="job-application" name="Job Application" isExecutable="true" operaton:historyTimeToLive="P30D">
     <bpmn:startEvent id="StartEvent_1" name="Application submitted">
       <bpmn:outgoing>Flow_Start_Confirm</bpmn:outgoing>
     </bpmn:startEvent>
-
-    <bpmn:serviceTask id="Task_SendConfirmation" name="Send confirmation email"
-                      operaton:delegateExpression="${sendConfirmationEmailDelegate}">
+    <bpmn:serviceTask id="Task_SendConfirmation" name="Send confirmation email" operaton:delegateExpression="${sendConfirmationEmailDelegate}">
       <bpmn:incoming>Flow_Start_Confirm</bpmn:incoming>
       <bpmn:outgoing>Flow_Confirm_Review</bpmn:outgoing>
     </bpmn:serviceTask>
-
-    <bpmn:userTask id="Task_ReviewApplication" name="Review application"
-                   operaton:candidateGroups="hr">
+    <bpmn:userTask id="Task_ReviewApplication" name="Review application" operaton:candidateGroups="hr">
       <bpmn:incoming>Flow_Confirm_Review</bpmn:incoming>
       <bpmn:outgoing>Flow_Review_Gateway</bpmn:outgoing>
     </bpmn:userTask>
-
     <bpmn:exclusiveGateway id="Gateway_Decision" name="Decision?">
       <bpmn:incoming>Flow_Review_Gateway</bpmn:incoming>
       <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
       <bpmn:outgoing>Flow_Rejected</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-
-    <bpmn:serviceTask id="Task_SendDecision" name="Send decision email"
-                      operaton:delegateExpression="${sendDecisionEmailDelegate}">
+    <bpmn:serviceTask id="Task_SendDecision" name="Send decision email" operaton:delegateExpression="${sendDecisionEmailDelegate}">
       <bpmn:incoming>Flow_Approved</bpmn:incoming>
       <bpmn:incoming>Flow_Rejected</bpmn:incoming>
       <bpmn:outgoing>Flow_Decision_End</bpmn:outgoing>
     </bpmn:serviceTask>
-
     <bpmn:endEvent id="EndEvent_1" name="Application processed">
       <bpmn:incoming>Flow_Decision_End</bpmn:incoming>
     </bpmn:endEvent>
-
-    <bpmn:sequenceFlow id="Flow_Start_Confirm" sourceRef="StartEvent_1" targetRef="Task_SendConfirmation"/>
-    <bpmn:sequenceFlow id="Flow_Confirm_Review" sourceRef="Task_SendConfirmation" targetRef="Task_ReviewApplication"/>
-    <bpmn:sequenceFlow id="Flow_Review_Gateway" sourceRef="Task_ReviewApplication" targetRef="Gateway_Decision"/>
+    <bpmn:sequenceFlow id="Flow_Start_Confirm" sourceRef="StartEvent_1" targetRef="Task_SendConfirmation" />
+    <bpmn:sequenceFlow id="Flow_Confirm_Review" sourceRef="Task_SendConfirmation" targetRef="Task_ReviewApplication" />
+    <bpmn:sequenceFlow id="Flow_Review_Gateway" sourceRef="Task_ReviewApplication" targetRef="Gateway_Decision" />
     <bpmn:sequenceFlow id="Flow_Approved" name="approved" sourceRef="Gateway_Decision" targetRef="Task_SendDecision">
       <bpmn:conditionExpression>${approved == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_Rejected" name="rejected" sourceRef="Gateway_Decision" targetRef="Task_SendDecision">
       <bpmn:conditionExpression>${approved != true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_Decision_End" sourceRef="Task_SendDecision" targetRef="EndEvent_1"/>
-
+    <bpmn:sequenceFlow id="Flow_Decision_End" sourceRef="Task_SendDecision" targetRef="EndEvent_1" />
   </bpmn:process>
-
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="job-application">
-
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_1">
-        <dc:Bounds x="152" y="162" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="125" y="205" width="90" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="152" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="125" y="205" width="90" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Confirm" bpmnElement="Task_SendConfirmation">
-        <dc:Bounds x="250" y="140" width="100" height="80"/>
+        <dc:Bounds x="250" y="140" width="100" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Review" bpmnElement="Task_ReviewApplication">
-        <dc:Bounds x="420" y="140" width="100" height="80"/>
+        <dc:Bounds x="420" y="140" width="100" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Gateway" bpmnElement="Gateway_Decision" isMarkerVisible="true">
-        <dc:Bounds x="585" y="155" width="50" height="50"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="587" y="212" width="46" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="585" y="155" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="644.5" y="173" width="49" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Decision" bpmnElement="Task_SendDecision">
-        <dc:Bounds x="700" y="140" width="100" height="80"/>
+        <dc:Bounds x="700" y="140" width="100" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_End" bpmnElement="EndEvent_1">
-        <dc:Bounds x="862" y="162" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="837" y="205" width="86" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="862" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="837" y="205" width="86" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNEdge id="Edge_Start_Confirm" bpmnElement="Flow_Start_Confirm">
-        <di:waypoint x="188" y="180"/>
-        <di:waypoint x="250" y="180"/>
+        <di:waypoint x="188" y="180" />
+        <di:waypoint x="250" y="180" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Confirm_Review" bpmnElement="Flow_Confirm_Review">
-        <di:waypoint x="350" y="180"/>
-        <di:waypoint x="420" y="180"/>
+        <di:waypoint x="350" y="180" />
+        <di:waypoint x="420" y="180" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Review_Gateway" bpmnElement="Flow_Review_Gateway">
-        <di:waypoint x="520" y="180"/>
-        <di:waypoint x="585" y="180"/>
+        <di:waypoint x="520" y="180" />
+        <di:waypoint x="585" y="180" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Approved" bpmnElement="Flow_Approved">
-        <di:waypoint x="610" y="155"/>
-        <di:waypoint x="610" y="130"/>
-        <di:waypoint x="750" y="130"/>
-        <di:waypoint x="750" y="140"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="660" y="112" width="46" height="14"/></bpmndi:BPMNLabel>
+        <di:waypoint x="610" y="155" />
+        <di:waypoint x="610" y="100" />
+        <di:waypoint x="750" y="100" />
+        <di:waypoint x="750" y="140" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="660" y="82" width="46" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Rejected" bpmnElement="Flow_Rejected">
-        <di:waypoint x="610" y="205"/>
-        <di:waypoint x="610" y="230"/>
-        <di:waypoint x="750" y="230"/>
-        <di:waypoint x="750" y="220"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="660" y="215" width="40" height="14"/></bpmndi:BPMNLabel>
+        <di:waypoint x="610" y="205" />
+        <di:waypoint x="610" y="260" />
+        <di:waypoint x="750" y="260" />
+        <di:waypoint x="750" y="220" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="660" y="245" width="40" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Decision_End" bpmnElement="Flow_Decision_End">
-        <di:waypoint x="800" y="180"/>
-        <di:waypoint x="862" y="180"/>
+        <di:waypoint x="800" y="180" />
+        <di:waypoint x="862" y="180" />
       </bpmndi:BPMNEdge>
-
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

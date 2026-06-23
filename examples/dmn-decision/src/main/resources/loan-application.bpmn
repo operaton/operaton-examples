@@ -1,158 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_LoanApplication"
-                  targetNamespace="http://operaton.org/examples/loan-application">
-
-  <bpmn:process id="loan-application"
-                name="Loan Application"
-                isExecutable="true"
-                operaton:historyTimeToLive="P30D">
-
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_LoanApplication" targetNamespace="http://operaton.org/examples/loan-application">
+  <bpmn:process id="loan-application" name="Loan Application" isExecutable="true" operaton:historyTimeToLive="P30D">
     <bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received">
       <bpmn:outgoing>Flow_Start_To_Credit</bpmn:outgoing>
     </bpmn:startEvent>
-
-    <bpmn:businessRuleTask id="Task_EvaluateCredit"
-                           name="Evaluate credit"
-                           operaton:decisionRef="credit-decision"
-                           operaton:resultVariable="loanDecision"
-                           operaton:mapDecisionResult="singleEntry">
+    <bpmn:businessRuleTask id="Task_EvaluateCredit" name="Evaluate credit" operaton:decisionRef="credit-decision" operaton:resultVariable="loanDecision" operaton:mapDecisionResult="singleEntry">
       <bpmn:incoming>Flow_Start_To_Credit</bpmn:incoming>
       <bpmn:outgoing>Flow_Credit_To_Gateway</bpmn:outgoing>
     </bpmn:businessRuleTask>
-
-    <bpmn:exclusiveGateway id="Gateway_DecisionOutcome"
-                           name="Decision outcome?"
-                           default="Flow_Gateway_To_Declined">
+    <bpmn:exclusiveGateway id="Gateway_DecisionOutcome" name="Decision outcome?" default="Flow_Gateway_To_Declined">
       <bpmn:incoming>Flow_Credit_To_Gateway</bpmn:incoming>
       <bpmn:outgoing>Flow_Gateway_To_Approved</bpmn:outgoing>
       <bpmn:outgoing>Flow_Gateway_To_Review</bpmn:outgoing>
       <bpmn:outgoing>Flow_Gateway_To_Declined</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-
-    <bpmn:sequenceFlow id="Flow_Start_To_Credit"
-                       sourceRef="StartEvent_ApplicationReceived"
-                       targetRef="Task_EvaluateCredit"/>
-
-    <bpmn:sequenceFlow id="Flow_Credit_To_Gateway"
-                       sourceRef="Task_EvaluateCredit"
-                       targetRef="Gateway_DecisionOutcome"/>
-
-    <bpmn:sequenceFlow id="Flow_Gateway_To_Approved"
-                       name="approved"
-                       sourceRef="Gateway_DecisionOutcome"
-                       targetRef="EndEvent_Approved">
+    <bpmn:sequenceFlow id="Flow_Start_To_Credit" sourceRef="StartEvent_ApplicationReceived" targetRef="Task_EvaluateCredit" />
+    <bpmn:sequenceFlow id="Flow_Credit_To_Gateway" sourceRef="Task_EvaluateCredit" targetRef="Gateway_DecisionOutcome" />
+    <bpmn:sequenceFlow id="Flow_Gateway_To_Approved" name="approved" sourceRef="Gateway_DecisionOutcome" targetRef="EndEvent_Approved">
       <bpmn:conditionExpression>${loanDecision == 'approved'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_Gateway_To_Review"
-                       name="review"
-                       sourceRef="Gateway_DecisionOutcome"
-                       targetRef="EndEvent_Review">
+    <bpmn:sequenceFlow id="Flow_Gateway_To_Review" name="review" sourceRef="Gateway_DecisionOutcome" targetRef="EndEvent_Review">
       <bpmn:conditionExpression>${loanDecision == 'review'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_Gateway_To_Declined"
-                       name="declined (default)"
-                       sourceRef="Gateway_DecisionOutcome"
-                       targetRef="EndEvent_Declined"/>
-
+    <bpmn:sequenceFlow id="Flow_Gateway_To_Declined" name="declined (default)" sourceRef="Gateway_DecisionOutcome" targetRef="EndEvent_Declined" />
     <bpmn:endEvent id="EndEvent_Approved" name="Loan approved">
       <bpmn:incoming>Flow_Gateway_To_Approved</bpmn:incoming>
     </bpmn:endEvent>
-
     <bpmn:endEvent id="EndEvent_Review" name="Sent for review">
       <bpmn:incoming>Flow_Gateway_To_Review</bpmn:incoming>
     </bpmn:endEvent>
-
     <bpmn:endEvent id="EndEvent_Declined" name="Loan declined">
       <bpmn:incoming>Flow_Gateway_To_Declined</bpmn:incoming>
     </bpmn:endEvent>
   </bpmn:process>
-
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="loan-application">
-
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_ApplicationReceived">
-        <dc:Bounds x="152" y="182" width="36" height="36"/>
+        <dc:Bounds x="152" y="182" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="130" y="225" width="81" height="27"/>
+          <dc:Bounds x="130" y="225" width="81" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_EvaluateCredit" bpmnElement="Task_EvaluateCredit">
-        <dc:Bounds x="240" y="160" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+        <dc:Bounds x="240" y="160" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Gateway" bpmnElement="Gateway_DecisionOutcome" isMarkerVisible="true">
-        <dc:Bounds x="395" y="175" width="50" height="50"/>
+        <dc:Bounds x="395" y="175" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="378" y="232" width="84" height="27"/>
+          <dc:Bounds x="435" y="225" width="49" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Approved" bpmnElement="EndEvent_Approved">
-        <dc:Bounds x="512" y="82" width="36" height="36"/>
+        <dc:Bounds x="532" y="82" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="490" y="125" width="81" height="14"/>
+          <dc:Bounds x="514" y="125" width="74" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Review" bpmnElement="EndEvent_Review">
-        <dc:Bounds x="512" y="182" width="36" height="36"/>
+        <dc:Bounds x="532" y="182" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="494" y="225" width="72" height="14"/>
+          <dc:Bounds x="513" y="225" width="74" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Declined" bpmnElement="EndEvent_Declined">
-        <dc:Bounds x="512" y="282" width="36" height="36"/>
+        <dc:Bounds x="532" y="282" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="490" y="325" width="81" height="14"/>
+          <dc:Bounds x="516" y="325" width="69" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNEdge id="Edge_Start_Credit" bpmnElement="Flow_Start_To_Credit">
-        <di:waypoint x="188" y="200"/>
-        <di:waypoint x="240" y="200"/>
+        <di:waypoint x="188" y="200" />
+        <di:waypoint x="240" y="200" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Credit_Gateway" bpmnElement="Flow_Credit_To_Gateway">
-        <di:waypoint x="340" y="200"/>
-        <di:waypoint x="395" y="200"/>
+        <di:waypoint x="340" y="200" />
+        <di:waypoint x="395" y="200" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Gateway_Approved" bpmnElement="Flow_Gateway_To_Approved">
-        <di:waypoint x="420" y="175"/>
-        <di:waypoint x="420" y="100"/>
-        <di:waypoint x="512" y="100"/>
+        <di:waypoint x="420" y="175" />
+        <di:waypoint x="420" y="100" />
+        <di:waypoint x="532" y="100" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="427" y="133" width="44" height="14"/>
+          <dc:Bounds x="457" y="83" width="46" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Gateway_Review" bpmnElement="Flow_Gateway_To_Review">
-        <di:waypoint x="445" y="200"/>
-        <di:waypoint x="512" y="200"/>
+        <di:waypoint x="445" y="200" />
+        <di:waypoint x="532" y="200" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="462" y="182" width="32" height="14"/>
+          <dc:Bounds x="472" y="182" width="32" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Gateway_Declined" bpmnElement="Flow_Gateway_To_Declined">
-        <di:waypoint x="420" y="225"/>
-        <di:waypoint x="420" y="300"/>
-        <di:waypoint x="512" y="300"/>
+        <di:waypoint x="420" y="225" />
+        <di:waypoint x="420" y="300" />
+        <di:waypoint x="532" y="300" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="427" y="253" width="82" height="27"/>
+          <dc:Bounds x="437" y="283" width="85" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

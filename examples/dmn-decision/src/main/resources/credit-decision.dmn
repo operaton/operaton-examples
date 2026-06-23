@@ -1,77 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
-             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
-             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
-             xmlns:operaton="http://operaton.org/schema/1.0/dmn"
-             id="credit-decision-drg"
-             name="Credit Decision DRG"
-             namespace="http://operaton.org/examples/credit-decision">
-
-  <!-- Decision 1: Map credit score to risk level -->
-  <decision id="risk-level" name="Risk Level Assessment" operaton:historyTimeToLive="30">
-    <decisionTable id="dt_risk_level" hitPolicy="UNIQUE">
-      <input id="input_creditScore" label="Credit Score">
-        <inputExpression id="inputExpr_creditScore" typeRef="integer">
-          <text>creditScore</text>
-        </inputExpression>
-      </input>
-      <output id="output_riskLevel" label="Risk Level" name="riskLevel" typeRef="string"/>
-      <rule id="rule_risk_low">
-        <inputEntry id="ie_risk_low"><text>&gt;= 700</text></inputEntry>
-        <outputEntry id="oe_risk_low"><text>"LOW"</text></outputEntry>
-      </rule>
-      <rule id="rule_risk_medium">
-        <inputEntry id="ie_risk_medium"><text>[600..699]</text></inputEntry>
-        <outputEntry id="oe_risk_medium"><text>"MEDIUM"</text></outputEntry>
-      </rule>
-      <rule id="rule_risk_high">
-        <inputEntry id="ie_risk_high"><text>&lt; 600</text></inputEntry>
-        <outputEntry id="oe_risk_high"><text>"HIGH"</text></outputEntry>
-      </rule>
-    </decisionTable>
-  </decision>
-
-  <!-- Decision 2: Final loan decision using risk level and amount -->
-  <decision id="credit-decision" name="Credit Decision" operaton:historyTimeToLive="30">
-    <informationRequirement id="ir_uses_risk">
-      <requiredDecision href="#risk-level"/>
-    </informationRequirement>
-    <decisionTable id="dt_credit_decision" hitPolicy="FIRST">
-      <input id="input_riskLevel" label="Risk Level">
-        <inputExpression id="inputExpr_riskLevel" typeRef="string">
-          <text>riskLevel</text>
-        </inputExpression>
-      </input>
-      <input id="input_requestedAmount" label="Requested Amount">
-        <inputExpression id="inputExpr_amount" typeRef="integer">
-          <text>requestedAmount</text>
-        </inputExpression>
-      </input>
-      <output id="output_loanDecision" label="Loan Decision" name="loanDecision" typeRef="string"/>
-      <!-- HIGH risk: always declined regardless of amount -->
-      <rule id="rule_high_declined">
-        <inputEntry id="ie_high_r"><text>"HIGH"</text></inputEntry>
-        <inputEntry id="ie_high_a"><text></text></inputEntry>
-        <outputEntry id="oe_high"><text>"declined"</text></outputEntry>
-      </rule>
-      <!-- LOW risk, any amount: approved -->
-      <rule id="rule_low_approved">
-        <inputEntry id="ie_low_r"><text>"LOW"</text></inputEntry>
-        <inputEntry id="ie_low_a"><text></text></inputEntry>
-        <outputEntry id="oe_low"><text>"approved"</text></outputEntry>
-      </rule>
-      <!-- MEDIUM risk, amount <= 50000: approved -->
-      <rule id="rule_medium_small_approved">
-        <inputEntry id="ie_med_r1"><text>"MEDIUM"</text></inputEntry>
-        <inputEntry id="ie_med_a1"><text>&lt;= 50000</text></inputEntry>
-        <outputEntry id="oe_med1"><text>"approved"</text></outputEntry>
-      </rule>
-      <!-- MEDIUM risk, amount > 50000: review -->
-      <rule id="rule_medium_large_review">
-        <inputEntry id="ie_med_r2"><text>"MEDIUM"</text></inputEntry>
-        <inputEntry id="ie_med_a2"><text>&gt; 50000</text></inputEntry>
-        <outputEntry id="oe_med2"><text>"review"</text></outputEntry>
-      </rule>
-    </decisionTable>
-  </decision>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:operaton="http://operaton.org/schema/1.0/dmn"
+             id="credit-decision-drg" name="Credit Decision DRG" namespace="http://operaton.org/examples/credit-decision">
+    <decision id="risk-level" name="Risk Level Assessment" operaton:historyTimeToLive="30">
+        <decisionTable id="dt_risk_level">
+            <input id="input_creditScore" label="Credit Score">
+                <inputExpression id="inputExpr_creditScore" typeRef="integer">
+                    <text>creditScore</text>
+                </inputExpression>
+            </input>
+            <output id="output_riskLevel" label="Risk Level" name="riskLevel" typeRef="string"/>
+            <rule id="rule_risk_low">
+                <inputEntry id="ie_risk_low">
+                    <text>&gt;= 700</text>
+                </inputEntry>
+                <outputEntry id="oe_risk_low">
+                    <text>"LOW"</text>
+                </outputEntry>
+            </rule>
+            <rule id="rule_risk_medium">
+                <inputEntry id="ie_risk_medium">
+                    <text>[600..699]</text>
+                </inputEntry>
+                <outputEntry id="oe_risk_medium">
+                    <text>"MEDIUM"</text>
+                </outputEntry>
+            </rule>
+            <rule id="rule_risk_high">
+                <inputEntry id="ie_risk_high">
+                    <text>&lt; 600</text>
+                </inputEntry>
+                <outputEntry id="oe_risk_high">
+                    <text>"HIGH"</text>
+                </outputEntry>
+            </rule>
+        </decisionTable>
+    </decision>
+    <decision id="credit-decision" name="Credit Decision" operaton:historyTimeToLive="30">
+        <informationRequirement id="ir_uses_risk">
+            <requiredDecision href="#risk-level"/>
+        </informationRequirement>
+        <decisionTable id="dt_credit_decision" hitPolicy="FIRST">
+            <input id="input_riskLevel" label="Risk Level">
+                <inputExpression id="inputExpr_riskLevel" typeRef="string">
+                    <text>riskLevel</text>
+                </inputExpression>
+            </input>
+            <input id="input_requestedAmount" label="Requested Amount">
+                <inputExpression id="inputExpr_amount" typeRef="integer">
+                    <text>requestedAmount</text>
+                </inputExpression>
+            </input>
+            <output id="output_loanDecision" label="Loan Decision" name="loanDecision" typeRef="string"/>
+            <rule id="rule_high_declined">
+                <inputEntry id="ie_high_r">
+                    <text>"HIGH"</text>
+                </inputEntry>
+                <inputEntry id="ie_high_a">
+                    <text></text>
+                </inputEntry>
+                <outputEntry id="oe_high">
+                    <text>"declined"</text>
+                </outputEntry>
+            </rule>
+            <rule id="rule_low_approved">
+                <inputEntry id="ie_low_r">
+                    <text>"LOW"</text>
+                </inputEntry>
+                <inputEntry id="ie_low_a">
+                    <text></text>
+                </inputEntry>
+                <outputEntry id="oe_low">
+                    <text>"approved"</text>
+                </outputEntry>
+            </rule>
+            <rule id="rule_medium_small_approved">
+                <inputEntry id="ie_med_r1">
+                    <text>"MEDIUM"</text>
+                </inputEntry>
+                <inputEntry id="ie_med_a1">
+                    <text>&lt;= 50000</text>
+                </inputEntry>
+                <outputEntry id="oe_med1">
+                    <text>"approved"</text>
+                </outputEntry>
+            </rule>
+            <rule id="rule_medium_large_review">
+                <inputEntry id="ie_med_r2">
+                    <text>"MEDIUM"</text>
+                </inputEntry>
+                <inputEntry id="ie_med_a2">
+                    <text>&gt; 50000</text>
+                </inputEntry>
+                <outputEntry id="oe_med2">
+                    <text>"review"</text>
+                </outputEntry>
+            </rule>
+        </decisionTable>
+    </decision>
 </definitions>

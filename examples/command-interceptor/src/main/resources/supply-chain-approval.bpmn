@@ -42,6 +42,9 @@
     <bpmndi:BPMNPlane id="BPMNPlane_SupplyChainApproval" bpmnElement="supply-chain-approval">
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_OrderReceived">
         <dc:Bounds x="152" y="202" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="133" y="243" width="73" height="14"/>
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_CheckInventory" bpmnElement="ServiceTask_CheckInventory">
         <dc:Bounds x="240" y="180" width="100" height="80"/>
@@ -51,6 +54,9 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_End" bpmnElement="EndEvent_OrderApproved">
         <dc:Bounds x="562" y="202" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="542" y="243" width="76" height="14"/>
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_ToCheckInventory" bpmnElement="Flow_ToCheckInventory">
         <di:waypoint x="188" y="220"/><di:waypoint x="240" y="220"/>

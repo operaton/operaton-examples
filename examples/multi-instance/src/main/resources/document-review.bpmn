@@ -1,108 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_DocumentReview"
-                  targetNamespace="http://operaton.org/examples/document-review">
-
-  <bpmn:process id="document-review"
-                name="Document Review"
-                isExecutable="true"
-                operaton:historyTimeToLive="P30D">
-
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_DocumentReview" targetNamespace="http://operaton.org/examples/document-review">
+  <bpmn:process id="document-review" name="Document Review" isExecutable="true" operaton:historyTimeToLive="P30D">
     <bpmn:startEvent id="StartEvent_1" name="Review requested">
       <bpmn:outgoing>Flow_Start_Review</bpmn:outgoing>
     </bpmn:startEvent>
-
-    <bpmn:userTask id="Task_ReviewDocument" name="Review document"
-                   operaton:assignee="${reviewer}">
+    <bpmn:userTask id="Task_ReviewDocument" name="Review document" operaton:assignee="${reviewer}">
       <bpmn:incoming>Flow_Start_Review</bpmn:incoming>
       <bpmn:outgoing>Flow_Review_Gateway</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics isSequential="false"
-                                              operaton:collection="${reviewers}"
-                                              operaton:elementVariable="reviewer">
+      <bpmn:multiInstanceLoopCharacteristics operaton:collection="${reviewers}" operaton:elementVariable="reviewer">
         <bpmn:completionCondition>${nrOfCompletedInstances == nrOfInstances}</bpmn:completionCondition>
       </bpmn:multiInstanceLoopCharacteristics>
     </bpmn:userTask>
-
     <bpmn:exclusiveGateway id="Gateway_Decision" name="All approved?">
       <bpmn:incoming>Flow_Review_Gateway</bpmn:incoming>
       <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
       <bpmn:outgoing>Flow_Rejected</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-
     <bpmn:endEvent id="EndEvent_Approved" name="Document approved">
       <bpmn:incoming>Flow_Approved</bpmn:incoming>
     </bpmn:endEvent>
-
     <bpmn:endEvent id="EndEvent_Rejected" name="Document rejected">
       <bpmn:incoming>Flow_Rejected</bpmn:incoming>
     </bpmn:endEvent>
-
-    <bpmn:sequenceFlow id="Flow_Start_Review" sourceRef="StartEvent_1" targetRef="Task_ReviewDocument"/>
-    <bpmn:sequenceFlow id="Flow_Review_Gateway" sourceRef="Task_ReviewDocument" targetRef="Gateway_Decision"/>
+    <bpmn:sequenceFlow id="Flow_Start_Review" sourceRef="StartEvent_1" targetRef="Task_ReviewDocument" />
+    <bpmn:sequenceFlow id="Flow_Review_Gateway" sourceRef="Task_ReviewDocument" targetRef="Gateway_Decision" />
     <bpmn:sequenceFlow id="Flow_Approved" name="all approved" sourceRef="Gateway_Decision" targetRef="EndEvent_Approved">
       <bpmn:conditionExpression>${approved == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_Rejected" name="any rejected" sourceRef="Gateway_Decision" targetRef="EndEvent_Rejected">
       <bpmn:conditionExpression>${approved != true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-
   </bpmn:process>
-
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="document-review">
-
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_1">
-        <dc:Bounds x="152" y="162" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="128" y="205" width="85" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="152" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="128" y="205" width="85" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Review" bpmnElement="Task_ReviewDocument">
-        <dc:Bounds x="250" y="140" width="100" height="80"/>
+        <dc:Bounds x="250" y="140" width="100" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Gateway" bpmnElement="Gateway_Decision" isMarkerVisible="true">
-        <dc:Bounds x="415" y="155" width="50" height="50"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="406" y="212" width="68" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="415" y="155" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="475" y="173" width="68" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Approved" bpmnElement="EndEvent_Approved">
-        <dc:Bounds x="532" y="112" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="507" y="155" width="86" height="14"/></bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Shape_Rejected" bpmnElement="EndEvent_Rejected">
-        <dc:Bounds x="532" y="212" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="507" y="255" width="86" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="572" y="212" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="565" y="255" width="51" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
+      <bpmndi:BPMNShape id="Shape_Approved" bpmnElement="EndEvent_Approved">
+        <dc:Bounds x="572" y="112" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="565" y="155" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Start_Review" bpmnElement="Flow_Start_Review">
-        <di:waypoint x="188" y="180"/>
-        <di:waypoint x="250" y="180"/>
+        <di:waypoint x="188" y="180" />
+        <di:waypoint x="250" y="180" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Review_Gateway" bpmnElement="Flow_Review_Gateway">
-        <di:waypoint x="350" y="180"/>
-        <di:waypoint x="415" y="180"/>
+        <di:waypoint x="350" y="180" />
+        <di:waypoint x="415" y="180" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Approved" bpmnElement="Flow_Approved">
-        <di:waypoint x="440" y="155"/>
-        <di:waypoint x="440" y="130"/>
-        <di:waypoint x="532" y="130"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="449" y="135" width="68" height="14"/></bpmndi:BPMNLabel>
+        <di:waypoint x="440" y="155" />
+        <di:waypoint x="440" y="130" />
+        <di:waypoint x="572" y="130" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="472" y="135" width="60" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Edge_Rejected" bpmnElement="Flow_Rejected">
-        <di:waypoint x="440" y="205"/>
-        <di:waypoint x="440" y="230"/>
-        <di:waypoint x="532" y="230"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="449" y="215" width="68" height="14"/></bpmndi:BPMNLabel>
+        <di:waypoint x="440" y="205" />
+        <di:waypoint x="440" y="230" />
+        <di:waypoint x="572" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="472" y="215" width="60" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

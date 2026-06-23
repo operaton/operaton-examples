@@ -1,116 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_ContractReview"
-                  targetNamespace="http://operaton.org/examples">
-
-  <bpmn:process id="contract-review" name="Contract Review" isExecutable="true"
-                operaton:historyTimeToLive="P30D">
-
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_ContractReview" targetNamespace="http://operaton.org/examples">
+  <bpmn:process id="contract-review" name="Contract Review" isExecutable="true" operaton:historyTimeToLive="P30D">
     <bpmn:startEvent id="StartEvent_1" name="Contract submitted">
       <bpmn:outgoing>Flow_ToCompliance</bpmn:outgoing>
     </bpmn:startEvent>
-
-    <bpmn:serviceTask id="Task_ComplianceCheck" name="Check compliance"
-                      operaton:delegateExpression="${complianceCheckDelegate}">
+    <bpmn:serviceTask id="Task_ComplianceCheck" name="Check compliance" operaton:delegateExpression="${complianceCheckDelegate}">
       <bpmn:incoming>Flow_ToCompliance</bpmn:incoming>
       <bpmn:outgoing>Flow_ToComplianceGateway</bpmn:outgoing>
     </bpmn:serviceTask>
-
-    <bpmn:exclusiveGateway id="Gateway_Compliance" name="Compliant?"
-                           default="Flow_NonCompliant">
+    <bpmn:exclusiveGateway id="Gateway_Compliance" name="Compliant?" default="Flow_NonCompliant">
       <bpmn:incoming>Flow_ToComplianceGateway</bpmn:incoming>
       <bpmn:outgoing>Flow_Compliant</bpmn:outgoing>
       <bpmn:outgoing>Flow_NonCompliant</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-
-    <bpmn:userTask id="Task_LegalReview" name="Legal review"
-                   operaton:candidateGroups="${tenantGroup}Legal">
+    <bpmn:userTask id="Task_LegalReview" name="Legal review" operaton:candidateGroups="${tenantGroup}Legal">
       <bpmn:incoming>Flow_Compliant</bpmn:incoming>
       <bpmn:outgoing>Flow_ToApproved</bpmn:outgoing>
     </bpmn:userTask>
-
     <bpmn:endEvent id="EndEvent_Approved" name="Approved">
       <bpmn:incoming>Flow_ToApproved</bpmn:incoming>
     </bpmn:endEvent>
-
     <bpmn:endEvent id="EndEvent_Rejected" name="Rejected">
       <bpmn:incoming>Flow_NonCompliant</bpmn:incoming>
     </bpmn:endEvent>
-
-    <bpmn:sequenceFlow id="Flow_ToCompliance" sourceRef="StartEvent_1"
-                       targetRef="Task_ComplianceCheck"/>
-    <bpmn:sequenceFlow id="Flow_ToComplianceGateway" sourceRef="Task_ComplianceCheck"
-                       targetRef="Gateway_Compliance"/>
-    <bpmn:sequenceFlow id="Flow_Compliant" name="compliant"
-                       sourceRef="Gateway_Compliance" targetRef="Task_LegalReview">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${compliant == true}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_ToCompliance" sourceRef="StartEvent_1" targetRef="Task_ComplianceCheck" />
+    <bpmn:sequenceFlow id="Flow_ToComplianceGateway" sourceRef="Task_ComplianceCheck" targetRef="Gateway_Compliance" />
+    <bpmn:sequenceFlow id="Flow_Compliant" name="compliant" sourceRef="Gateway_Compliance" targetRef="Task_LegalReview">
+      <bpmn:conditionExpression xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="bpmn:tFormalExpression">${compliant == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_NonCompliant" name="non-compliant"
-                       sourceRef="Gateway_Compliance" targetRef="EndEvent_Rejected"/>
-    <bpmn:sequenceFlow id="Flow_ToApproved" sourceRef="Task_LegalReview"
-                       targetRef="EndEvent_Approved"/>
-
+    <bpmn:sequenceFlow id="Flow_NonCompliant" name="non-compliant" sourceRef="Gateway_Compliance" targetRef="EndEvent_Rejected" />
+    <bpmn:sequenceFlow id="Flow_ToApproved" sourceRef="Task_LegalReview" targetRef="EndEvent_Approved" />
   </bpmn:process>
-
   <bpmndi:BPMNDiagram id="BPMNDiagram_ContractReview">
     <bpmndi:BPMNPlane id="BPMNPlane_ContractReview" bpmnElement="contract-review">
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_1">
-        <dc:Bounds x="152" y="202" width="36" height="36"/>
+        <dc:Bounds x="152" y="202" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="128" y="245" width="84" height="27"/>
+          <dc:Bounds x="128" y="245" width="84" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_ComplianceCheck" bpmnElement="Task_ComplianceCheck">
-        <dc:Bounds x="240" y="180" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+        <dc:Bounds x="240" y="180" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_GwCompliance" bpmnElement="Gateway_Compliance" isMarkerVisible="true">
-        <dc:Bounds x="395" y="195" width="50" height="50"/>
+        <dc:Bounds x="395" y="195" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="395" y="252" width="50" height="14"/>
+          <dc:Bounds x="395" y="252" width="50" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_LegalReview" bpmnElement="Task_LegalReview">
-        <dc:Bounds x="500" y="80" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+        <dc:Bounds x="500" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_EndApproved" bpmnElement="EndEvent_Approved">
-        <dc:Bounds x="662" y="102" width="36" height="36"/>
+        <dc:Bounds x="662" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="657" y="145" width="46" height="14"/>
+          <dc:Bounds x="657" y="145" width="46" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_EndRejected" bpmnElement="EndEvent_Rejected">
-        <dc:Bounds x="662" y="202" width="36" height="36"/>
+        <dc:Bounds x="662" y="202" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="659" y="245" width="42" height="14"/>
+          <dc:Bounds x="659" y="245" width="42" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_ToCompliance" bpmnElement="Flow_ToCompliance">
-        <di:waypoint x="188" y="220"/><di:waypoint x="240" y="220"/>
+        <di:waypoint x="188" y="220" />
+        <di:waypoint x="240" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_ToComplianceGateway" bpmnElement="Flow_ToComplianceGateway">
-        <di:waypoint x="340" y="220"/><di:waypoint x="395" y="220"/>
+        <di:waypoint x="340" y="220" />
+        <di:waypoint x="395" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Compliant" bpmnElement="Flow_Compliant">
-        <di:waypoint x="420" y="195"/><di:waypoint x="420" y="120"/><di:waypoint x="500" y="120"/>
+        <di:waypoint x="420" y="195" />
+        <di:waypoint x="420" y="120" />
+        <di:waypoint x="500" y="120" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="428" y="153" width="47" height="14"/>
+          <dc:Bounds x="428" y="153" width="47" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_NonCompliant" bpmnElement="Flow_NonCompliant">
-        <di:waypoint x="445" y="220"/><di:waypoint x="662" y="220"/>
+        <di:waypoint x="445" y="220" />
+        <di:waypoint x="662" y="220" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="519" y="202" width="70" height="14"/>
+          <dc:Bounds x="475" y="202" width="70" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_ToApproved" bpmnElement="Flow_ToApproved">
-        <di:waypoint x="600" y="120"/><di:waypoint x="662" y="120"/>
+        <di:waypoint x="600" y="120" />
+        <di:waypoint x="662" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

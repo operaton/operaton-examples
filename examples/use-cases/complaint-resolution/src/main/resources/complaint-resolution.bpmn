@@ -1,270 +1,237 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_ComplaintResolution"
-                  targetNamespace="http://operaton.org/examples/complaint-resolution">
-
-  <bpmn:escalation id="Escalation_RefundApproval" name="Refund Approval"
-                   escalationCode="REFUND_APPROVAL" />
-  <bpmn:escalation id="Escalation_HighSeverity" name="High Severity"
-                   escalationCode="HIGH_SEVERITY" />
-
-  <bpmn:process id="complaint-resolution"
-                name="Customer Complaint Resolution"
-                isExecutable="true"
-                operaton:historyTimeToLive="P30D">
-
-    <!-- ─── Outer start ─── -->
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_ComplaintResolution" targetNamespace="http://operaton.org/examples/complaint-resolution">
+  <bpmn:escalation id="Escalation_RefundApproval" name="Refund Approval" escalationCode="REFUND_APPROVAL" />
+  <bpmn:escalation id="Escalation_HighSeverity" name="High Severity" escalationCode="HIGH_SEVERITY" />
+  <bpmn:process id="complaint-resolution" name="Customer Complaint Resolution" isExecutable="true" operaton:historyTimeToLive="P30D">
     <bpmn:startEvent id="StartEvent_ComplaintReceived" name="Complaint received">
       <bpmn:outgoing>Flow_Start_SP</bpmn:outgoing>
     </bpmn:startEvent>
-
-    <!-- ─── Handle complaint subprocess ─── -->
     <bpmn:subProcess id="SubProcess_HandleComplaint" name="Handle complaint">
       <bpmn:incoming>Flow_Start_SP</bpmn:incoming>
       <bpmn:outgoing>Flow_SP_Close</bpmn:outgoing>
-
       <bpmn:startEvent id="StartEvent_SP_Begin">
         <bpmn:outgoing>Flow_SP_Start_Assess</bpmn:outgoing>
       </bpmn:startEvent>
-
-      <bpmn:serviceTask id="Task_AssessComplaint" name="Assess complaint"
-                        operaton:delegateExpression="${assessComplaintDelegate}">
+      <bpmn:serviceTask id="Task_AssessComplaint" name="Assess complaint" operaton:delegateExpression="${assessComplaintDelegate}">
         <bpmn:incoming>Flow_SP_Start_Assess</bpmn:incoming>
         <bpmn:outgoing>Flow_Assess_GW_Severity</bpmn:outgoing>
       </bpmn:serviceTask>
-
       <bpmn:exclusiveGateway id="Gateway_Severity" name="Severity?" default="Flow_GW_LowSeverity">
         <bpmn:incoming>Flow_Assess_GW_Severity</bpmn:incoming>
         <bpmn:outgoing>Flow_GW_HighSeverity</bpmn:outgoing>
         <bpmn:outgoing>Flow_GW_LowSeverity</bpmn:outgoing>
       </bpmn:exclusiveGateway>
-
       <bpmn:endEvent id="EndEvent_SP_HighSeverity" name="High severity raised">
         <bpmn:incoming>Flow_GW_HighSeverity</bpmn:incoming>
         <bpmn:escalationEventDefinition escalationRef="Escalation_HighSeverity" />
       </bpmn:endEvent>
-
       <bpmn:exclusiveGateway id="Gateway_RefundAuthority" name="Refund within authority?" default="Flow_GW_WithinAuthority">
         <bpmn:incoming>Flow_GW_LowSeverity</bpmn:incoming>
         <bpmn:outgoing>Flow_GW_WithinAuthority</bpmn:outgoing>
         <bpmn:outgoing>Flow_GW_ExceedsAuthority</bpmn:outgoing>
       </bpmn:exclusiveGateway>
-
-      <bpmn:intermediateThrowEvent id="ThrowEscalation_RefundApproval"
-                                   name="Refund needs approval">
+      <bpmn:intermediateThrowEvent id="ThrowEscalation_RefundApproval" name="Refund needs approval">
         <bpmn:incoming>Flow_GW_ExceedsAuthority</bpmn:incoming>
         <bpmn:outgoing>Flow_Throw_Resolve</bpmn:outgoing>
         <bpmn:escalationEventDefinition escalationRef="Escalation_RefundApproval" />
       </bpmn:intermediateThrowEvent>
-
-      <bpmn:serviceTask id="Task_ResolveComplaint" name="Resolve complaint"
-                        operaton:delegateExpression="${resolveComplaintDelegate}">
+      <bpmn:serviceTask id="Task_ResolveComplaint" name="Resolve complaint" operaton:delegateExpression="${resolveComplaintDelegate}">
         <bpmn:incoming>Flow_GW_WithinAuthority</bpmn:incoming>
         <bpmn:incoming>Flow_Throw_Resolve</bpmn:incoming>
         <bpmn:outgoing>Flow_Resolve_SP_End</bpmn:outgoing>
       </bpmn:serviceTask>
-
       <bpmn:endEvent id="EndEvent_SP_Normal" name="Complaint handled">
         <bpmn:incoming>Flow_Resolve_SP_End</bpmn:incoming>
       </bpmn:endEvent>
-
-      <bpmn:sequenceFlow id="Flow_SP_Start_Assess"
-                         sourceRef="StartEvent_SP_Begin"
-                         targetRef="Task_AssessComplaint" />
-      <bpmn:sequenceFlow id="Flow_Assess_GW_Severity"
-                         sourceRef="Task_AssessComplaint"
-                         targetRef="Gateway_Severity" />
-      <bpmn:sequenceFlow id="Flow_GW_HighSeverity" name="high"
-                         sourceRef="Gateway_Severity"
-                         targetRef="EndEvent_SP_HighSeverity">
+      <bpmn:sequenceFlow id="Flow_SP_Start_Assess" sourceRef="StartEvent_SP_Begin" targetRef="Task_AssessComplaint" />
+      <bpmn:sequenceFlow id="Flow_Assess_GW_Severity" sourceRef="Task_AssessComplaint" targetRef="Gateway_Severity" />
+      <bpmn:sequenceFlow id="Flow_GW_HighSeverity" name="high" sourceRef="Gateway_Severity" targetRef="EndEvent_SP_HighSeverity">
         <bpmn:conditionExpression>${severity == "high"}</bpmn:conditionExpression>
       </bpmn:sequenceFlow>
-      <bpmn:sequenceFlow id="Flow_GW_LowSeverity" name="low / medium"
-                         sourceRef="Gateway_Severity"
-                         targetRef="Gateway_RefundAuthority" />
-      <bpmn:sequenceFlow id="Flow_GW_WithinAuthority" name="within authority"
-                         sourceRef="Gateway_RefundAuthority"
-                         targetRef="Task_ResolveComplaint" />
-      <bpmn:sequenceFlow id="Flow_GW_ExceedsAuthority" name="exceeds authority"
-                         sourceRef="Gateway_RefundAuthority"
-                         targetRef="ThrowEscalation_RefundApproval">
+      <bpmn:sequenceFlow id="Flow_GW_LowSeverity" name="low / medium" sourceRef="Gateway_Severity" targetRef="Gateway_RefundAuthority" />
+      <bpmn:sequenceFlow id="Flow_GW_WithinAuthority" name="within authority" sourceRef="Gateway_RefundAuthority" targetRef="Task_ResolveComplaint" />
+      <bpmn:sequenceFlow id="Flow_GW_ExceedsAuthority" name="exceeds authority" sourceRef="Gateway_RefundAuthority" targetRef="ThrowEscalation_RefundApproval">
         <bpmn:conditionExpression>${refundWithinAuthority == false}</bpmn:conditionExpression>
       </bpmn:sequenceFlow>
-      <bpmn:sequenceFlow id="Flow_Throw_Resolve"
-                         sourceRef="ThrowEscalation_RefundApproval"
-                         targetRef="Task_ResolveComplaint" />
-      <bpmn:sequenceFlow id="Flow_Resolve_SP_End"
-                         sourceRef="Task_ResolveComplaint"
-                         targetRef="EndEvent_SP_Normal" />
+      <bpmn:sequenceFlow id="Flow_Throw_Resolve" sourceRef="ThrowEscalation_RefundApproval" targetRef="Task_ResolveComplaint" />
+      <bpmn:sequenceFlow id="Flow_Resolve_SP_End" sourceRef="Task_ResolveComplaint" targetRef="EndEvent_SP_Normal" />
     </bpmn:subProcess>
-
-    <!-- Non-interrupting escalation boundary — REFUND_APPROVAL -->
-    <bpmn:boundaryEvent id="BoundaryEvent_RefundApproval"
-                        name="Refund approval needed"
-                        cancelActivity="false"
-                        attachedToRef="SubProcess_HandleComplaint">
+    <bpmn:boundaryEvent id="BoundaryEvent_RefundApproval" name="Refund approval needed" cancelActivity="false" attachedToRef="SubProcess_HandleComplaint">
       <bpmn:outgoing>Flow_Boundary_Refund_Approve</bpmn:outgoing>
       <bpmn:escalationEventDefinition escalationRef="Escalation_RefundApproval" />
     </bpmn:boundaryEvent>
-
-    <!-- Interrupting escalation boundary — HIGH_SEVERITY -->
-    <bpmn:boundaryEvent id="BoundaryEvent_HighSeverity"
-                        name="High severity"
-                        cancelActivity="true"
-                        attachedToRef="SubProcess_HandleComplaint">
+    <bpmn:boundaryEvent id="BoundaryEvent_HighSeverity" name="High severity" attachedToRef="SubProcess_HandleComplaint">
       <bpmn:outgoing>Flow_Boundary_HighSev_Handoff</bpmn:outgoing>
       <bpmn:escalationEventDefinition escalationRef="Escalation_HighSeverity" />
     </bpmn:boundaryEvent>
-
-    <!-- Non-interrupting boundary path -->
-    <bpmn:serviceTask id="Task_ManagerApproveRefund" name="Manager approves refund"
-                      operaton:delegateExpression="${approveRefundDelegate}">
+    <bpmn:serviceTask id="Task_ManagerApproveRefund" name="Manager approves refund" operaton:delegateExpression="${approveRefundDelegate}">
       <bpmn:incoming>Flow_Boundary_Refund_Approve</bpmn:incoming>
       <bpmn:outgoing>Flow_Approve_End</bpmn:outgoing>
     </bpmn:serviceTask>
-
     <bpmn:endEvent id="EndEvent_RefundApproved" name="Refund approved">
       <bpmn:incoming>Flow_Approve_End</bpmn:incoming>
     </bpmn:endEvent>
-
-    <!-- Interrupting boundary path -->
-    <bpmn:serviceTask id="Task_HandoffSpecialist" name="Hand off to specialist"
-                      operaton:delegateExpression="${handoffSpecialistDelegate}">
+    <bpmn:serviceTask id="Task_HandoffSpecialist" name="Hand off to specialist" operaton:delegateExpression="${handoffSpecialistDelegate}">
       <bpmn:incoming>Flow_Boundary_HighSev_Handoff</bpmn:incoming>
       <bpmn:outgoing>Flow_Handoff_End</bpmn:outgoing>
     </bpmn:serviceTask>
-
     <bpmn:endEvent id="EndEvent_EscalatedToSpecialist" name="Escalated to specialist">
       <bpmn:incoming>Flow_Handoff_End</bpmn:incoming>
     </bpmn:endEvent>
-
-    <!-- Normal outgoing path -->
-    <bpmn:serviceTask id="Task_CloseComplaint" name="Close complaint"
-                      operaton:delegateExpression="${closeComplaintDelegate}">
+    <bpmn:serviceTask id="Task_CloseComplaint" name="Close complaint" operaton:delegateExpression="${closeComplaintDelegate}">
       <bpmn:incoming>Flow_SP_Close</bpmn:incoming>
       <bpmn:outgoing>Flow_Close_End</bpmn:outgoing>
     </bpmn:serviceTask>
-
     <bpmn:endEvent id="EndEvent_ComplaintResolved" name="Complaint resolved">
       <bpmn:incoming>Flow_Close_End</bpmn:incoming>
     </bpmn:endEvent>
-
-    <!-- Outer sequence flows -->
-    <bpmn:sequenceFlow id="Flow_Start_SP"
-                       sourceRef="StartEvent_ComplaintReceived"
-                       targetRef="SubProcess_HandleComplaint" />
-    <bpmn:sequenceFlow id="Flow_SP_Close"
-                       sourceRef="SubProcess_HandleComplaint"
-                       targetRef="Task_CloseComplaint" />
-    <bpmn:sequenceFlow id="Flow_Close_End"
-                       sourceRef="Task_CloseComplaint"
-                       targetRef="EndEvent_ComplaintResolved" />
-    <bpmn:sequenceFlow id="Flow_Boundary_Refund_Approve"
-                       sourceRef="BoundaryEvent_RefundApproval"
-                       targetRef="Task_ManagerApproveRefund" />
-    <bpmn:sequenceFlow id="Flow_Approve_End"
-                       sourceRef="Task_ManagerApproveRefund"
-                       targetRef="EndEvent_RefundApproved" />
-    <bpmn:sequenceFlow id="Flow_Boundary_HighSev_Handoff"
-                       sourceRef="BoundaryEvent_HighSeverity"
-                       targetRef="Task_HandoffSpecialist" />
-    <bpmn:sequenceFlow id="Flow_Handoff_End"
-                       sourceRef="Task_HandoffSpecialist"
-                       targetRef="EndEvent_EscalatedToSpecialist" />
+    <bpmn:sequenceFlow id="Flow_Start_SP" sourceRef="StartEvent_ComplaintReceived" targetRef="SubProcess_HandleComplaint" />
+    <bpmn:sequenceFlow id="Flow_SP_Close" sourceRef="SubProcess_HandleComplaint" targetRef="Task_CloseComplaint" />
+    <bpmn:sequenceFlow id="Flow_Close_End" sourceRef="Task_CloseComplaint" targetRef="EndEvent_ComplaintResolved" />
+    <bpmn:sequenceFlow id="Flow_Boundary_Refund_Approve" sourceRef="BoundaryEvent_RefundApproval" targetRef="Task_ManagerApproveRefund" />
+    <bpmn:sequenceFlow id="Flow_Approve_End" sourceRef="Task_ManagerApproveRefund" targetRef="EndEvent_RefundApproved" />
+    <bpmn:sequenceFlow id="Flow_Boundary_HighSev_Handoff" sourceRef="BoundaryEvent_HighSeverity" targetRef="Task_HandoffSpecialist" />
+    <bpmn:sequenceFlow id="Flow_Handoff_End" sourceRef="Task_HandoffSpecialist" targetRef="EndEvent_EscalatedToSpecialist" />
   </bpmn:process>
-
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="complaint-resolution">
-
       <bpmndi:BPMNShape id="StartEvent_ComplaintReceived_di" bpmnElement="StartEvent_ComplaintReceived">
         <dc:Bounds x="152" y="212" width="36" height="36" />
-        <bpmndi:BPMNLabel><dc:Bounds x="130" y="255" width="83" height="27" /></bpmndi:BPMNLabel>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="130" y="255" width="83" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
+      <bpmndi:BPMNShape id="Task_HandoffSpecialist_di" bpmnElement="Task_HandoffSpecialist">
+        <dc:Bounds x="690" y="510" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_EscalatedToSpecialist_di" bpmnElement="EndEvent_EscalatedToSpecialist">
+        <dc:Bounds x="832" y="532" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="819" y="575" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="SubProcess_HandleComplaint_di" bpmnElement="SubProcess_HandleComplaint" isExpanded="true">
         <dc:Bounds x="240" y="80" width="720" height="350" />
-        <bpmndi:BPMNLabel><dc:Bounds x="556" y="86" width="88" height="14" /></bpmndi:BPMNLabel>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="556" y="86" width="88" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="StartEvent_SP_Begin_di" bpmnElement="StartEvent_SP_Begin">
         <dc:Bounds x="272" y="212" width="36" height="36" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Task_AssessComplaint_di" bpmnElement="Task_AssessComplaint">
         <dc:Bounds x="360" y="190" width="100" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Gateway_Severity_di" bpmnElement="Gateway_Severity" isMarkerVisible="true">
         <dc:Bounds x="515" y="205" width="50" height="50" />
-        <bpmndi:BPMNLabel><dc:Bounds x="511" y="175" width="57" height="14" /></bpmndi:BPMNLabel>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="575" y="223" width="46" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="EndEvent_SP_HighSeverity_di" bpmnElement="EndEvent_SP_HighSeverity">
         <dc:Bounds x="652" y="112" width="36" height="36" />
-        <bpmndi:BPMNLabel><dc:Bounds x="626" y="155" width="88" height="27" /></bpmndi:BPMNLabel>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="626" y="155" width="88" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Gateway_RefundAuthority_di" bpmnElement="Gateway_RefundAuthority" isMarkerVisible="true">
         <dc:Bounds x="515" y="285" width="50" height="50" />
-        <bpmndi:BPMNLabel><dc:Bounds x="493" y="342" width="94" height="27" /></bpmndi:BPMNLabel>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="437.5" y="296" width="67" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="ThrowEscalation_RefundApproval_di" bpmnElement="ThrowEscalation_RefundApproval">
-        <dc:Bounds x="652" y="297" width="36" height="36" />
-        <bpmndi:BPMNLabel><dc:Bounds x="626" y="340" width="88" height="27" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Task_ResolveComplaint_di" bpmnElement="Task_ResolveComplaint">
         <dc:Bounds x="750" y="270" width="100" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="EndEvent_SP_Normal_di" bpmnElement="EndEvent_SP_Normal">
         <dc:Bounds x="912" y="292" width="36" height="36" />
-        <bpmndi:BPMNLabel><dc:Bounds x="886" y="335" width="87" height="27" /></bpmndi:BPMNLabel>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="886" y="335" width="87" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="BoundaryEvent_RefundApproval_di" bpmnElement="BoundaryEvent_RefundApproval">
-        <dc:Bounds x="452" y="412" width="36" height="36" />
-        <bpmndi:BPMNLabel><dc:Bounds x="420" y="455" width="100" height="27" /></bpmndi:BPMNLabel>
+      <bpmndi:BPMNShape id="ThrowEscalation_RefundApproval_di" bpmnElement="ThrowEscalation_RefundApproval">
+        <dc:Bounds x="642" y="352" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="645" y="395" width="69" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="BoundaryEvent_HighSeverity_di" bpmnElement="BoundaryEvent_HighSeverity">
-        <dc:Bounds x="672" y="412" width="36" height="36" />
-        <bpmndi:BPMNLabel><dc:Bounds x="652" y="455" width="77" height="14" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-
+      <bpmndi:BPMNEdge id="Flow_SP_Start_Assess_di" bpmnElement="Flow_SP_Start_Assess">
+        <di:waypoint x="308" y="230" />
+        <di:waypoint x="360" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Assess_GW_Severity_di" bpmnElement="Flow_Assess_GW_Severity">
+        <di:waypoint x="460" y="230" />
+        <di:waypoint x="515" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GW_HighSeverity_di" bpmnElement="Flow_GW_HighSeverity">
+        <di:waypoint x="540" y="205" />
+        <di:waypoint x="540" y="130" />
+        <di:waypoint x="652" y="130" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="546" y="113" width="21" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GW_LowSeverity_di" bpmnElement="Flow_GW_LowSeverity">
+        <di:waypoint x="540" y="255" />
+        <di:waypoint x="540" y="285" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="546" y="263" width="63" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GW_WithinAuthority_di" bpmnElement="Flow_GW_WithinAuthority">
+        <di:waypoint x="565" y="310" />
+        <di:waypoint x="750" y="310" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="573" y="292" width="74" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GW_ExceedsAuthority_di" bpmnElement="Flow_GW_ExceedsAuthority">
+        <di:waypoint x="540" y="335" />
+        <di:waypoint x="540" y="370" />
+        <di:waypoint x="642" y="370" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="506" y="346" width="87" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Throw_Resolve_di" bpmnElement="Flow_Throw_Resolve">
+        <di:waypoint x="660" y="352" />
+        <di:waypoint x="660" y="315" />
+        <di:waypoint x="750" y="315" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Resolve_SP_End_di" bpmnElement="Flow_Resolve_SP_End">
+        <di:waypoint x="850" y="310" />
+        <di:waypoint x="912" y="310" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Task_ManagerApproveRefund_di" bpmnElement="Task_ManagerApproveRefund">
         <dc:Bounds x="430" y="510" width="100" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="EndEvent_RefundApproved_di" bpmnElement="EndEvent_RefundApproved">
         <dc:Bounds x="592" y="532" width="36" height="36" />
-        <bpmndi:BPMNLabel><dc:Bounds x="566" y="575" width="87" height="27" /></bpmndi:BPMNLabel>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="566" y="575" width="87" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Task_HandoffSpecialist_di" bpmnElement="Task_HandoffSpecialist">
-        <dc:Bounds x="650" y="510" width="100" height="80" />
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="EndEvent_EscalatedToSpecialist_di" bpmnElement="EndEvent_EscalatedToSpecialist">
-        <dc:Bounds x="812" y="532" width="36" height="36" />
-        <bpmndi:BPMNLabel><dc:Bounds x="786" y="575" width="87" height="27" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Task_CloseComplaint_di" bpmnElement="Task_CloseComplaint">
         <dc:Bounds x="1020" y="190" width="100" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="EndEvent_ComplaintResolved_di" bpmnElement="EndEvent_ComplaintResolved">
         <dc:Bounds x="1182" y="212" width="36" height="36" />
-        <bpmndi:BPMNLabel><dc:Bounds x="1156" y="255" width="87" height="27" /></bpmndi:BPMNLabel>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1156" y="255" width="87" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <!-- Outer edges -->
+      <bpmndi:BPMNShape id="BoundaryEvent_RefundApproval_di" bpmnElement="BoundaryEvent_RefundApproval">
+        <dc:Bounds x="452" y="412" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="479" y="455" width="81" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_HighSeverity_di" bpmnElement="BoundaryEvent_HighSeverity">
+        <dc:Bounds x="712" y="412" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="738" y="455" width="64" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_Start_SP_di" bpmnElement="Flow_Start_SP">
         <di:waypoint x="188" y="230" />
         <di:waypoint x="240" y="230" />
@@ -286,53 +253,12 @@
         <di:waypoint x="592" y="550" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Boundary_HighSev_Handoff_di" bpmnElement="Flow_Boundary_HighSev_Handoff">
-        <di:waypoint x="690" y="448" />
-        <di:waypoint x="690" y="510" />
+        <di:waypoint x="730" y="448" />
+        <di:waypoint x="730" y="510" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Handoff_End_di" bpmnElement="Flow_Handoff_End">
-        <di:waypoint x="750" y="550" />
-        <di:waypoint x="812" y="550" />
-      </bpmndi:BPMNEdge>
-
-      <!-- Inner subprocess edges -->
-      <bpmndi:BPMNEdge id="Flow_SP_Start_Assess_di" bpmnElement="Flow_SP_Start_Assess">
-        <di:waypoint x="308" y="230" />
-        <di:waypoint x="360" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Assess_GW_Severity_di" bpmnElement="Flow_Assess_GW_Severity">
-        <di:waypoint x="460" y="230" />
-        <di:waypoint x="515" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_GW_HighSeverity_di" bpmnElement="Flow_GW_HighSeverity">
-        <di:waypoint x="540" y="205" />
-        <di:waypoint x="540" y="130" />
-        <di:waypoint x="652" y="130" />
-        <bpmndi:BPMNLabel><dc:Bounds x="545" y="113" width="22" height="14" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_GW_LowSeverity_di" bpmnElement="Flow_GW_LowSeverity">
-        <di:waypoint x="540" y="255" />
-        <di:waypoint x="540" y="285" />
-        <bpmndi:BPMNLabel><dc:Bounds x="546" y="263" width="63" height="27" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_GW_WithinAuthority_di" bpmnElement="Flow_GW_WithinAuthority">
-        <di:waypoint x="565" y="310" />
-        <di:waypoint x="750" y="310" />
-        <bpmndi:BPMNLabel><dc:Bounds x="614" y="292" width="82" height="14" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_GW_ExceedsAuthority_di" bpmnElement="Flow_GW_ExceedsAuthority">
-        <di:waypoint x="540" y="335" />
-        <di:waypoint x="540" y="365" />
-        <di:waypoint x="652" y="365" />
-        <di:waypoint x="652" y="333" />
-        <bpmndi:BPMNLabel><dc:Bounds x="554" y="348" width="86" height="14" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Throw_Resolve_di" bpmnElement="Flow_Throw_Resolve">
-        <di:waypoint x="688" y="315" />
-        <di:waypoint x="750" y="315" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Resolve_SP_End_di" bpmnElement="Flow_Resolve_SP_End">
-        <di:waypoint x="850" y="310" />
-        <di:waypoint x="912" y="310" />
+        <di:waypoint x="790" y="550" />
+        <di:waypoint x="832" y="550" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

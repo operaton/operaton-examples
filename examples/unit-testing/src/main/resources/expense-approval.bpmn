@@ -1,95 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_ExpenseApproval"
-                  targetNamespace="http://operaton.org/examples">
-
-  <bpmn:process id="expense-approval" name="Expense Approval" isExecutable="true"
-                operaton:historyTimeToLive="P30D">
-
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_ExpenseApproval" targetNamespace="http://operaton.org/examples">
+  <bpmn:process id="expense-approval" name="Expense Approval" isExecutable="true" operaton:historyTimeToLive="P30D">
     <bpmn:startEvent id="StartEvent_1" name="Expense submitted">
       <bpmn:outgoing>Flow_ToValidate</bpmn:outgoing>
     </bpmn:startEvent>
-
-    <bpmn:serviceTask id="Task_Validate" name="Validate expense"
-                      operaton:class="org.operaton.examples.unittesting.ValidateExpenseDelegate">
+    <bpmn:serviceTask id="Task_Validate" name="Validate expense" operaton:class="org.operaton.examples.unittesting.ValidateExpenseDelegate">
       <bpmn:incoming>Flow_ToValidate</bpmn:incoming>
       <bpmn:outgoing>Flow_ToGateway</bpmn:outgoing>
     </bpmn:serviceTask>
-
-    <bpmn:exclusiveGateway id="Gateway_Policy" name="Amount within policy?"
-                           default="Flow_OverLimit">
+    <bpmn:exclusiveGateway id="Gateway_Policy" name="Amount within policy?" default="Flow_OverLimit">
       <bpmn:incoming>Flow_ToGateway</bpmn:incoming>
       <bpmn:outgoing>Flow_WithinLimit</bpmn:outgoing>
       <bpmn:outgoing>Flow_OverLimit</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-
     <bpmn:endEvent id="EndEvent_AutoApproved" name="Auto approved">
       <bpmn:incoming>Flow_WithinLimit</bpmn:incoming>
     </bpmn:endEvent>
-
-    <bpmn:userTask id="Task_ManagerApproval" name="Manager approval"
-                   operaton:candidateGroups="managers">
+    <bpmn:userTask id="Task_ManagerApproval" name="Manager approval" operaton:candidateGroups="managers">
       <bpmn:incoming>Flow_OverLimit</bpmn:incoming>
       <bpmn:outgoing>Flow_ToApproved</bpmn:outgoing>
     </bpmn:userTask>
-
     <bpmn:endEvent id="EndEvent_Approved" name="Approved">
       <bpmn:incoming>Flow_ToApproved</bpmn:incoming>
     </bpmn:endEvent>
-
-    <bpmn:sequenceFlow id="Flow_ToValidate" sourceRef="StartEvent_1"
-                       targetRef="Task_Validate"/>
-    <bpmn:sequenceFlow id="Flow_ToGateway" sourceRef="Task_Validate"
-                       targetRef="Gateway_Policy"/>
-    <bpmn:sequenceFlow id="Flow_WithinLimit" name="within limit"
-                       sourceRef="Gateway_Policy" targetRef="EndEvent_AutoApproved">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${amount &lt;= 500}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_ToValidate" sourceRef="StartEvent_1" targetRef="Task_Validate" />
+    <bpmn:sequenceFlow id="Flow_ToGateway" sourceRef="Task_Validate" targetRef="Gateway_Policy" />
+    <bpmn:sequenceFlow id="Flow_WithinLimit" name="within limit" sourceRef="Gateway_Policy" targetRef="EndEvent_AutoApproved">
+      <bpmn:conditionExpression xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="bpmn:tFormalExpression">${amount &lt;= 500}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_OverLimit" name="over limit"
-                       sourceRef="Gateway_Policy" targetRef="Task_ManagerApproval"/>
-    <bpmn:sequenceFlow id="Flow_ToApproved" sourceRef="Task_ManagerApproval"
-                       targetRef="EndEvent_Approved"/>
+    <bpmn:sequenceFlow id="Flow_OverLimit" name="over limit" sourceRef="Gateway_Policy" targetRef="Task_ManagerApproval" />
+    <bpmn:sequenceFlow id="Flow_ToApproved" sourceRef="Task_ManagerApproval" targetRef="EndEvent_Approved" />
   </bpmn:process>
-
   <bpmndi:BPMNDiagram id="BPMNDiagram_ExpenseApproval">
     <bpmndi:BPMNPlane id="BPMNPlane_ExpenseApproval" bpmnElement="expense-approval">
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_1">
-        <dc:Bounds x="152" y="202" width="36" height="36"/>
+        <dc:Bounds x="152" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="146" y="246" width="48" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Validate" bpmnElement="Task_Validate">
-        <dc:Bounds x="240" y="180" width="100" height="80"/>
+        <dc:Bounds x="240" y="180" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Gateway" bpmnElement="Gateway_Policy" isMarkerVisible="true">
-        <dc:Bounds x="395" y="195" width="50" height="50"/>
+        <dc:Bounds x="395" y="195" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="455" y="216" width="70" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_EndAutoApproved" bpmnElement="EndEvent_AutoApproved">
-        <dc:Bounds x="502" y="322" width="36" height="36"/>
+        <dc:Bounds x="502" y="322" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="484" y="363" width="72" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_ManagerApproval" bpmnElement="Task_ManagerApproval">
-        <dc:Bounds x="500" y="80" width="100" height="80"/>
+        <dc:Bounds x="500" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_EndApproved" bpmnElement="EndEvent_Approved">
-        <dc:Bounds x="662" y="102" width="36" height="36"/>
+        <dc:Bounds x="662" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="656" y="148" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_ToValidate" bpmnElement="Flow_ToValidate">
-        <di:waypoint x="188" y="220"/><di:waypoint x="240" y="220"/>
+        <di:waypoint x="188" y="220" />
+        <di:waypoint x="240" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_ToGateway" bpmnElement="Flow_ToGateway">
-        <di:waypoint x="340" y="220"/><di:waypoint x="395" y="220"/>
+        <di:waypoint x="340" y="220" />
+        <di:waypoint x="395" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_WithinLimit" bpmnElement="Flow_WithinLimit">
-        <di:waypoint x="420" y="245"/><di:waypoint x="420" y="340"/><di:waypoint x="502" y="340"/>
+        <di:waypoint x="420" y="245" />
+        <di:waypoint x="420" y="340" />
+        <di:waypoint x="502" y="340" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="434" y="283" width="51" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_OverLimit" bpmnElement="Flow_OverLimit">
-        <di:waypoint x="420" y="195"/><di:waypoint x="420" y="120"/><di:waypoint x="500" y="120"/>
+        <di:waypoint x="420" y="195" />
+        <di:waypoint x="420" y="120" />
+        <di:waypoint x="500" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="427" y="148" width="45" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_ToApproved" bpmnElement="Flow_ToApproved">
-        <di:waypoint x="600" y="120"/><di:waypoint x="662" y="120"/>
+        <di:waypoint x="600" y="120" />
+        <di:waypoint x="662" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
