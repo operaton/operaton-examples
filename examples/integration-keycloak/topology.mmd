@@ -1,0 +1,11 @@
+flowchart LR
+    User(["👤 User\nbrowser"]) -->|"Login dialog\nPOST /api/admin/auth/…"| Operaton
+
+    subgraph Docker Network
+        Operaton["operaton/operaton:2.1.1\n+ operaton-keycloak-run-2.1.0.jar\nport 8080"]
+        Keycloak["Keycloak 26.6.3\nRealm: operaton\nport 8081"]
+        Postgres[("PostgreSQL 16\nport 5432")]
+    end
+
+    Operaton -->|"Password grant\nAdmin REST API"| Keycloak
+    Operaton -->|JDBC| Postgres
