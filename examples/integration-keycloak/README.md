@@ -1,7 +1,7 @@
 # Keycloak Identity Provider
 
 Demonstrates installing the `operaton-keycloak` identity-provider plugin into the
-`operaton/operaton` run-distribution image and authenticating webapp logins
+`operaton/operaton` distribution image and authenticating webapp logins
 against an external Keycloak server via the standard login dialog.
 
 ## What you will learn

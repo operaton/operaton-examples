@@ -12,17 +12,11 @@ spring.datasource:
   username: ${DB_USERNAME:operaton}
   password: ${DB_PASSWORD:operaton}
 
-keycloak:
-  host: ${KEYCLOAK_HOST:http://keycloak:8080}
-  realm: ${KEYCLOAK_REALM:operaton}
-  client.id: ${KEYCLOAK_CLIENT_ID:operaton-identity-service}
-  client.secret: ${KEYCLOAK_CLIENT_SECRET:operaton-keycloak-secret}
-
 plugin.identity.keycloak:
-  keycloakIssuerUrl: ${keycloak.host}/auth/realms/${keycloak.realm}
-  keycloakAdminUrl: ${keycloak.host}/auth/admin/realms/${keycloak.realm}
-  clientId: ${keycloak.client.id}
-  clientSecret: ${keycloak.client.secret}
+  keycloakIssuerUrl: ${KEYCLOAK_HOST:http://keycloak:8080}/auth/realms/${KEYCLOAK_REALM:operaton}
+  keycloakAdminUrl: ${KEYCLOAK_HOST:http://keycloak:8080}/auth/admin/realms/${KEYCLOAK_REALM:operaton}
+  clientId: ${KEYCLOAK_CLIENT_ID:operaton-identity-service}
+  clientSecret: ${KEYCLOAK_CLIENT_SECRET:operaton-keycloak-secret}
   useUsernameAsOperatonUserId: true
   useGroupPathAsOperatonGroupId: true
   administratorGroupName: operaton-admin
