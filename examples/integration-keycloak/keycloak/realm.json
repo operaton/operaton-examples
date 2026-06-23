@@ -1,0 +1,101 @@
+{
+  "realm": "operaton",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": false,
+  "clients": [
+    {
+      "clientId": "operaton-identity-service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "operaton-keycloak-secret",
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": false,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"]
+    }
+  ],
+  "groups": [
+    { "name": "accounting" },
+    { "name": "management" },
+    { "name": "operaton-admin" },
+    { "name": "sales" }
+  ],
+  "users": [
+    {
+      "username": "service-account-operaton-identity-service",
+      "enabled": true,
+      "serviceAccountClientId": "operaton-identity-service",
+      "clientRoles": {
+        "realm-management": ["query-users", "query-groups", "view-users"]
+      }
+    },
+    {
+      "username": "admin",
+      "firstName": "Monica",
+      "lastName": "Admin",
+      "email": "admin@operaton.org",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "s3cr3t", "temporary": false }
+      ],
+      "groups": ["/management", "/operaton-admin"]
+    },
+    {
+      "username": "demo",
+      "firstName": "Demo",
+      "lastName": "Demo",
+      "email": "demo@operaton.org",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "demo", "temporary": false }
+      ],
+      "groups": ["/sales", "/accounting", "/management"]
+    },
+    {
+      "username": "john",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@operaton.org",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "john", "temporary": false }
+      ],
+      "groups": ["/sales"]
+    },
+    {
+      "username": "mary",
+      "firstName": "Mary",
+      "lastName": "Anne",
+      "email": "mary@operaton.org",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "mary", "temporary": false }
+      ],
+      "groups": ["/accounting"]
+    },
+    {
+      "username": "peter",
+      "firstName": "Peter",
+      "lastName": "Meter",
+      "email": "peter@operaton.org",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "peter", "temporary": false }
+      ],
+      "groups": ["/management"]
+    }
+  ]
+}
