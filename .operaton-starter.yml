@@ -1588,3 +1588,43 @@ examples:
       - examples/use-cases/procurement-collaboration/src/main/resources/quote-handling.png
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/procurement-collaboration/README.md"
     lastUpdated: "2026-06-22"
+
+  - id: integration-keycloak
+    title: "Keycloak Identity Provider"
+    icon: "🔐"
+    path: examples/integration-keycloak
+    shortDescription: >
+      Install the operaton-keycloak identity-provider plugin into the operaton/operaton run image
+      and authenticate webapp logins against a Keycloak server via the standard login dialog.
+    longDescription: |
+      Demonstrates delegating Operaton webapp authentication to an external Keycloak server.
+
+      - **Plugin installation** — `operaton-keycloak-run` fat jar dropped into `configuration/userlib/`
+        of a custom `operaton/operaton` image; no application code required
+      - **Read-only identity provider** — all users and groups live in Keycloak, not the engine DB
+      - **Login dialog authentication** — standard webapp login form; credentials validated via
+        Keycloak password grant (no OAuth2/SSO redirect)
+      - **Realm provisioning** — a single `keycloak/realm.json` is the source of truth; a sidecar
+        container imports it at compose startup; the IT uses `--import-realm` on the same file
+      - **Authorization separation** — `admin`/Monica (operaton-admin group) reaches Cockpit;
+        other users authenticate but hold no engine authorizations, demonstrating auth vs authorization
+      - **Integration test** — login success, wrong-password rejection, engine REST identity
+        query asserting users/groups sourced from Keycloak
+    buildSystem: maven
+    runtime: operaton-run
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: advanced
+    tags:
+      - { label: "Keycloak", category: integration }
+      - { label: "Identity Provider", category: concept }
+      - { label: "Authentication", category: concept }
+    integrations: [postgres, keycloak]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/integration-keycloak/README.md"
+    screenshots:
+      - examples/integration-keycloak/docs/topology.png
+    lastUpdated: "2026-06-23"

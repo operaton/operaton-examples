@@ -241,6 +241,23 @@ Applies to: `22-operations-flowset-control`
 | §6 docker-compose | **Applies** | Postgres (engine) + `operaton/operaton` (webapps disabled) + Flowset Control own Postgres + flowset-control service |
 | All other §8–§9 rules | **Apply unchanged** | — |
 
+### Shape D — Container-only custom image embedding a plugin
+
+Applies to: `integration-keycloak`
+
+| Base rule | Status | Notes |
+|---|---|---|
+| §2 Project structure | **Modified** | No `src/main/java`; test-only module with `Dockerfile`, `configuration/`, `keycloak/`, docker-compose |
+| §3 Dual build Maven + Gradle | **Applies** | Both wrappers run the IT (failsafe / JUnit Platform `test` task) |
+| §5 Testcontainers IT | **Applies** | Postgres + **real Keycloak** (`--import-realm` on `keycloak/realm.json`) + custom operaton image built via `ImageFromDockerfile`; asserts login + engine REST identity |
+| §7 Spring Boot `@SpringBootApplication` | **Waived** | No application code |
+| §7 `demo/demo` Cockpit admin user | **Waived** | Admin user lives in Keycloak; no `admin-user` in engine config |
+| §7 `application.yaml` | **Waived** | `configuration/default.yml` (run-distribution config) instead |
+| §8 "Process model" PNG | **Replaced** | Topology diagram PNG (rendered from `topology.mmd` via Mermaid CLI) |
+| §6 docker-compose | **Applies** | Postgres + Keycloak + realm-import sidecar + custom operaton image |
+| Version pinning | **Split** | Library/image tag from root README; `operaton-keycloak-run` jar version added to version table |
+| All other §1, §4, §8–§9 rules | **Apply unchanged** | — |
+
 ### Version table addendum
 
 The root `README.md` version table includes a **Distribution images** row for
