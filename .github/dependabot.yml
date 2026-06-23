@@ -33,6 +33,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "org.operaton*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "org.springframework.boot:*"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "io.quarkus*"
@@ -63,6 +65,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "org.operaton*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "org.springframework.boot:*"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "io.quarkus*"
