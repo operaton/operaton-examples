@@ -16,7 +16,7 @@ jobs:
       maven-examples: ${{ steps.discover.outputs.maven }}
       gradle-examples: ${{ steps.discover.outputs.gradle }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -71,7 +71,7 @@ jobs:
         example: ${{ fromJson(needs.discover.outputs.maven-examples) }}
     name: ${{ matrix.example }} (maven)
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -90,7 +90,7 @@ jobs:
       matrix:
         example: ${{ fromJson(needs.discover.outputs.gradle-examples) }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
