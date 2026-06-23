@@ -24,7 +24,7 @@ services:
     ports:
       - "8081:8080"
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health/ready || exit 1"]
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && printf 'GET /auth/health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -40,13 +40,11 @@ services:
     entrypoint:
       - /bin/sh
       - -c
-      - >
-        /opt/keycloak/bin/kcadm.sh config credentials
-          --server http://keycloak:8080/auth
-          --realm master
-          --user keycloak
-          --password keycloak &&
-        /opt/keycloak/bin/kcadm.sh create realms --file /realm.json
+      - |
+        /opt/keycloak/bin/kcadm.sh config credentials \
+          --server http://keycloak:8080/auth \
+          --realm master --user keycloak --password keycloak \
+        && /opt/keycloak/bin/kcadm.sh create realms --file /realm.json
     restart: "no"
 
   operaton:
