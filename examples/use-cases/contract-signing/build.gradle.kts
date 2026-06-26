@@ -26,7 +26,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     // Operaton
-    implementation("org.operaton.bpm.springboot:operaton-spring-boot-starter")
+    implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-webapp")
+    implementation("org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter-rest")
 
     // Database
     runtimeOnly("org.postgresql:postgresql")
@@ -35,7 +36,7 @@ dependencies {
     implementation("software.amazon.awssdk:s3")
 
     // PDF Processing
-    implementation("org.apache.pdfbox:pdfbox:2.0.31")
+    implementation("org.apache.pdfbox:pdfbox:3.0.7")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
