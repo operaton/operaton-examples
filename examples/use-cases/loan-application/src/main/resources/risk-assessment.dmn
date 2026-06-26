@@ -1,48 +1,44 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
-             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
-             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
-             xmlns:operaton="http://operaton.org/schema/1.0/dmn"
-             id="risk-assessment-definitions"
-             name="Risk Assessment"
-             namespace="http://operaton.org/examples">
+<?xml version='1.0' encoding='utf-8'?>
+<dmn:definitions xmlns:dmn="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:operaton="http://operaton.org/schema/1.0/dmn" id="risk-assessment-definitions" name="Risk Assessment" namespace="http://operaton.org/examples">
 
-  <decision id="risk-assessment" name="Risk Assessment" operaton:historyTimeToLive="30">
-    <decisionTable id="decisionTable_1" hitPolicy="FIRST">
-      <input id="input_creditScore" label="Credit Score">
-        <inputExpression id="inputExpression_creditScore" typeRef="integer">
-          <text>creditScore</text>
-        </inputExpression>
-      </input>
-      <input id="input_loanAmount" label="Loan Amount">
-        <inputExpression id="inputExpression_loanAmount" typeRef="integer">
-          <text>loanAmount</text>
-        </inputExpression>
-      </input>
-      <output id="output_riskLevel" label="Risk Level" name="riskLevel" typeRef="string"/>
+  <descriptions>A self-contained Operaton example for loan application triage that combines a credit-score service call, DMN evaluation, and conditional user-task routing.
 
-      <!-- Rule 1: High credit score, any loan amount → low risk -->
-      <rule id="rule_low">
-        <inputEntry id="inputEntry_low_credit"><text>&gt;= 700</text></inputEntry>
-        <inputEntry id="inputEntry_low_loan"><text>&lt;= 500000</text></inputEntry>
-        <outputEntry id="outputEntry_low"><text>"low"</text></outputEntry>
-      </rule>
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</descriptions><dmn:decision id="risk-assessment" name="Risk Assessment" operaton:historyTimeToLive="30">
+    <dmn:decisionTable id="decisionTable_1" hitPolicy="FIRST">
+      <dmn:input id="input_creditScore" label="Credit Score">
+        <dmn:inputExpression id="inputExpression_creditScore" typeRef="integer">
+          <dmn:text>creditScore</dmn:text>
+        </dmn:inputExpression>
+      </dmn:input>
+      <dmn:input id="input_loanAmount" label="Loan Amount">
+        <dmn:inputExpression id="inputExpression_loanAmount" typeRef="integer">
+          <dmn:text>loanAmount</dmn:text>
+        </dmn:inputExpression>
+      </dmn:input>
+      <dmn:output id="output_riskLevel" label="Risk Level" name="riskLevel" typeRef="string" />
 
-      <!-- Rule 2: Medium credit score → medium risk -->
-      <rule id="rule_medium">
-        <inputEntry id="inputEntry_medium_credit"><text>[600..699]</text></inputEntry>
-        <inputEntry id="inputEntry_medium_loan"><text>&lt;= 500000</text></inputEntry>
-        <outputEntry id="outputEntry_medium"><text>"medium"</text></outputEntry>
-      </rule>
+      
+      <dmn:rule id="rule_low">
+        <dmn:inputEntry id="inputEntry_low_credit"><dmn:text>&gt;= 700</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="inputEntry_low_loan"><dmn:text>&lt;= 500000</dmn:text></dmn:inputEntry>
+        <dmn:outputEntry id="outputEntry_low"><dmn:text>"low"</dmn:text></dmn:outputEntry>
+      </dmn:rule>
 
-      <!-- Rule 3: Low credit score → high risk -->
-      <rule id="rule_high">
-        <inputEntry id="inputEntry_high_credit"><text>&lt; 600</text></inputEntry>
-        <inputEntry id="inputEntry_high_loan"><text></text></inputEntry>
-        <outputEntry id="outputEntry_high"><text>"high"</text></outputEntry>
-      </rule>
+      
+      <dmn:rule id="rule_medium">
+        <dmn:inputEntry id="inputEntry_medium_credit"><dmn:text>[600..699]</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="inputEntry_medium_loan"><dmn:text>&lt;= 500000</dmn:text></dmn:inputEntry>
+        <dmn:outputEntry id="outputEntry_medium"><dmn:text>"medium"</dmn:text></dmn:outputEntry>
+      </dmn:rule>
 
-    </decisionTable>
-  </decision>
+      
+      <dmn:rule id="rule_high">
+        <dmn:inputEntry id="inputEntry_high_credit"><dmn:text>&lt; 600</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="inputEntry_high_loan"><dmn:text /></dmn:inputEntry>
+        <dmn:outputEntry id="outputEntry_high"><dmn:text>"high"</dmn:text></dmn:outputEntry>
+      </dmn:rule>
 
-</definitions>
+    </dmn:decisionTable>
+  </dmn:decision>
+
+</dmn:definitions>

@@ -1,46 +1,60 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
-             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
-             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
-             xmlns:operaton="http://operaton.org/schema/1.0/dmn"
-             id="purchase-requisition-routing-definitions"
-             name="Purchase Requisition Routing"
-             namespace="http://operaton.org/examples/approval-sla-metrics">
+<?xml version='1.0' encoding='utf-8'?>
+<dmn:definitions xmlns:dmn="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:operaton="http://operaton.org/schema/1.0/dmn" id="purchase-requisition-routing-definitions" name="Purchase Requisition Routing" namespace="http://operaton.org/examples/approval-sla-metrics">
+    <descriptions>Demonstrates observing a BPMN process in real time: a purchase-requisition
 
-  <decision id="purchase-requisition-routing" name="Purchase Requisition Routing" operaton:historyTimeToLive="30">
-    <decisionTable id="decisionTable_routing" hitPolicy="FIRST">
-      <input id="input_amount" label="Amount">
-        <inputExpression id="inputExpression_amount" typeRef="double">
-          <text>amount</text>
-        </inputExpression>
-      </input>
-      <output id="output_tier" label="Approval Tier" name="approvalTier" typeRef="string"/>
-      <output id="output_sla" label="SLA Duration" name="slaDuration" typeRef="string"/>
-      <output id="output_group" label="Approver Group" name="approverGroup" typeRef="string"/>
-
-      <!-- Rule 1: small amounts auto-approve, no human step -->
-      <rule id="rule_auto">
-        <inputEntry id="ie_auto"><text>&lt; 1000</text></inputEntry>
-        <outputEntry id="oe_auto_tier"><text>"auto"</text></outputEntry>
-        <outputEntry id="oe_auto_sla"><text>"PT0S"</text></outputEntry>
-        <outputEntry id="oe_auto_group"><text>""</text></outputEntry>
-      </rule>
-
-      <!-- Rule 2: mid amounts → manager, 5s SLA (compressed for demo) -->
-      <rule id="rule_manager">
-        <inputEntry id="ie_manager"><text>&lt; 10000</text></inputEntry>
-        <outputEntry id="oe_manager_tier"><text>"manager"</text></outputEntry>
-        <outputEntry id="oe_manager_sla"><text>"PT5S"</text></outputEntry>
-        <outputEntry id="oe_manager_group"><text>"managers"</text></outputEntry>
-      </rule>
-
-      <!-- Rule 3: large amounts → director, tighter 2s SLA -->
-      <rule id="rule_director">
-        <inputEntry id="ie_director"><text></text></inputEntry>
-        <outputEntry id="oe_director_tier"><text>"director"</text></outputEntry>
-        <outputEntry id="oe_director_sla"><text>"PT2S"</text></outputEntry>
-        <outputEntry id="oe_director_group"><text>"directors"</text></outputEntry>
-      </rule>
-    </decisionTable>
-  </decision>
-</definitions>
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</descriptions><dmn:description>sds</dmn:description>
+    <dmn:decision id="purchase-requisition-routing" name="Purchase Requisition Routing" operaton:historyTimeToLive="30">
+        <dmn:decisionTable id="decisionTable_routing" hitPolicy="FIRST">
+            <dmn:input id="input_amount" label="Amount">
+                <dmn:inputExpression id="inputExpression_amount" typeRef="double">
+                    <dmn:text>amount</dmn:text>
+                </dmn:inputExpression>
+            </dmn:input>
+            <dmn:output id="output_tier" label="Approval Tier" name="approvalTier" typeRef="string" />
+            <dmn:output id="output_sla" label="SLA Duration" name="slaDuration" typeRef="string" />
+            <dmn:output id="output_group" label="Approver Group" name="approverGroup" typeRef="string" />
+            <dmn:rule id="rule_auto">
+                <dmn:inputEntry id="ie_auto">
+                    <dmn:text>&lt; 1000</dmn:text>
+                </dmn:inputEntry>
+                <dmn:outputEntry id="oe_auto_tier">
+                    <dmn:text>"auto"</dmn:text>
+                </dmn:outputEntry>
+                <dmn:outputEntry id="oe_auto_sla">
+                    <dmn:text>"PT0S"</dmn:text>
+                </dmn:outputEntry>
+                <dmn:outputEntry id="oe_auto_group">
+                    <dmn:text>""</dmn:text>
+                </dmn:outputEntry>
+            </dmn:rule>
+            <dmn:rule id="rule_manager">
+                <dmn:inputEntry id="ie_manager">
+                    <dmn:text>&lt; 10000</dmn:text>
+                </dmn:inputEntry>
+                <dmn:outputEntry id="oe_manager_tier">
+                    <dmn:text>"manager"</dmn:text>
+                </dmn:outputEntry>
+                <dmn:outputEntry id="oe_manager_sla">
+                    <dmn:text>"PT5S"</dmn:text>
+                </dmn:outputEntry>
+                <dmn:outputEntry id="oe_manager_group">
+                    <dmn:text>"managers"</dmn:text>
+                </dmn:outputEntry>
+            </dmn:rule>
+            <dmn:rule id="rule_director">
+                <dmn:inputEntry id="ie_director">
+                    <dmn:text />
+                </dmn:inputEntry>
+                <dmn:outputEntry id="oe_director_tier">
+                    <dmn:text>"director"</dmn:text>
+                </dmn:outputEntry>
+                <dmn:outputEntry id="oe_director_sla">
+                    <dmn:text>"PT2S"</dmn:text>
+                </dmn:outputEntry>
+                <dmn:outputEntry id="oe_director_group">
+                    <dmn:text>"directors"</dmn:text>
+                </dmn:outputEntry>
+            </dmn:rule>
+        </dmn:decisionTable>
+    </dmn:decision>
+</dmn:definitions>

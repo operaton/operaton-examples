@@ -1,81 +1,75 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
-             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
-             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
-             xmlns:operaton="http://operaton.org/schema/1.0/dmn"
-             id="claim-settlement-definitions"
-             name="Claim Settlement"
-             namespace="http://operaton.org/examples/insurance-claim">
+<?xml version='1.0' encoding='utf-8'?>
+<dmn:definitions xmlns:dmn="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:operaton="http://operaton.org/schema/1.0/dmn" id="claim-settlement-definitions" name="Claim Settlement" namespace="http://operaton.org/examples/insurance-claim">
 
-  <decision id="claim-settlement" name="Claim Settlement" operaton:historyTimeToLive="30">
-    <decisionTable id="decisionTable_settlement" hitPolicy="FIRST">
+  <descriptions>Demonstrates the event-based gateway — a race between a message event (documents
 
-      <input id="input_fraud" label="Fraud suspected">
-        <inputExpression id="ie_fraud" typeRef="boolean">
-          <text>fraudSuspected</text>
-        </inputExpression>
-      </input>
-      <input id="input_type" label="Claim type">
-        <inputExpression id="ie_type" typeRef="string">
-          <text>claimType</text>
-        </inputExpression>
-      </input>
-      <input id="input_amount" label="Appraised amount">
-        <inputExpression id="ie_amount" typeRef="double">
-          <text>appraisedAmount</text>
-        </inputExpression>
-      </input>
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</descriptions><dmn:decision id="claim-settlement" name="Claim Settlement" operaton:historyTimeToLive="30">
+    <dmn:decisionTable id="decisionTable_settlement" hitPolicy="FIRST">
 
-      <output id="output_decision" label="Settlement decision"
-              name="settlementDecision" typeRef="string"/>
-      <output id="output_amount" label="Approved amount"
-              name="approvedAmount" typeRef="double"/>
+      <dmn:input id="input_fraud" label="Fraud suspected">
+        <dmn:inputExpression id="ie_fraud" typeRef="boolean">
+          <dmn:text>fraudSuspected</dmn:text>
+        </dmn:inputExpression>
+      </dmn:input>
+      <dmn:input id="input_type" label="Claim type">
+        <dmn:inputExpression id="ie_type" typeRef="string">
+          <dmn:text>claimType</dmn:text>
+        </dmn:inputExpression>
+      </dmn:input>
+      <dmn:input id="input_amount" label="Appraised amount">
+        <dmn:inputExpression id="ie_amount" typeRef="double">
+          <dmn:text>appraisedAmount</dmn:text>
+        </dmn:inputExpression>
+      </dmn:input>
 
-      <!-- Rule 1: fraud suspected → reject regardless -->
-      <rule id="rule_fraud">
-        <inputEntry id="ie_fraud_1"><text>true</text></inputEntry>
-        <inputEntry id="ie_type_1"><text></text></inputEntry>
-        <inputEntry id="ie_amount_1"><text></text></inputEntry>
-        <outputEntry id="oe_decision_1"><text>"reject"</text></outputEntry>
-        <outputEntry id="oe_amount_1"><text>0</text></outputEntry>
-      </rule>
+      <dmn:output id="output_decision" label="Settlement decision" name="settlementDecision" typeRef="string" />
+      <dmn:output id="output_amount" label="Approved amount" name="approvedAmount" typeRef="double" />
 
-      <!-- Rule 2: flood → reject regardless -->
-      <rule id="rule_flood">
-        <inputEntry id="ie_fraud_2"><text></text></inputEntry>
-        <inputEntry id="ie_type_2"><text>"flood"</text></inputEntry>
-        <inputEntry id="ie_amount_2"><text></text></inputEntry>
-        <outputEntry id="oe_decision_2"><text>"reject"</text></outputEntry>
-        <outputEntry id="oe_amount_2"><text>0</text></outputEntry>
-      </rule>
+      
+      <dmn:rule id="rule_fraud">
+        <dmn:inputEntry id="ie_fraud_1"><dmn:text>true</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="ie_type_1"><dmn:text /></dmn:inputEntry>
+        <dmn:inputEntry id="ie_amount_1"><dmn:text /></dmn:inputEntry>
+        <dmn:outputEntry id="oe_decision_1"><dmn:text>"reject"</dmn:text></dmn:outputEntry>
+        <dmn:outputEntry id="oe_amount_1"><dmn:text>0</dmn:text></dmn:outputEntry>
+      </dmn:rule>
 
-      <!-- Rule 3: small amount (<=1000) → approve full appraised -->
-      <rule id="rule_small">
-        <inputEntry id="ie_fraud_3"><text></text></inputEntry>
-        <inputEntry id="ie_type_3"><text></text></inputEntry>
-        <inputEntry id="ie_amount_3"><text>&lt;= 1000</text></inputEntry>
-        <outputEntry id="oe_decision_3"><text>"approve"</text></outputEntry>
-        <outputEntry id="oe_amount_3"><text>appraisedAmount</text></outputEntry>
-      </rule>
+      
+      <dmn:rule id="rule_flood">
+        <dmn:inputEntry id="ie_fraud_2"><dmn:text /></dmn:inputEntry>
+        <dmn:inputEntry id="ie_type_2"><dmn:text>"flood"</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="ie_amount_2"><dmn:text /></dmn:inputEntry>
+        <dmn:outputEntry id="oe_decision_2"><dmn:text>"reject"</dmn:text></dmn:outputEntry>
+        <dmn:outputEntry id="oe_amount_2"><dmn:text>0</dmn:text></dmn:outputEntry>
+      </dmn:rule>
 
-      <!-- Rule 4: medium amount (<=50000) → approve at 80% -->
-      <rule id="rule_medium">
-        <inputEntry id="ie_fraud_4"><text></text></inputEntry>
-        <inputEntry id="ie_type_4"><text></text></inputEntry>
-        <inputEntry id="ie_amount_4"><text>&lt;= 50000</text></inputEntry>
-        <outputEntry id="oe_decision_4"><text>"approve"</text></outputEntry>
-        <outputEntry id="oe_amount_4"><text>appraisedAmount * 0.8</text></outputEntry>
-      </rule>
+      
+      <dmn:rule id="rule_small">
+        <dmn:inputEntry id="ie_fraud_3"><dmn:text /></dmn:inputEntry>
+        <dmn:inputEntry id="ie_type_3"><dmn:text /></dmn:inputEntry>
+        <dmn:inputEntry id="ie_amount_3"><dmn:text>&lt;= 1000</dmn:text></dmn:inputEntry>
+        <dmn:outputEntry id="oe_decision_3"><dmn:text>"approve"</dmn:text></dmn:outputEntry>
+        <dmn:outputEntry id="oe_amount_3"><dmn:text>appraisedAmount</dmn:text></dmn:outputEntry>
+      </dmn:rule>
 
-      <!-- Rule 5: large amount → reject -->
-      <rule id="rule_large">
-        <inputEntry id="ie_fraud_5"><text></text></inputEntry>
-        <inputEntry id="ie_type_5"><text></text></inputEntry>
-        <inputEntry id="ie_amount_5"><text></text></inputEntry>
-        <outputEntry id="oe_decision_5"><text>"reject"</text></outputEntry>
-        <outputEntry id="oe_amount_5"><text>0</text></outputEntry>
-      </rule>
+      
+      <dmn:rule id="rule_medium">
+        <dmn:inputEntry id="ie_fraud_4"><dmn:text /></dmn:inputEntry>
+        <dmn:inputEntry id="ie_type_4"><dmn:text /></dmn:inputEntry>
+        <dmn:inputEntry id="ie_amount_4"><dmn:text>&lt;= 50000</dmn:text></dmn:inputEntry>
+        <dmn:outputEntry id="oe_decision_4"><dmn:text>"approve"</dmn:text></dmn:outputEntry>
+        <dmn:outputEntry id="oe_amount_4"><dmn:text>appraisedAmount * 0.8</dmn:text></dmn:outputEntry>
+      </dmn:rule>
 
-    </decisionTable>
-  </decision>
-</definitions>
+      
+      <dmn:rule id="rule_large">
+        <dmn:inputEntry id="ie_fraud_5"><dmn:text /></dmn:inputEntry>
+        <dmn:inputEntry id="ie_type_5"><dmn:text /></dmn:inputEntry>
+        <dmn:inputEntry id="ie_amount_5"><dmn:text /></dmn:inputEntry>
+        <dmn:outputEntry id="oe_decision_5"><dmn:text>"reject"</dmn:text></dmn:outputEntry>
+        <dmn:outputEntry id="oe_amount_5"><dmn:text>0</dmn:text></dmn:outputEntry>
+      </dmn:rule>
+
+    </dmn:decisionTable>
+  </dmn:decision>
+</dmn:definitions>
