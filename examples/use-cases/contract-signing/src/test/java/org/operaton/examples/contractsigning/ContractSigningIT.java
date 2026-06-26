@@ -1,33 +1,24 @@
 package org.operaton.examples.contractsigning;
 
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.operaton.bpm.engine.*;
 import org.operaton.bpm.engine.history.HistoricProcessInstance;
 import org.operaton.bpm.engine.task.Task;
-import org.operaton.bpm.engine.variable.VariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.wait.strategy.Wait;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 
@@ -40,20 +31,25 @@ class ContractSigningIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine");
 
     @Container
     static GenericContainer<?> rustfs = new GenericContainer<>(DockerImageName.parse("rustfs/rustfs:latest"))
         .withEnv("RUSTFS_ACCESS_KEY", "minioadmin")
         .withEnv("RUSTFS_SECRET_KEY", "minioadmin")
         .withExposedPorts(9000)
-        .waitingFor(Wait.forHttp("/health/live").forPort(9000));
+        .withStartupTimeout(java.time.Duration.ofSeconds(60));
 
-    @Autowired private TestRestTemplate restTemplate;
     @Autowired private ProcessEngine processEngine;
     @Autowired private RuntimeService runtimeService;
     @Autowired private TaskService taskService;
     @Autowired private HistoryService historyService;
+    @Autowired private org.springframework.boot.web.server.WebServer webServer;
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.baseURI = "http://localhost:" + webServer.getPort();
+    }
 
     @DynamicPropertySource
     static void configureDynamicProperties(DynamicPropertyRegistry registry) {
@@ -72,24 +68,24 @@ class ContractSigningIT {
     @Test
     void happyPath_bothPartiesSign_completesWithArchivedArtifact() throws IOException {
         // Create/upload sample PDF
-        byte[] pdfBytes = Files.readAllBytes(Paths.get("src/test/resources/sample-contract.pdf"));
+        Response response = RestAssured
+            .given()
+                .multiPart("file", new java.io.File("src/test/resources/sample-contract.pdf"))
+                .multiPart("customer", "Alice")
+                .multiPart("company", "Operaton GmbH")
+            .when()
+                .post("/contracts")
+            .then()
+                .statusCode(201)
+                .extract().response();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", new FileSystemResource("src/test/resources/sample-contract.pdf"));
-        body.add("customer", "Alice");
-        body.add("company", "Operaton GmbH");
-
-        ResponseEntity<ContractUploadResponse> response = restTemplate.postForEntity(
-            "/contracts", new HttpEntity<>(body, headers), ContractUploadResponse.class);
-
-        assertThat(response.getStatusCodeValue()).isEqualTo(201);
-        String processInstanceId = response.getBody().getProcessInstanceId();
+        ContractUploadResponse uploadResponse = response.as(ContractUploadResponse.class);
+        String processInstanceId = uploadResponse.processInstanceId;
+        assertThat(processInstanceId).isNotBlank();
 
         // Customer signs
         List<Task> customerTasks = taskService.createTaskQuery()
-            .candidateGroup("customers")
+            .taskCandidateGroup("customers")
             .processInstanceId(processInstanceId)
             .list();
         assertThat(customerTasks).hasSize(1);
@@ -100,7 +96,7 @@ class ContractSigningIT {
 
         // Company signs
         List<Task> companyTasks = taskService.createTaskQuery()
-            .candidateGroup("legal")
+            .taskCandidateGroup("legal")
             .processInstanceId(processInstanceId)
             .list();
         assertThat(companyTasks).hasSize(1);
@@ -119,10 +115,10 @@ class ContractSigningIT {
         });
 
         // Anti-pattern guard: no byte[] variables
-        List<VariableInstance> variables = runtimeService.createVariableInstanceQuery()
+        var variables = historyService.createHistoricVariableInstanceQuery()
             .processInstanceId(processInstanceId)
             .list();
-        for (VariableInstance var : variables) {
+        for (var var : variables) {
             assertThat(var.getTypeName())
                 .as("Variable %s must not be byte[]", var.getName())
                 .isNotEqualTo("Files");
@@ -144,23 +140,23 @@ class ContractSigningIT {
 
     @Test
     void customerDeclines_terminatesInstance_noCompanySigning() throws IOException {
-        byte[] pdfBytes = Files.readAllBytes(Paths.get("src/test/resources/sample-contract.pdf"));
+        Response response = RestAssured
+            .given()
+                .multiPart("file", new java.io.File("src/test/resources/sample-contract.pdf"))
+                .multiPart("customer", "Bob")
+                .multiPart("company", "Operaton GmbH")
+            .when()
+                .post("/contracts")
+            .then()
+                .statusCode(201)
+                .extract().response();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", new FileSystemResource("src/test/resources/sample-contract.pdf"));
-        body.add("customer", "Bob");
-        body.add("company", "Operaton GmbH");
-
-        ResponseEntity<ContractUploadResponse> response = restTemplate.postForEntity(
-            "/contracts", new HttpEntity<>(body, headers), ContractUploadResponse.class);
-
-        String processInstanceId = response.getBody().getProcessInstanceId();
+        ContractUploadResponse uploadResponse = response.as(ContractUploadResponse.class);
+        String processInstanceId = uploadResponse.processInstanceId;
 
         // Customer declines
         Task customerTask = taskService.createTaskQuery()
-            .candidateGroup("customers")
+            .taskCandidateGroup("customers")
             .processInstanceId(processInstanceId)
             .singleResult();
         taskService.claim(customerTask.getId(), "alice");
@@ -178,7 +174,7 @@ class ContractSigningIT {
 
         // Company task should not exist
         long companyTaskCount = taskService.createTaskQuery()
-            .candidateGroup("legal")
+            .taskCandidateGroup("legal")
             .processInstanceId(processInstanceId)
             .count();
         assertThat(companyTaskCount).isZero();

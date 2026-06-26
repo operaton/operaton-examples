@@ -40,10 +40,12 @@ dependencies {
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.testcontainers:testcontainers")
-    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.awaitility:awaitility")
+    testImplementation("io.rest-assured:rest-assured:5.4.0")
 }
 
 tasks.named<Test>("test") {
