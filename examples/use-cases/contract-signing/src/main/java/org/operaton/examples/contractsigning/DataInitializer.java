@@ -35,7 +35,7 @@ public class DataInitializer {
             user.setPassword(password);
             user.setFirstName(firstName);
             identityService.saveUser(user);
+            identityService.createMembership(userId, groupId);
         }
-        identityService.createMembership(userId, groupId);
     }
 }
