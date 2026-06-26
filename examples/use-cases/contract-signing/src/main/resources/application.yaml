@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: contract-signing
+  datasource:
+    url: jdbc:postgresql://localhost:5432/operaton
+    username: operaton
+    password: operaton
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 21MB
+
+storage:
+  endpoint: http://localhost:9000
+  region: us-east-1
+  bucket: contracts
+  access-key: minioadmin
+  secret-key: minioadmin
+
+operaton:
+  bpm:
+    admin-user:
+      id: demo
+      password: demo
+      first-name: Demo
+    filter:
+      create: All tasks

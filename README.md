@@ -15,6 +15,8 @@ example means testing its processes against real integrations.
 | Docker | any recent version (required for tests and local run) |
 | Distribution images (`operaton/tomcat`, `operaton/wildfly`, `operaton/operaton`) | `2.1.1` |
 | `operaton-keycloak-run` (plugin) | `2.1.0` |
+| AWS SDK v2 | 2.29.0 |
+| Apache PDFBox | 3.0.7 |
 
 Pinned stack (all examples): Spring Boot **4.1.0**, Operaton **2.1.1**,
 Maven Wrapper **3.9.12**, Gradle Wrapper **9.2.0**, PostgreSQL **16**.
