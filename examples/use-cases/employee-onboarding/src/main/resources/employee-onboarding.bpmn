@@ -1,62 +1,50 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_EmployeeOnboarding"
-                  targetNamespace="http://operaton.org/examples">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_EmployeeOnboarding" targetNamespace="http://operaton.org/examples">
 
-  <bpmn:process id="employee-onboarding" name="Employee Onboarding" isExecutable="true"
-                operaton:historyTimeToLive="P30D">
+  <bpmn:process id="employee-onboarding" name="Employee Onboarding" isExecutable="true" operaton:historyTimeToLive="P30D">
 
-    <bpmn:startEvent id="StartEvent_NewHire" name="New hire approved">
+    <bpmn:documentation>Demonstrates call activity process composition: a parent process orchestrates two reusable child process definitions, including a parallel multi-instance call activity that provisions a list of equipment items concurrently.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_NewHire" name="New hire approved">
       <bpmn:outgoing>Flow_Start_Prepare</bpmn:outgoing>
     </bpmn:startEvent>
 
-    <bpmn:serviceTask id="Task_PrepareOnboarding" name="Prepare onboarding"
-                      operaton:delegateExpression="${prepareOnboardingDelegate}">
+    <bpmn:serviceTask id="Task_PrepareOnboarding" name="Prepare onboarding" operaton:delegateExpression="${prepareOnboardingDelegate}">
       <bpmn:incoming>Flow_Start_Prepare</bpmn:incoming>
       <bpmn:outgoing>Flow_Prepare_Provision</bpmn:outgoing>
     </bpmn:serviceTask>
 
-    <!-- Parallel multi-instance call activity: one child process per item in equipmentList -->
-    <bpmn:callActivity id="CallActivity_ProvisionEquipment" name="Provision equipment"
-                       calledElement="provision-equipment">
+    
+    <bpmn:callActivity id="CallActivity_ProvisionEquipment" name="Provision equipment" calledElement="provision-equipment">
       <bpmn:extensionElements>
-        <operaton:in sourceExpression="${equipmentItem}" target="equipmentItem"/>
-        <operaton:in source="employeeId" target="employeeId"/>
+        <operaton:in sourceExpression="${equipmentItem}" target="equipmentItem" />
+        <operaton:in source="employeeId" target="employeeId" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_Prepare_Provision</bpmn:incoming>
       <bpmn:outgoing>Flow_Provision_Access</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics isSequential="false"
-        operaton:collection="${equipmentList}"
-        operaton:elementVariable="equipmentItem">
+      <bpmn:multiInstanceLoopCharacteristics isSequential="false" operaton:collection="${equipmentList}" operaton:elementVariable="equipmentItem">
         <bpmn:completionCondition>${nrOfCompletedInstances == nrOfInstances}</bpmn:completionCondition>
       </bpmn:multiInstanceLoopCharacteristics>
     </bpmn:callActivity>
 
-    <!-- Single call activity: grant (or deny) system access based on role -->
-    <bpmn:callActivity id="CallActivity_GrantAccess" name="Grant system access"
-                       calledElement="grant-system-access">
+    
+    <bpmn:callActivity id="CallActivity_GrantAccess" name="Grant system access" calledElement="grant-system-access">
       <bpmn:extensionElements>
-        <operaton:in source="employeeId" target="employeeId"/>
-        <operaton:in source="role" target="role"/>
-        <operaton:out source="accessGranted" target="accessGranted"/>
+        <operaton:in source="employeeId" target="employeeId" />
+        <operaton:in source="role" target="role" />
+        <operaton:out source="accessGranted" target="accessGranted" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_Provision_Access</bpmn:incoming>
       <bpmn:outgoing>Flow_Access_Gateway</bpmn:outgoing>
     </bpmn:callActivity>
 
-    <bpmn:exclusiveGateway id="Gateway_AccessGranted" name="Access granted?"
-                           default="Flow_Granted_Activate">
+    <bpmn:exclusiveGateway id="Gateway_AccessGranted" name="Access granted?" default="Flow_Granted_Activate">
       <bpmn:incoming>Flow_Access_Gateway</bpmn:incoming>
       <bpmn:outgoing>Flow_Granted_Activate</bpmn:outgoing>
       <bpmn:outgoing>Flow_Denied_Flag</bpmn:outgoing>
     </bpmn:exclusiveGateway>
 
-    <bpmn:serviceTask id="Task_ActivateAccount" name="Activate account"
-                      operaton:delegateExpression="${activateAccountDelegate}">
+    <bpmn:serviceTask id="Task_ActivateAccount" name="Activate account" operaton:delegateExpression="${activateAccountDelegate}">
       <bpmn:incoming>Flow_Granted_Activate</bpmn:incoming>
       <bpmn:outgoing>Flow_Activate_End</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -65,8 +53,7 @@
       <bpmn:incoming>Flow_Activate_End</bpmn:incoming>
     </bpmn:endEvent>
 
-    <bpmn:serviceTask id="Task_FlagForItReview" name="Flag for IT review"
-                      operaton:delegateExpression="${flagForItReviewDelegate}">
+    <bpmn:serviceTask id="Task_FlagForItReview" name="Flag for IT review" operaton:delegateExpression="${flagForItReviewDelegate}">
       <bpmn:incoming>Flow_Denied_Flag</bpmn:incoming>
       <bpmn:outgoing>Flow_Flag_End</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -75,90 +62,74 @@
       <bpmn:incoming>Flow_Flag_End</bpmn:incoming>
     </bpmn:endEvent>
 
-    <bpmn:sequenceFlow id="Flow_Start_Prepare"
-                       sourceRef="StartEvent_NewHire"
-                       targetRef="Task_PrepareOnboarding"/>
-    <bpmn:sequenceFlow id="Flow_Prepare_Provision"
-                       sourceRef="Task_PrepareOnboarding"
-                       targetRef="CallActivity_ProvisionEquipment"/>
-    <bpmn:sequenceFlow id="Flow_Provision_Access"
-                       sourceRef="CallActivity_ProvisionEquipment"
-                       targetRef="CallActivity_GrantAccess"/>
-    <bpmn:sequenceFlow id="Flow_Access_Gateway"
-                       sourceRef="CallActivity_GrantAccess"
-                       targetRef="Gateway_AccessGranted"/>
-    <bpmn:sequenceFlow id="Flow_Granted_Activate" name="granted"
-                       sourceRef="Gateway_AccessGranted"
-                       targetRef="Task_ActivateAccount"/>
-    <bpmn:sequenceFlow id="Flow_Denied_Flag" name="denied"
-                       sourceRef="Gateway_AccessGranted"
-                       targetRef="Task_FlagForItReview">
+    <bpmn:sequenceFlow id="Flow_Start_Prepare" sourceRef="StartEvent_NewHire" targetRef="Task_PrepareOnboarding" />
+    <bpmn:sequenceFlow id="Flow_Prepare_Provision" sourceRef="Task_PrepareOnboarding" targetRef="CallActivity_ProvisionEquipment" />
+    <bpmn:sequenceFlow id="Flow_Provision_Access" sourceRef="CallActivity_ProvisionEquipment" targetRef="CallActivity_GrantAccess" />
+    <bpmn:sequenceFlow id="Flow_Access_Gateway" sourceRef="CallActivity_GrantAccess" targetRef="Gateway_AccessGranted" />
+    <bpmn:sequenceFlow id="Flow_Granted_Activate" name="granted" sourceRef="Gateway_AccessGranted" targetRef="Task_ActivateAccount" />
+    <bpmn:sequenceFlow id="Flow_Denied_Flag" name="denied" sourceRef="Gateway_AccessGranted" targetRef="Task_FlagForItReview">
       <bpmn:conditionExpression>${accessGranted == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_Activate_End"
-                       sourceRef="Task_ActivateAccount"
-                       targetRef="EndEvent_Onboarded"/>
-    <bpmn:sequenceFlow id="Flow_Flag_End"
-                       sourceRef="Task_FlagForItReview"
-                       targetRef="EndEvent_ManualRemediation"/>
+    <bpmn:sequenceFlow id="Flow_Activate_End" sourceRef="Task_ActivateAccount" targetRef="EndEvent_Onboarded" />
+    <bpmn:sequenceFlow id="Flow_Flag_End" sourceRef="Task_FlagForItReview" targetRef="EndEvent_ManualRemediation" />
   </bpmn:process>
 
   <bpmndi:BPMNDiagram id="BPMNDiagram_EmployeeOnboarding">
     <bpmndi:BPMNPlane id="BPMNPlane_EmployeeOnboarding" bpmnElement="employee-onboarding">
       <bpmndi:BPMNShape id="Shape_StartEvent_NewHire" bpmnElement="StartEvent_NewHire">
-        <dc:Bounds x="152" y="222" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="130" y="265" width="80" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="152" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="130" y="265" width="80" height="27" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Task_PrepareOnboarding" bpmnElement="Task_PrepareOnboarding">
-        <dc:Bounds x="240" y="200" width="100" height="80"/>
+        <dc:Bounds x="240" y="200" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_CallActivity_Provision" bpmnElement="CallActivity_ProvisionEquipment">
-        <dc:Bounds x="400" y="200" width="100" height="80"/>
+        <dc:Bounds x="400" y="200" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_CallActivity_Access" bpmnElement="CallActivity_GrantAccess">
-        <dc:Bounds x="560" y="200" width="100" height="80"/>
+        <dc:Bounds x="560" y="200" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Gateway_AccessGranted" bpmnElement="Gateway_AccessGranted" isMarkerVisible="true">
-        <dc:Bounds x="725" y="215" width="50" height="50"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="710" y="272" width="80" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="725" y="215" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="710" y="272" width="80" height="27" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Task_ActivateAccount" bpmnElement="Task_ActivateAccount">
-        <dc:Bounds x="840" y="150" width="100" height="80"/>
+        <dc:Bounds x="840" y="150" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_EndEvent_Onboarded" bpmnElement="EndEvent_Onboarded">
-        <dc:Bounds x="1002" y="172" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="994" y="215" width="52" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1002" y="172" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="994" y="215" width="52" height="14" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Task_FlagForItReview" bpmnElement="Task_FlagForItReview">
-        <dc:Bounds x="840" y="290" width="100" height="80"/>
+        <dc:Bounds x="840" y="290" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_EndEvent_ManualRemediation" bpmnElement="EndEvent_ManualRemediation">
-        <dc:Bounds x="1002" y="312" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="983" y="355" width="74" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1002" y="312" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="983" y="355" width="74" height="27" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Start_Prepare" bpmnElement="Flow_Start_Prepare">
-        <di:waypoint x="188" y="240"/><di:waypoint x="240" y="240"/>
+        <di:waypoint x="188" y="240" /><di:waypoint x="240" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Prepare_Provision" bpmnElement="Flow_Prepare_Provision">
-        <di:waypoint x="340" y="240"/><di:waypoint x="400" y="240"/>
+        <di:waypoint x="340" y="240" /><di:waypoint x="400" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Provision_Access" bpmnElement="Flow_Provision_Access">
-        <di:waypoint x="500" y="240"/><di:waypoint x="560" y="240"/>
+        <di:waypoint x="500" y="240" /><di:waypoint x="560" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Access_Gateway" bpmnElement="Flow_Access_Gateway">
-        <di:waypoint x="660" y="240"/><di:waypoint x="725" y="240"/>
+        <di:waypoint x="660" y="240" /><di:waypoint x="725" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Granted_Activate" bpmnElement="Flow_Granted_Activate">
-        <di:waypoint x="750" y="215"/><di:waypoint x="750" y="190"/><di:waypoint x="840" y="190"/>
+        <di:waypoint x="750" y="215" /><di:waypoint x="750" y="190" /><di:waypoint x="840" y="190" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Denied_Flag" bpmnElement="Flow_Denied_Flag">
-        <di:waypoint x="750" y="265"/><di:waypoint x="750" y="330"/><di:waypoint x="840" y="330"/>
+        <di:waypoint x="750" y="265" /><di:waypoint x="750" y="330" /><di:waypoint x="840" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Activate_End" bpmnElement="Flow_Activate_End">
-        <di:waypoint x="940" y="190"/><di:waypoint x="1002" y="190"/>
+        <di:waypoint x="940" y="190" /><di:waypoint x="1002" y="190" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flag_End" bpmnElement="Flow_Flag_End">
-        <di:waypoint x="940" y="330"/><di:waypoint x="1002" y="330"/>
+        <di:waypoint x="940" y="330" /><di:waypoint x="1002" y="330" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

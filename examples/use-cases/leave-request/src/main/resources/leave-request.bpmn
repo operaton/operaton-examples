@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" targetNamespace="http://bpmn.io/schema/bpmn">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn:collaboration id="Collaboration_LeaveRequest">
     <bpmn:participant id="Pool_LeaveRequest" name="Leave Request Approval" processRef="leave-request" />
   </bpmn:collaboration>
   <bpmn:process id="leave-request" name="Leave Request Approval" isExecutable="true" operaton:historyTimeToLive="P90D" operaton:candidateStarterGroups="employees,operaton-admin">
-    <bpmn:laneSet id="LaneSet_1">
+    <bpmn:documentation>A self-contained Operaton example for a realistic leave request approval workflow with persisted vacation balances.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:laneSet id="LaneSet_1">
       <bpmn:lane id="Lane_Employees" name="employees">
         <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_EmployeeNotified</bpmn:flowNodeRef>
@@ -77,7 +79,7 @@
     <bpmn:sequenceFlow id="Flow_reminder_to_end" sourceRef="Task_EscalationReminder" targetRef="EndEvent_EscalationSent" />
     <bpmn:sequenceFlow id="Flow_rejected" name="rejected" sourceRef="Gateway_Decision" targetRef="Task_SendRejectionEmail">
       <bpmn:extensionElements>
-        <operaton:executionListener event="take" expression="${execution.setVariable(&#39;leaveStatus&#39;, &#39;REJECTED&#39;)}" />
+        <operaton:executionListener event="take" expression="${execution.setVariable('leaveStatus', 'REJECTED')}" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_finalize_to_end" sourceRef="Task_FinalizeApproval" targetRef="EndEvent_Approved" />

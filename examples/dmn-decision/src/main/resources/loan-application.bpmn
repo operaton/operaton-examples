@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_LoanApplication" targetNamespace="http://operaton.org/examples/loan-application">
   <bpmn:process id="loan-application" name="Loan Application" isExecutable="true" operaton:historyTimeToLive="P30D">
+    <bpmn:documentation>A loan application process demonstrating DMN decision evaluation from a BPMN process: a businessRuleTask references a DMN file containing a Decision Requirements Graph (DRG) with two linked decisions that determine whether a loan application is approved, sent for review, or declined.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation>
     <bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received">
       <bpmn:outgoing>Flow_Start_To_Credit</bpmn:outgoing>
     </bpmn:startEvent>

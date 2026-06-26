@@ -1,85 +1,87 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" targetNamespace="http://www.operaton.org/examples" exporter="operaton modeler" exporterVersion="1.0">
-  <collaboration id="Collaboration_LoanApplication">
-    <participant id="Pool_LoanApplication" name="Loan Application" processRef="loan-application" />
-  </collaboration>
-  <process id="loan-application" name="Loan Application" isExecutable="true" operaton:historyTimeToLive="P30D" operaton:candidateStarterGroups="employees,operaton-admin">
-    <laneSet id="LaneSet_1">
-      <lane id="Lane_Employees" name="employees">
-        <flowNodeRef>StartEvent_1</flowNodeRef>
-      </lane>
-      <lane id="Lane_Underwriters" name="underwriters">
-        <flowNodeRef>Task_UnderwriterReview</flowNodeRef>
-        <flowNodeRef>EndEvent_UnderwriterPending</flowNodeRef>
-      </lane>
-      <lane id="Lane_System" name="System">
-        <flowNodeRef>Task_AutoApprove</flowNodeRef>
-        <flowNodeRef>Task_AutoReject</flowNodeRef>
-        <flowNodeRef>EndEvent_Approved</flowNodeRef>
-        <flowNodeRef>EndEvent_Rejected</flowNodeRef>
-        <flowNodeRef>Gateway_Risk</flowNodeRef>
-        <flowNodeRef>Task_RiskAssessment</flowNodeRef>
-        <flowNodeRef>Task_CreditScore</flowNodeRef>
-      </lane>
-    </laneSet>
-    <startEvent id="StartEvent_1" name="Loan Application Received">
-      <outgoing>Flow_start_to_credit</outgoing>
-    </startEvent>
-    <userTask id="Task_UnderwriterReview" name="Underwriter Review" operaton:candidateGroups="underwriters">
-      <incoming>Flow_medium</incoming>
-      <outgoing>Flow_medium_end</outgoing>
-    </userTask>
-    <endEvent id="EndEvent_UnderwriterPending" name="Pending Underwriter Decision">
-      <incoming>Flow_medium_end</incoming>
-    </endEvent>
-    <sequenceFlow id="Flow_start_to_credit" sourceRef="StartEvent_1" targetRef="Task_CreditScore" />
-    <sequenceFlow id="Flow_medium" name="medium" sourceRef="Gateway_Risk" targetRef="Task_UnderwriterReview">
-      <conditionExpression xsi:type="tFormalExpression">${riskLevel == 'medium'}</conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="Flow_medium_end" sourceRef="Task_UnderwriterReview" targetRef="EndEvent_UnderwriterPending">
-      <extensionElements>
-        <operaton:executionListener event="take" expression="${execution.setVariable(&#39;loanDecision&#39;, &#39;APPROVED&#39;)}" />
-      </extensionElements>
-    </sequenceFlow>
-    <serviceTask id="Task_AutoApprove" name="Auto-Approve Notify" operaton:delegateExpression="${notificationDelegate}">
-      <incoming>Flow_low</incoming>
-      <outgoing>Flow_approve_end</outgoing>
-    </serviceTask>
-    <sendTask id="Task_AutoReject" name="Send Rejection Email" operaton:delegateExpression="${rejectionEmailDelegate}">
-      <incoming>Flow_high</incoming>
-      <outgoing>Flow_reject_end</outgoing>
-    </sendTask>
-    <endEvent id="EndEvent_Approved" name="Loan Approved">
-      <incoming>Flow_approve_end</incoming>
-    </endEvent>
-    <endEvent id="EndEvent_Rejected" name="Loan Rejected">
-      <incoming>Flow_reject_end</incoming>
-    </endEvent>
-    <sequenceFlow id="Flow_credit_to_dmn" sourceRef="Task_CreditScore" targetRef="Task_RiskAssessment" />
-    <sequenceFlow id="Flow_dmn_to_gw" sourceRef="Task_RiskAssessment" targetRef="Gateway_Risk" />
-    <sequenceFlow id="Flow_low" name="low" sourceRef="Gateway_Risk" targetRef="Task_AutoApprove">
-      <conditionExpression xsi:type="tFormalExpression">${riskLevel == 'low'}</conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="Flow_high" name="high" sourceRef="Gateway_Risk" targetRef="Task_AutoReject">
-      <conditionExpression xsi:type="tFormalExpression">${riskLevel == 'high'}</conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="Flow_approve_end" sourceRef="Task_AutoApprove" targetRef="EndEvent_Approved" />
-    <sequenceFlow id="Flow_reject_end" sourceRef="Task_AutoReject" targetRef="EndEvent_Rejected" />
-    <exclusiveGateway id="Gateway_Risk" name="Risk Level?">
-      <incoming>Flow_dmn_to_gw</incoming>
-      <outgoing>Flow_low</outgoing>
-      <outgoing>Flow_medium</outgoing>
-      <outgoing>Flow_high</outgoing>
-    </exclusiveGateway>
-    <businessRuleTask id="Task_RiskAssessment" name="Assess Risk (DMN)" operaton:decisionRef="risk-assessment" operaton:decisionRefBinding="latest" operaton:mapDecisionResult="singleEntry" operaton:resultVariable="riskLevel">
-      <incoming>Flow_credit_to_dmn</incoming>
-      <outgoing>Flow_dmn_to_gw</outgoing>
-    </businessRuleTask>
-    <serviceTask id="Task_CreditScore" name="Check Credit Score" operaton:delegateExpression="${creditScoreDelegate}">
-      <incoming>Flow_start_to_credit</incoming>
-      <outgoing>Flow_credit_to_dmn</outgoing>
-    </serviceTask>
-  </process>
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://www.operaton.org/examples" exporter="operaton modeler" exporterVersion="1.0">
+  <bpmn:collaboration id="Collaboration_LoanApplication">
+    <bpmn:participant id="Pool_LoanApplication" name="Loan Application" processRef="loan-application" />
+  </bpmn:collaboration>
+  <bpmn:process id="loan-application" name="Loan Application" isExecutable="true" operaton:historyTimeToLive="P30D" operaton:candidateStarterGroups="employees,operaton-admin">
+    <bpmn:documentation>A self-contained Operaton example for loan application triage that combines a credit-score service call, DMN evaluation, and conditional user-task routing.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Employees" name="employees">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Underwriters" name="underwriters">
+        <bpmn:flowNodeRef>Task_UnderwriterReview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_UnderwriterPending</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_System" name="System">
+        <bpmn:flowNodeRef>Task_AutoApprove</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_AutoReject</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Approved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Risk</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_RiskAssessment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CreditScore</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_1" name="Loan Application Received">
+      <bpmn:outgoing>Flow_start_to_credit</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Task_UnderwriterReview" name="Underwriter Review" operaton:candidateGroups="underwriters">
+      <bpmn:incoming>Flow_medium</bpmn:incoming>
+      <bpmn:outgoing>Flow_medium_end</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_UnderwriterPending" name="Pending Underwriter Decision">
+      <bpmn:incoming>Flow_medium_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_start_to_credit" sourceRef="StartEvent_1" targetRef="Task_CreditScore" />
+    <bpmn:sequenceFlow id="Flow_medium" name="medium" sourceRef="Gateway_Risk" targetRef="Task_UnderwriterReview">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${riskLevel == 'medium'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_medium_end" sourceRef="Task_UnderwriterReview" targetRef="EndEvent_UnderwriterPending">
+      <bpmn:extensionElements>
+        <operaton:executionListener event="take" expression="${execution.setVariable('loanDecision', 'APPROVED')}" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Task_AutoApprove" name="Auto-Approve Notify" operaton:delegateExpression="${notificationDelegate}">
+      <bpmn:incoming>Flow_low</bpmn:incoming>
+      <bpmn:outgoing>Flow_approve_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Task_AutoReject" name="Send Rejection Email" operaton:delegateExpression="${rejectionEmailDelegate}">
+      <bpmn:incoming>Flow_high</bpmn:incoming>
+      <bpmn:outgoing>Flow_reject_end</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent_Approved" name="Loan Approved">
+      <bpmn:incoming>Flow_approve_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_Rejected" name="Loan Rejected">
+      <bpmn:incoming>Flow_reject_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_credit_to_dmn" sourceRef="Task_CreditScore" targetRef="Task_RiskAssessment" />
+    <bpmn:sequenceFlow id="Flow_dmn_to_gw" sourceRef="Task_RiskAssessment" targetRef="Gateway_Risk" />
+    <bpmn:sequenceFlow id="Flow_low" name="low" sourceRef="Gateway_Risk" targetRef="Task_AutoApprove">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${riskLevel == 'low'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_high" name="high" sourceRef="Gateway_Risk" targetRef="Task_AutoReject">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${riskLevel == 'high'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_approve_end" sourceRef="Task_AutoApprove" targetRef="EndEvent_Approved" />
+    <bpmn:sequenceFlow id="Flow_reject_end" sourceRef="Task_AutoReject" targetRef="EndEvent_Rejected" />
+    <bpmn:exclusiveGateway id="Gateway_Risk" name="Risk Level?">
+      <bpmn:incoming>Flow_dmn_to_gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_low</bpmn:outgoing>
+      <bpmn:outgoing>Flow_medium</bpmn:outgoing>
+      <bpmn:outgoing>Flow_high</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:businessRuleTask id="Task_RiskAssessment" name="Assess Risk (DMN)" operaton:decisionRef="risk-assessment" operaton:decisionRefBinding="latest" operaton:mapDecisionResult="singleEntry" operaton:resultVariable="riskLevel">
+      <bpmn:incoming>Flow_credit_to_dmn</bpmn:incoming>
+      <bpmn:outgoing>Flow_dmn_to_gw</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:serviceTask id="Task_CreditScore" name="Check Credit Score" operaton:delegateExpression="${creditScoreDelegate}">
+      <bpmn:incoming>Flow_start_to_credit</bpmn:incoming>
+      <bpmn:outgoing>Flow_credit_to_dmn</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_LoanApplication">
       <bpmndi:BPMNShape id="Pool_LoanApplication_di" bpmnElement="Pool_LoanApplication" isHorizontal="true">
@@ -189,4 +191,4 @@
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
-</definitions>
+</bpmn:definitions>

@@ -1,95 +1,97 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" targetNamespace="http://www.operaton.org/examples" exporter="operaton modeler" exporterVersion="1.0">
-  <signal id="EscalationSignal" name="EscalationSignal" />
-  <collaboration id="Collaboration_IncidentManagement">
-    <participant id="Pool_IncidentManagement" name="Incident Management" processRef="incident-management" />
-  </collaboration>
-  <process id="incident-management" name="Incident Management" isExecutable="true" operaton:historyTimeToLive="P30D" operaton:candidateStarterGroups="employees,operaton-admin">
-    <laneSet id="LaneSet_1">
-      <lane id="Lane_Employees" name="employees">
-        <flowNodeRef>StartEvent_1</flowNodeRef>
-      </lane>
-      <lane id="Lane_FirstLine" name="firstline">
-        <flowNodeRef>Task_FirstLineTriage</flowNodeRef>
-        <flowNodeRef>Signal_Escalation</flowNodeRef>
-        <flowNodeRef>BoundaryTimer_Escalate</flowNodeRef>
-        <flowNodeRef>Gateway_Resolved</flowNodeRef>
-      </lane>
-      <lane id="Lane_SecondLine" name="secondline">
-        <flowNodeRef>Task_SecondLine</flowNodeRef>
-      </lane>
-      <lane id="Lane_System" name="System">
-        <flowNodeRef>EndEvent_PostMortem</flowNodeRef>
-        <flowNodeRef>Task_PostMortem</flowNodeRef>
-        <flowNodeRef>EndEvent_Closed</flowNodeRef>
-        <flowNodeRef>Task_SetHighPriority</flowNodeRef>
-        <flowNodeRef>Task_CloseTicket</flowNodeRef>
-      </lane>
-    </laneSet>
-    <startEvent id="StartEvent_1" name="Incident Reported">
-      <extensionElements>
-        <operaton:executionListener event="end" expression="${execution.setVariable(&#39;incidentPriority&#39;, &#39;LOW&#39;)}" />
-      </extensionElements>
-      <outgoing>Flow_start_to_triage</outgoing>
-    </startEvent>
-    <userTask id="Task_SecondLine" name="Handle Escalation" operaton:candidateGroups="secondline">
-      <incoming>Flow_timer_to_secondline</incoming>
-      <incoming>Flow_not_resolved</incoming>
-      <incoming>Flow_priority_to_secondline</incoming>
-      <outgoing>Flow_secondline_postmortem</outgoing>
-    </userTask>
-    <sequenceFlow id="Flow_signal_to_priority" sourceRef="Signal_Escalation" targetRef="Task_SetHighPriority" />
-    <sequenceFlow id="Flow_priority_to_secondline" sourceRef="Task_SetHighPriority" targetRef="Task_SecondLine" />
-    <sequenceFlow id="Flow_start_to_triage" sourceRef="StartEvent_1" targetRef="Task_FirstLineTriage" />
-    <sequenceFlow id="Flow_triage_to_gw" sourceRef="Task_FirstLineTriage" targetRef="Gateway_Resolved" />
-    <sequenceFlow id="Flow_timer_to_secondline" sourceRef="BoundaryTimer_Escalate" targetRef="Task_SecondLine" />
-    <sequenceFlow id="Flow_resolved" name="resolved" sourceRef="Gateway_Resolved" targetRef="Task_CloseTicket">
-      <conditionExpression xsi:type="tFormalExpression">${resolved == true}</conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="Flow_not_resolved" name="not resolved" sourceRef="Gateway_Resolved" targetRef="Task_SecondLine">
-      <conditionExpression xsi:type="tFormalExpression">${resolved != true}</conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="Flow_close_end" sourceRef="Task_CloseTicket" targetRef="EndEvent_Closed" />
-    <sequenceFlow id="Flow_secondline_postmortem" sourceRef="Task_SecondLine" targetRef="Task_PostMortem" />
-    <sequenceFlow id="Flow_postmortem_end" sourceRef="Task_PostMortem" targetRef="EndEvent_PostMortem" />
-    <endEvent id="EndEvent_PostMortem" name="Post-Mortem Done">
-      <incoming>Flow_postmortem_end</incoming>
-    </endEvent>
-    <serviceTask id="Task_PostMortem" name="Post-Mortem Notify" operaton:class="org.operaton.examples.incidentmanagement.delegate.PostMortemDelegate">
-      <incoming>Flow_secondline_postmortem</incoming>
-      <outgoing>Flow_postmortem_end</outgoing>
-    </serviceTask>
-    <endEvent id="EndEvent_Closed" name="Ticket Closed">
-      <incoming>Flow_close_end</incoming>
-    </endEvent>
-    <userTask id="Task_FirstLineTriage" name="Triage" operaton:candidateGroups="firstline">
-      <incoming>Flow_start_to_triage</incoming>
-      <outgoing>Flow_triage_to_gw</outgoing>
-    </userTask>
-    <boundaryEvent id="Signal_Escalation" name="Escalation Signal" cancelActivity="false" attachedToRef="Task_FirstLineTriage">
-      <outgoing>Flow_signal_to_priority</outgoing>
-      <signalEventDefinition signalRef="EscalationSignal" />
-    </boundaryEvent>
-    <boundaryEvent id="BoundaryTimer_Escalate" name="SLA Timer" attachedToRef="Task_FirstLineTriage">
-      <outgoing>Flow_timer_to_secondline</outgoing>
-      <timerEventDefinition id="TimerEventDefinition_1">
-        <timeDuration xsi:type="tFormalExpression">${timerDuration}</timeDuration>
-      </timerEventDefinition>
-    </boundaryEvent>
-    <exclusiveGateway id="Gateway_Resolved" name="Resolved?">
-      <incoming>Flow_triage_to_gw</incoming>
-      <outgoing>Flow_resolved</outgoing>
-      <outgoing>Flow_not_resolved</outgoing>
-    </exclusiveGateway>
-    <serviceTask id="Task_SetHighPriority" name="Set High Priority" operaton:expression="${execution.setVariable(&#39;incidentPriority&#39;, &#39;HIGH&#39;)}" operaton:resultVariable="_ignored">
-      <incoming>Flow_signal_to_priority</incoming>
-      <outgoing>Flow_priority_to_secondline</outgoing>
-    </serviceTask>
-    <serviceTask id="Task_CloseTicket" name="Close Ticket" operaton:class="org.operaton.examples.incidentmanagement.delegate.CloseTicketDelegate">
-      <incoming>Flow_resolved</incoming>
-      <outgoing>Flow_close_end</outgoing>
-    </serviceTask>
-  </process>
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://www.operaton.org/examples" exporter="operaton modeler" exporterVersion="1.0">
+  <bpmn:signal id="EscalationSignal" name="EscalationSignal" />
+  <bpmn:collaboration id="Collaboration_IncidentManagement">
+    <bpmn:participant id="Pool_IncidentManagement" name="Incident Management" processRef="incident-management" />
+  </bpmn:collaboration>
+  <bpmn:process id="incident-management" name="Incident Management" isExecutable="true" operaton:historyTimeToLive="P30D" operaton:candidateStarterGroups="employees,operaton-admin">
+    <bpmn:documentation>A self-contained Operaton example for incident management with SLA escalation using timer boundary events and service-task integrations.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Employees" name="employees">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_FirstLine" name="firstline">
+        <bpmn:flowNodeRef>Task_FirstLineTriage</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Signal_Escalation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BoundaryTimer_Escalate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Resolved</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_SecondLine" name="secondline">
+        <bpmn:flowNodeRef>Task_SecondLine</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_System" name="System">
+        <bpmn:flowNodeRef>EndEvent_PostMortem</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_PostMortem</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Closed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SetHighPriority</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CloseTicket</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_1" name="Incident Reported">
+      <bpmn:extensionElements>
+        <operaton:executionListener event="end" expression="${execution.setVariable('incidentPriority', 'LOW')}" />
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_start_to_triage</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Task_SecondLine" name="Handle Escalation" operaton:candidateGroups="secondline">
+      <bpmn:incoming>Flow_timer_to_secondline</bpmn:incoming>
+      <bpmn:incoming>Flow_not_resolved</bpmn:incoming>
+      <bpmn:incoming>Flow_priority_to_secondline</bpmn:incoming>
+      <bpmn:outgoing>Flow_secondline_postmortem</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_signal_to_priority" sourceRef="Signal_Escalation" targetRef="Task_SetHighPriority" />
+    <bpmn:sequenceFlow id="Flow_priority_to_secondline" sourceRef="Task_SetHighPriority" targetRef="Task_SecondLine" />
+    <bpmn:sequenceFlow id="Flow_start_to_triage" sourceRef="StartEvent_1" targetRef="Task_FirstLineTriage" />
+    <bpmn:sequenceFlow id="Flow_triage_to_gw" sourceRef="Task_FirstLineTriage" targetRef="Gateway_Resolved" />
+    <bpmn:sequenceFlow id="Flow_timer_to_secondline" sourceRef="BoundaryTimer_Escalate" targetRef="Task_SecondLine" />
+    <bpmn:sequenceFlow id="Flow_resolved" name="resolved" sourceRef="Gateway_Resolved" targetRef="Task_CloseTicket">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${resolved == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_not_resolved" name="not resolved" sourceRef="Gateway_Resolved" targetRef="Task_SecondLine">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${resolved != true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_close_end" sourceRef="Task_CloseTicket" targetRef="EndEvent_Closed" />
+    <bpmn:sequenceFlow id="Flow_secondline_postmortem" sourceRef="Task_SecondLine" targetRef="Task_PostMortem" />
+    <bpmn:sequenceFlow id="Flow_postmortem_end" sourceRef="Task_PostMortem" targetRef="EndEvent_PostMortem" />
+    <bpmn:endEvent id="EndEvent_PostMortem" name="Post-Mortem Done">
+      <bpmn:incoming>Flow_postmortem_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_PostMortem" name="Post-Mortem Notify" operaton:class="org.operaton.examples.incidentmanagement.delegate.PostMortemDelegate">
+      <bpmn:incoming>Flow_secondline_postmortem</bpmn:incoming>
+      <bpmn:outgoing>Flow_postmortem_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_Closed" name="Ticket Closed">
+      <bpmn:incoming>Flow_close_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="Task_FirstLineTriage" name="Triage" operaton:candidateGroups="firstline">
+      <bpmn:incoming>Flow_start_to_triage</bpmn:incoming>
+      <bpmn:outgoing>Flow_triage_to_gw</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="Signal_Escalation" name="Escalation Signal" cancelActivity="false" attachedToRef="Task_FirstLineTriage">
+      <bpmn:outgoing>Flow_signal_to_priority</bpmn:outgoing>
+      <bpmn:signalEventDefinition signalRef="EscalationSignal" />
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="BoundaryTimer_Escalate" name="SLA Timer" attachedToRef="Task_FirstLineTriage">
+      <bpmn:outgoing>Flow_timer_to_secondline</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1">
+        <bpmn:timeDuration xsi:type="tFormalExpression">${timerDuration}</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="Gateway_Resolved" name="Resolved?">
+      <bpmn:incoming>Flow_triage_to_gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_resolved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_not_resolved</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_SetHighPriority" name="Set High Priority" operaton:expression="${execution.setVariable('incidentPriority', 'HIGH')}" operaton:resultVariable="_ignored">
+      <bpmn:incoming>Flow_signal_to_priority</bpmn:incoming>
+      <bpmn:outgoing>Flow_priority_to_secondline</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_CloseTicket" name="Close Ticket" operaton:class="org.operaton.examples.incidentmanagement.delegate.CloseTicketDelegate">
+      <bpmn:incoming>Flow_resolved</bpmn:incoming>
+      <bpmn:outgoing>Flow_close_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_IncidentManagement">
       <bpmndi:BPMNShape id="Pool_IncidentManagement_di" bpmnElement="Pool_IncidentManagement" isHorizontal="true">
@@ -214,4 +216,4 @@
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
-</definitions>
+</bpmn:definitions>

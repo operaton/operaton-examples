@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_ComplaintResolution" targetNamespace="http://operaton.org/examples/complaint-resolution">
   <bpmn:escalation id="Escalation_RefundApproval" name="Refund Approval" escalationCode="REFUND_APPROVAL" />
   <bpmn:escalation id="Escalation_HighSeverity" name="High Severity" escalationCode="HIGH_SEVERITY" />
   <bpmn:process id="complaint-resolution" name="Customer Complaint Resolution" isExecutable="true" operaton:historyTimeToLive="P30D">
-    <bpmn:startEvent id="StartEvent_ComplaintReceived" name="Complaint received">
+    <bpmn:documentation>Demonstrates all four BPMN escalation event flavors in a single process: non-interrupting escalation throw, escalation end event, non-interrupting escalation boundary, and interrupting escalation boundary.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_ComplaintReceived" name="Complaint received">
       <bpmn:outgoing>Flow_Start_SP</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:subProcess id="SubProcess_HandleComplaint" name="Handle complaint">

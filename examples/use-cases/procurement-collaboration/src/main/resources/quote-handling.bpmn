@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_QuoteHandling" targetNamespace="http://operaton.org/examples">
   <bpmn:message id="Message_QuoteRequest" name="QuoteRequest" />
   <bpmn:message id="Message_OrderDecision" name="OrderDecision" />
   <bpmn:process id="quote-handling" name="Quote Handling" isExecutable="true" operaton:historyTimeToLive="P30D">
-    <bpmn:startEvent id="StartEvent_QuoteRequest" name="Quote request received" operaton:asyncBefore="true">
+    <bpmn:documentation>Two-pool BPMN collaboration between a Buyer process and a Supplier process, communicating via three correlated messages within one Operaton engine.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_QuoteRequest" name="Quote request received" operaton:asyncBefore="true">
       <bpmn:outgoing>Flow_Start_Calculate</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDef_QuoteRequest" messageRef="Message_QuoteRequest" />
     </bpmn:startEvent>

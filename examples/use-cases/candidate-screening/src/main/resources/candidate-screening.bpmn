@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_CandidateScreening" targetNamespace="http://operaton.org/examples">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_CandidateScreening" targetNamespace="http://operaton.org/examples">
   <bpmn:process id="candidate-screening" name="Candidate Screening" isExecutable="true" operaton:historyTimeToLive="P30D">
-    <bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received">
+    <bpmn:documentation>Uses an LLM (via the Operaton HTTP connector) inside a BPMN process to score a job application, drive a confidence-banded gateway, generate candidate and recruiter emails, and propose an interview slot from the recruiter's calendar — escalating the uncertain score band to a human.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received">
       <bpmn:outgoing>Flow_start_score</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:serviceTask id="ServiceTask_ScoreApplication" name="Score application">
@@ -173,18 +175,18 @@
     <bpmn:sequenceFlow id="Flow_score_gateway" sourceRef="ServiceTask_ScoreApplication" targetRef="Gateway_FitScore" />
     <bpmn:sequenceFlow id="Flow_strong" name="score ≥ 70 (strong)" sourceRef="Gateway_FitScore" targetRef="Gateway_InviteMerge">
       <bpmn:extensionElements>
-        <operaton:executionListener event="take" expression="${execution.setVariable(&#39;autoInvite&#39;, true)}" />
+        <operaton:executionListener event="take" expression="${execution.setVariable('autoInvite', true)}" />
       </bpmn:extensionElements>
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fitScore &gt;= 70}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_borderline" name="score 50–69 (review)" sourceRef="Gateway_FitScore" targetRef="UserTask_RecruiterReview">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fitScore &gt;= 50 &amp;&amp; fitScore &lt; 70}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_weak" name="score &#60; 50 (reject)" sourceRef="Gateway_FitScore" targetRef="Gateway_RejectMerge" />
+    <bpmn:sequenceFlow id="Flow_weak" name="score &lt; 50 (reject)" sourceRef="Gateway_FitScore" targetRef="Gateway_RejectMerge" />
     <bpmn:sequenceFlow id="Flow_review_decision" sourceRef="UserTask_RecruiterReview" targetRef="Gateway_RecruiterDecision" />
     <bpmn:sequenceFlow id="Flow_approve" name="approve" sourceRef="Gateway_RecruiterDecision" targetRef="Gateway_InviteMerge">
       <bpmn:extensionElements>
-        <operaton:executionListener event="take" expression="${execution.setVariable(&#39;autoInvite&#39;, false)}" />
+        <operaton:executionListener event="take" expression="${execution.setVariable('autoInvite', false)}" />
       </bpmn:extensionElements>
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${approved}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>

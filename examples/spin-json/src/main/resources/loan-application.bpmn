@@ -1,35 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_LoanApplication"
-                  targetNamespace="http://operaton.org/examples">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_LoanApplication" targetNamespace="http://operaton.org/examples">
 
-  <bpmn:process id="loan-application" name="Loan Application" isExecutable="true"
-                operaton:historyTimeToLive="P30D">
+  <bpmn:process id="loan-application" name="Loan Application" isExecutable="true" operaton:historyTimeToLive="P30D">
 
-    <bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received"
-                     operaton:formKey="embedded:app:forms/start-application.html">
+    <bpmn:documentation>Demonstrates JSON-typed process variables using Operaton Spin: store Java objects
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received" operaton:formKey="embedded:app:forms/start-application.html">
       <bpmn:outgoing>Flow_ToValidate</bpmn:outgoing>
     </bpmn:startEvent>
 
-    <bpmn:serviceTask id="ServiceTask_ValidateApplication" name="Validate application"
-                      operaton:delegateExpression="${validateApplicationDelegate}">
+    <bpmn:serviceTask id="ServiceTask_ValidateApplication" name="Validate application" operaton:delegateExpression="${validateApplicationDelegate}">
       <bpmn:incoming>Flow_ToValidate</bpmn:incoming>
       <bpmn:outgoing>Flow_ToPrepareOffer</bpmn:outgoing>
     </bpmn:serviceTask>
 
-    <bpmn:serviceTask id="ServiceTask_PrepareOffer" name="Prepare offer"
-                      operaton:delegateExpression="${prepareOfferDelegate}">
+    <bpmn:serviceTask id="ServiceTask_PrepareOffer" name="Prepare offer" operaton:delegateExpression="${prepareOfferDelegate}">
       <bpmn:incoming>Flow_ToPrepareOffer</bpmn:incoming>
       <bpmn:outgoing>Flow_ToReview</bpmn:outgoing>
     </bpmn:serviceTask>
 
-    <bpmn:userTask id="UserTask_ReviewOffer" name="Review offer"
-                   operaton:candidateGroups="loanOfficers"
-                   operaton:formKey="embedded:app:forms/review-offer.html">
+    <bpmn:userTask id="UserTask_ReviewOffer" name="Review offer" operaton:candidateGroups="loanOfficers" operaton:formKey="embedded:app:forms/review-offer.html">
       <bpmn:incoming>Flow_ToReview</bpmn:incoming>
       <bpmn:outgoing>Flow_ToEnd</bpmn:outgoing>
     </bpmn:userTask>
@@ -38,46 +28,42 @@
       <bpmn:incoming>Flow_ToEnd</bpmn:incoming>
     </bpmn:endEvent>
 
-    <bpmn:sequenceFlow id="Flow_ToValidate" sourceRef="StartEvent_ApplicationReceived"
-                       targetRef="ServiceTask_ValidateApplication"/>
-    <bpmn:sequenceFlow id="Flow_ToPrepareOffer" sourceRef="ServiceTask_ValidateApplication"
-                       targetRef="ServiceTask_PrepareOffer"/>
-    <bpmn:sequenceFlow id="Flow_ToReview" sourceRef="ServiceTask_PrepareOffer"
-                       targetRef="UserTask_ReviewOffer"/>
-    <bpmn:sequenceFlow id="Flow_ToEnd" sourceRef="UserTask_ReviewOffer"
-                       targetRef="EndEvent_OfferReady"/>
+    <bpmn:sequenceFlow id="Flow_ToValidate" sourceRef="StartEvent_ApplicationReceived" targetRef="ServiceTask_ValidateApplication" />
+    <bpmn:sequenceFlow id="Flow_ToPrepareOffer" sourceRef="ServiceTask_ValidateApplication" targetRef="ServiceTask_PrepareOffer" />
+    <bpmn:sequenceFlow id="Flow_ToReview" sourceRef="ServiceTask_PrepareOffer" targetRef="UserTask_ReviewOffer" />
+    <bpmn:sequenceFlow id="Flow_ToEnd" sourceRef="UserTask_ReviewOffer" targetRef="EndEvent_OfferReady" />
   </bpmn:process>
 
   <bpmndi:BPMNDiagram id="BPMNDiagram_LoanApplication">
     <bpmndi:BPMNPlane id="BPMNPlane_LoanApplication" bpmnElement="loan-application">
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_ApplicationReceived">
-        <dc:Bounds x="152" y="202" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="132" y="245" width="76" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="152" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="132" y="245" width="76" height="27" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_ValidateApplication" bpmnElement="ServiceTask_ValidateApplication">
-        <dc:Bounds x="240" y="180" width="100" height="80"/>
+        <dc:Bounds x="240" y="180" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_PrepareOffer" bpmnElement="ServiceTask_PrepareOffer">
-        <dc:Bounds x="392" y="180" width="100" height="80"/>
+        <dc:Bounds x="392" y="180" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_ReviewOffer" bpmnElement="UserTask_ReviewOffer">
-        <dc:Bounds x="544" y="180" width="100" height="80"/>
+        <dc:Bounds x="544" y="180" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_End" bpmnElement="EndEvent_OfferReady">
-        <dc:Bounds x="696" y="202" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="681" y="245" width="66" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="696" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="681" y="245" width="66" height="14" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_ToValidate" bpmnElement="Flow_ToValidate">
-        <di:waypoint x="188" y="220"/><di:waypoint x="240" y="220"/>
+        <di:waypoint x="188" y="220" /><di:waypoint x="240" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_ToPrepareOffer" bpmnElement="Flow_ToPrepareOffer">
-        <di:waypoint x="340" y="220"/><di:waypoint x="392" y="220"/>
+        <di:waypoint x="340" y="220" /><di:waypoint x="392" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_ToReview" bpmnElement="Flow_ToReview">
-        <di:waypoint x="492" y="220"/><di:waypoint x="544" y="220"/>
+        <di:waypoint x="492" y="220" /><di:waypoint x="544" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_ToEnd" bpmnElement="Flow_ToEnd">
-        <di:waypoint x="644" y="220"/><di:waypoint x="696" y="220"/>
+        <di:waypoint x="644" y="220" /><di:waypoint x="696" y="220" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

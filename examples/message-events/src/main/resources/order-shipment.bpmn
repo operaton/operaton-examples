@@ -1,27 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_OrderShipment"
-                  targetNamespace="http://operaton.org/examples/order-shipment">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_OrderShipment" targetNamespace="http://operaton.org/examples/order-shipment">
 
-  <bpmn:message id="Message_OrderPlaced" name="OrderPlaced"/>
-  <bpmn:message id="Message_ShipmentReady" name="ShipmentReady"/>
+  <bpmn:message id="Message_OrderPlaced" name="OrderPlaced" />
+  <bpmn:message id="Message_ShipmentReady" name="ShipmentReady" />
 
-  <bpmn:process id="order-shipment"
-                name="Order Shipment"
-                isExecutable="true"
-                operaton:historyTimeToLive="P30D">
+  <bpmn:process id="order-shipment" name="Order Shipment" isExecutable="true" operaton:historyTimeToLive="P30D">
 
-    <bpmn:startEvent id="StartEvent_OrderPlaced" name="Order placed">
+    <bpmn:documentation>A Spring Boot application demonstrating Operaton message events: a process is started by a
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_OrderPlaced" name="Order placed">
       <bpmn:outgoing>Flow_Start_To_Process</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MsgDef_OrderPlaced" messageRef="Message_OrderPlaced"/>
+      <bpmn:messageEventDefinition id="MsgDef_OrderPlaced" messageRef="Message_OrderPlaced" />
     </bpmn:startEvent>
 
-    <bpmn:serviceTask id="Task_ProcessOrder" name="Process order"
-                      operaton:expression="${execution.setVariable(&apos;status&apos;, &apos;processing&apos;)}">
+    <bpmn:serviceTask id="Task_ProcessOrder" name="Process order" operaton:expression="${execution.setVariable('status', 'processing')}">
       <bpmn:incoming>Flow_Start_To_Process</bpmn:incoming>
       <bpmn:outgoing>Flow_Process_To_Wait</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -29,68 +21,62 @@
     <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_ShipmentReady" name="Shipment ready">
       <bpmn:incoming>Flow_Process_To_Wait</bpmn:incoming>
       <bpmn:outgoing>Flow_Wait_To_End</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MsgDef_ShipmentReady" messageRef="Message_ShipmentReady"/>
+      <bpmn:messageEventDefinition id="MsgDef_ShipmentReady" messageRef="Message_ShipmentReady" />
     </bpmn:intermediateCatchEvent>
 
     <bpmn:endEvent id="EndEvent_Delivered" name="Order delivered">
       <bpmn:incoming>Flow_Wait_To_End</bpmn:incoming>
     </bpmn:endEvent>
 
-    <bpmn:sequenceFlow id="Flow_Start_To_Process"
-                       sourceRef="StartEvent_OrderPlaced"
-                       targetRef="Task_ProcessOrder"/>
+    <bpmn:sequenceFlow id="Flow_Start_To_Process" sourceRef="StartEvent_OrderPlaced" targetRef="Task_ProcessOrder" />
 
-    <bpmn:sequenceFlow id="Flow_Process_To_Wait"
-                       sourceRef="Task_ProcessOrder"
-                       targetRef="IntermediateCatchEvent_ShipmentReady"/>
+    <bpmn:sequenceFlow id="Flow_Process_To_Wait" sourceRef="Task_ProcessOrder" targetRef="IntermediateCatchEvent_ShipmentReady" />
 
-    <bpmn:sequenceFlow id="Flow_Wait_To_End"
-                       sourceRef="IntermediateCatchEvent_ShipmentReady"
-                       targetRef="EndEvent_Delivered"/>
+    <bpmn:sequenceFlow id="Flow_Wait_To_End" sourceRef="IntermediateCatchEvent_ShipmentReady" targetRef="EndEvent_Delivered" />
   </bpmn:process>
 
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="order-shipment">
 
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_OrderPlaced">
-        <dc:Bounds x="152" y="162" width="36" height="36"/>
+        <dc:Bounds x="152" y="162" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="135" y="205" width="70" height="14"/>
+          <dc:Bounds x="135" y="205" width="70" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_ProcessOrder" bpmnElement="Task_ProcessOrder">
-        <dc:Bounds x="240" y="140" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+        <dc:Bounds x="240" y="140" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_ShipmentReady" bpmnElement="IntermediateCatchEvent_ShipmentReady">
-        <dc:Bounds x="402" y="162" width="36" height="36"/>
+        <dc:Bounds x="402" y="162" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="382" y="205" width="76" height="27"/>
+          <dc:Bounds x="382" y="205" width="76" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_End" bpmnElement="EndEvent_Delivered">
-        <dc:Bounds x="502" y="162" width="36" height="36"/>
+        <dc:Bounds x="502" y="162" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="478" y="205" width="84" height="14"/>
+          <dc:Bounds x="478" y="205" width="84" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNEdge id="Edge_Start_Process" bpmnElement="Flow_Start_To_Process">
-        <di:waypoint x="188" y="180"/>
-        <di:waypoint x="240" y="180"/>
+        <di:waypoint x="188" y="180" />
+        <di:waypoint x="240" y="180" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Edge_Process_Wait" bpmnElement="Flow_Process_To_Wait">
-        <di:waypoint x="340" y="180"/>
-        <di:waypoint x="402" y="180"/>
+        <di:waypoint x="340" y="180" />
+        <di:waypoint x="402" y="180" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Edge_Wait_End" bpmnElement="Flow_Wait_To_End">
-        <di:waypoint x="438" y="180"/>
-        <di:waypoint x="502" y="180"/>
+        <di:waypoint x="438" y="180" />
+        <di:waypoint x="502" y="180" />
       </bpmndi:BPMNEdge>
 
     </bpmndi:BPMNPlane>

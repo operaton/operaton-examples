@@ -1,25 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_InventoryManager"
-                  targetNamespace="http://operaton.org/examples/signal-events">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_InventoryManager" targetNamespace="http://operaton.org/examples/signal-events">
 
-  <bpmn:signal id="Signal_StockAvailable" name="StockAvailable"/>
+  <bpmn:signal id="Signal_StockAvailable" name="StockAvailable" />
 
-  <bpmn:process id="inventory-manager"
-                name="Inventory Manager"
-                isExecutable="true"
-                operaton:historyTimeToLive="P30D">
+  <bpmn:process id="inventory-manager" name="Inventory Manager" isExecutable="true" operaton:historyTimeToLive="P30D">
 
-    <bpmn:startEvent id="StartEvent_RestockEvent" name="Restock event">
+    <bpmn:documentation>This example demonstrates signal events in Operaton: a signal intermediate throw event that broadcasts to all matching subscribers simultaneously, showing the fundamental difference between signals (broadcast) and messages (point-to-point).
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_RestockEvent" name="Restock event">
       <bpmn:outgoing>Flow_Start_Update</bpmn:outgoing>
     </bpmn:startEvent>
 
-    <bpmn:serviceTask id="ServiceTask_UpdateInventory" name="Update inventory"
-                      operaton:delegateExpression="${updateInventoryDelegate}">
+    <bpmn:serviceTask id="ServiceTask_UpdateInventory" name="Update inventory" operaton:delegateExpression="${updateInventoryDelegate}">
       <bpmn:incoming>Flow_Start_Update</bpmn:incoming>
       <bpmn:outgoing>Flow_Update_Throw</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -27,66 +19,60 @@
     <bpmn:intermediateThrowEvent id="ThrowEvent_StockAvailable" name="Stock available">
       <bpmn:incoming>Flow_Update_Throw</bpmn:incoming>
       <bpmn:outgoing>Flow_Throw_End</bpmn:outgoing>
-      <bpmn:signalEventDefinition id="SigDef_Throw" signalRef="Signal_StockAvailable"/>
+      <bpmn:signalEventDefinition id="SigDef_Throw" signalRef="Signal_StockAvailable" />
     </bpmn:intermediateThrowEvent>
 
     <bpmn:endEvent id="EndEvent_RestockComplete" name="Restock complete">
       <bpmn:incoming>Flow_Throw_End</bpmn:incoming>
     </bpmn:endEvent>
 
-    <bpmn:sequenceFlow id="Flow_Start_Update"
-                       sourceRef="StartEvent_RestockEvent"
-                       targetRef="ServiceTask_UpdateInventory"/>
-    <bpmn:sequenceFlow id="Flow_Update_Throw"
-                       sourceRef="ServiceTask_UpdateInventory"
-                       targetRef="ThrowEvent_StockAvailable"/>
-    <bpmn:sequenceFlow id="Flow_Throw_End"
-                       sourceRef="ThrowEvent_StockAvailable"
-                       targetRef="EndEvent_RestockComplete"/>
+    <bpmn:sequenceFlow id="Flow_Start_Update" sourceRef="StartEvent_RestockEvent" targetRef="ServiceTask_UpdateInventory" />
+    <bpmn:sequenceFlow id="Flow_Update_Throw" sourceRef="ServiceTask_UpdateInventory" targetRef="ThrowEvent_StockAvailable" />
+    <bpmn:sequenceFlow id="Flow_Throw_End" sourceRef="ThrowEvent_StockAvailable" targetRef="EndEvent_RestockComplete" />
   </bpmn:process>
 
   <bpmndi:BPMNDiagram id="BPMNDiagram_InventoryManager">
     <bpmndi:BPMNPlane id="BPMNPlane_InventoryManager" bpmnElement="inventory-manager">
 
       <bpmndi:BPMNShape id="Shape_StartRestockEvent" bpmnElement="StartEvent_RestockEvent">
-        <dc:Bounds x="152" y="162" width="36" height="36"/>
+        <dc:Bounds x="152" y="162" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="136" y="205" width="68" height="14"/>
+          <dc:Bounds x="136" y="205" width="68" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_UpdateInventory" bpmnElement="ServiceTask_UpdateInventory">
-        <dc:Bounds x="240" y="140" width="100" height="80"/>
-        <bpmndi:BPMNLabel/>
+        <dc:Bounds x="240" y="140" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_ThrowStockAvailable" bpmnElement="ThrowEvent_StockAvailable">
-        <dc:Bounds x="402" y="162" width="36" height="36"/>
+        <dc:Bounds x="402" y="162" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="381" y="205" width="78" height="14"/>
+          <dc:Bounds x="381" y="205" width="78" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_EndRestockComplete" bpmnElement="EndEvent_RestockComplete">
-        <dc:Bounds x="500" y="162" width="36" height="36"/>
+        <dc:Bounds x="500" y="162" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="475" y="205" width="86" height="14"/>
+          <dc:Bounds x="475" y="205" width="86" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNEdge id="Edge_Start_Update" bpmnElement="Flow_Start_Update">
-        <di:waypoint x="188" y="180"/>
-        <di:waypoint x="240" y="180"/>
+        <di:waypoint x="188" y="180" />
+        <di:waypoint x="240" y="180" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Edge_Update_Throw" bpmnElement="Flow_Update_Throw">
-        <di:waypoint x="340" y="180"/>
-        <di:waypoint x="402" y="180"/>
+        <di:waypoint x="340" y="180" />
+        <di:waypoint x="402" y="180" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Edge_Throw_End" bpmnElement="Flow_Throw_End">
-        <di:waypoint x="438" y="180"/>
-        <di:waypoint x="500" y="180"/>
+        <di:waypoint x="438" y="180" />
+        <di:waypoint x="500" y="180" />
       </bpmndi:BPMNEdge>
 
     </bpmndi:BPMNPlane>

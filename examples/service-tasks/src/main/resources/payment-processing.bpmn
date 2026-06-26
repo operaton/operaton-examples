@@ -1,38 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_PaymentProcessing"
-                  targetNamespace="http://operaton.org/examples">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_PaymentProcessing" targetNamespace="http://operaton.org/examples">
 
-  <bpmn:error id="Error_PaymentDeclined" name="Payment declined" errorCode="PAYMENT_DECLINED"/>
+  <bpmn:error id="Error_PaymentDeclined" name="Payment declined" errorCode="PAYMENT_DECLINED" />
 
-  <bpmn:process id="payment-processing" name="Payment Processing" isExecutable="true"
-                operaton:historyTimeToLive="P30D">
+  <bpmn:process id="payment-processing" name="Payment Processing" isExecutable="true" operaton:historyTimeToLive="P30D">
 
-    <bpmn:startEvent id="StartEvent_PaymentReceived" name="Payment received">
+    <bpmn:documentation>A Spring Boot application demonstrating the two execution modes of Operaton
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_PaymentReceived" name="Payment received">
       <bpmn:outgoing>Flow_ToEnrich</bpmn:outgoing>
     </bpmn:startEvent>
 
-    <!-- Synchronous service task: runs in the engine thread, participates in
-         the startProcessInstance transaction. An exception here rolls back. -->
-    <bpmn:serviceTask id="ServiceTask_EnrichPayment" name="Enrich payment data"
-                      operaton:delegateExpression="${enrichPaymentDelegate}">
+    
+    <bpmn:serviceTask id="ServiceTask_EnrichPayment" name="Enrich payment data" operaton:delegateExpression="${enrichPaymentDelegate}">
       <bpmn:incoming>Flow_ToEnrich</bpmn:incoming>
       <bpmn:outgoing>Flow_ToCharge</bpmn:outgoing>
     </bpmn:serviceTask>
 
-    <!-- Asynchronous service task: operaton:asyncBefore="true" causes the engine
-         to commit the current state and schedule a job BEFORE executing this task.
-         The job executor picks it up in a new transaction.
-         A RuntimeException decrements retries per failedJobRetryTimeCycle;
-         a BpmnError triggers the boundary event. -->
-    <bpmn:serviceTask id="ServiceTask_ChargePayment" name="Charge payment"
-                      operaton:asyncBefore="true"
-                      operaton:delegateExpression="${chargePaymentDelegate}">
+    
+    <bpmn:serviceTask id="ServiceTask_ChargePayment" name="Charge payment" operaton:asyncBefore="true" operaton:delegateExpression="${chargePaymentDelegate}">
       <bpmn:extensionElements>
         <operaton:failedJobRetryTimeCycle>R4/PT5S</operaton:failedJobRetryTimeCycle>
       </bpmn:extensionElements>
@@ -40,11 +26,9 @@
       <bpmn:outgoing>Flow_ToProcessed</bpmn:outgoing>
     </bpmn:serviceTask>
 
-    <bpmn:boundaryEvent id="BoundaryEvent_PaymentDeclined" name="Payment declined"
-                        attachedToRef="ServiceTask_ChargePayment">
+    <bpmn:boundaryEvent id="BoundaryEvent_PaymentDeclined" name="Payment declined" attachedToRef="ServiceTask_ChargePayment">
       <bpmn:outgoing>Flow_ToDeclined</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorDef_PaymentDeclined"
-                                 errorRef="Error_PaymentDeclined"/>
+      <bpmn:errorEventDefinition id="ErrorDef_PaymentDeclined" errorRef="Error_PaymentDeclined" />
     </bpmn:boundaryEvent>
 
     <bpmn:endEvent id="EndEvent_PaymentProcessed" name="Payment processed">
@@ -55,78 +39,70 @@
       <bpmn:incoming>Flow_ToDeclined</bpmn:incoming>
     </bpmn:endEvent>
 
-    <bpmn:sequenceFlow id="Flow_ToEnrich"
-                       sourceRef="StartEvent_PaymentReceived"
-                       targetRef="ServiceTask_EnrichPayment"/>
-    <bpmn:sequenceFlow id="Flow_ToCharge"
-                       sourceRef="ServiceTask_EnrichPayment"
-                       targetRef="ServiceTask_ChargePayment"/>
-    <bpmn:sequenceFlow id="Flow_ToProcessed"
-                       sourceRef="ServiceTask_ChargePayment"
-                       targetRef="EndEvent_PaymentProcessed"/>
-    <bpmn:sequenceFlow id="Flow_ToDeclined"
-                       sourceRef="BoundaryEvent_PaymentDeclined"
-                       targetRef="EndEvent_PaymentDeclined"/>
+    <bpmn:sequenceFlow id="Flow_ToEnrich" sourceRef="StartEvent_PaymentReceived" targetRef="ServiceTask_EnrichPayment" />
+    <bpmn:sequenceFlow id="Flow_ToCharge" sourceRef="ServiceTask_EnrichPayment" targetRef="ServiceTask_ChargePayment" />
+    <bpmn:sequenceFlow id="Flow_ToProcessed" sourceRef="ServiceTask_ChargePayment" targetRef="EndEvent_PaymentProcessed" />
+    <bpmn:sequenceFlow id="Flow_ToDeclined" sourceRef="BoundaryEvent_PaymentDeclined" targetRef="EndEvent_PaymentDeclined" />
   </bpmn:process>
 
   <bpmndi:BPMNDiagram id="BPMNDiagram_PaymentProcessing">
     <bpmndi:BPMNPlane id="BPMNPlane_PaymentProcessing" bpmnElement="payment-processing">
 
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_PaymentReceived">
-        <dc:Bounds x="152" y="182" width="36" height="36"/>
+        <dc:Bounds x="152" y="182" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="130" y="225" width="82" height="14"/>
+          <dc:Bounds x="130" y="225" width="82" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_Enrich" bpmnElement="ServiceTask_EnrichPayment">
-        <dc:Bounds x="250" y="160" width="100" height="80"/>
+        <dc:Bounds x="250" y="160" width="100" height="80" />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_Charge" bpmnElement="ServiceTask_ChargePayment">
-        <dc:Bounds x="420" y="160" width="100" height="80"/>
+        <dc:Bounds x="420" y="160" width="100" height="80" />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_BoundaryDeclined" bpmnElement="BoundaryEvent_PaymentDeclined">
-        <dc:Bounds x="452" y="222" width="36" height="36"/>
+        <dc:Bounds x="452" y="222" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="438" y="265" width="66" height="27"/>
+          <dc:Bounds x="438" y="265" width="66" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_EndProcessed" bpmnElement="EndEvent_PaymentProcessed">
-        <dc:Bounds x="592" y="182" width="36" height="36"/>
+        <dc:Bounds x="592" y="182" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="570" y="225" width="82" height="27"/>
+          <dc:Bounds x="570" y="225" width="82" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_EndDeclined" bpmnElement="EndEvent_PaymentDeclined">
-        <dc:Bounds x="592" y="322" width="36" height="36"/>
+        <dc:Bounds x="592" y="322" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="570" y="365" width="82" height="27"/>
+          <dc:Bounds x="570" y="365" width="82" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNEdge id="Edge_ToEnrich" bpmnElement="Flow_ToEnrich">
-        <di:waypoint x="188" y="200"/>
-        <di:waypoint x="250" y="200"/>
+        <di:waypoint x="188" y="200" />
+        <di:waypoint x="250" y="200" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Edge_ToCharge" bpmnElement="Flow_ToCharge">
-        <di:waypoint x="350" y="200"/>
-        <di:waypoint x="420" y="200"/>
+        <di:waypoint x="350" y="200" />
+        <di:waypoint x="420" y="200" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Edge_ToProcessed" bpmnElement="Flow_ToProcessed">
-        <di:waypoint x="520" y="200"/>
-        <di:waypoint x="592" y="200"/>
+        <di:waypoint x="520" y="200" />
+        <di:waypoint x="592" y="200" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Edge_ToDeclined" bpmnElement="Flow_ToDeclined">
-        <di:waypoint x="470" y="258"/>
-        <di:waypoint x="470" y="340"/>
-        <di:waypoint x="592" y="340"/>
+        <di:waypoint x="470" y="258" />
+        <di:waypoint x="470" y="340" />
+        <di:waypoint x="592" y="340" />
       </bpmndi:BPMNEdge>
 
     </bpmndi:BPMNPlane>

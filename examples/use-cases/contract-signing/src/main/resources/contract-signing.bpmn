@@ -1,29 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                   xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                   id="Definitions_ContractSigning"
-                   targetNamespace="http://operaton.org/schema/1.0/bpmn"
-                   exporter="Claude Code"
-                   exporterVersion="1.0">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_ContractSigning" targetNamespace="http://operaton.org/schema/1.0/bpmn" exporter="Claude Code" exporterVersion="1.0">
 
   <bpmn:process id="contract-signing" name="Contract Signing Process" isExecutable="true" operaton:historyTimeToLive="P30D">
 
-    <!-- Start Event -->
-    <bpmn:startEvent id="StartEvent_ContractUpload" name="Contract Uploaded">
+    
+    <bpmn:documentation>Demonstrates how to orchestrate file-heavy processes safely: large documents live in S3-compatible object storage and the engine tracks only a lightweight reference key, never raw bytes.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_ContractUpload" name="Contract Uploaded">
       <bpmn:outgoing>Flow_ContractToFork</bpmn:outgoing>
     </bpmn:startEvent>
 
-    <!-- Parallel Fork -->
+    
     <bpmn:parallelGateway id="Gateway_SigningFork" name="Initiate Parallel Signing">
       <bpmn:incoming>Flow_ContractToFork</bpmn:incoming>
       <bpmn:outgoing>Flow_ToCustomerSign</bpmn:outgoing>
       <bpmn:outgoing>Flow_ToCompanySign</bpmn:outgoing>
     </bpmn:parallelGateway>
 
-    <!-- Customer Signing Branch -->
+    
     <bpmn:userTask id="Task_CustomerSign" name="Sign Contract as Customer" operaton:candidateGroups="customers">
       <bpmn:incoming>Flow_ToCustomerSign</bpmn:incoming>
       <bpmn:outgoing>Flow_CustomerSignToDecision</bpmn:outgoing>
@@ -35,10 +29,10 @@
       <bpmn:outgoing>Flow_CustomerDeclined</bpmn:outgoing>
     </bpmn:exclusiveGateway>
 
-    <bpmn:sequenceFlow id="Flow_CustomerSigned" sourceRef="Gateway_CustomerDecision" targetRef="Task_ApplyCustomerSignature"/>
+    <bpmn:sequenceFlow id="Flow_CustomerSigned" sourceRef="Gateway_CustomerDecision" targetRef="Task_ApplyCustomerSignature" />
 
     <bpmn:sequenceFlow id="Flow_CustomerDeclined" sourceRef="Gateway_CustomerDecision" targetRef="EndEvent_DeclinedByCustomer">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${signDecision == 'declined'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${signDecision == 'declined'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
 
     <bpmn:serviceTask id="Task_ApplyCustomerSignature" name="Apply Customer Signature">
@@ -52,7 +46,7 @@
       <bpmn:outgoing>Flow_CustomerSigToJoin</bpmn:outgoing>
     </bpmn:serviceTask>
 
-    <!-- Company Signing Branch -->
+    
     <bpmn:userTask id="Task_CompanySign" name="Sign Contract as Company" operaton:candidateGroups="legal">
       <bpmn:incoming>Flow_ToCompanySign</bpmn:incoming>
       <bpmn:outgoing>Flow_CompanySignToDecision</bpmn:outgoing>
@@ -64,10 +58,10 @@
       <bpmn:outgoing>Flow_CompanyDeclined</bpmn:outgoing>
     </bpmn:exclusiveGateway>
 
-    <bpmn:sequenceFlow id="Flow_CompanySigned" sourceRef="Gateway_CompanyDecision" targetRef="Task_ApplyCompanySignature"/>
+    <bpmn:sequenceFlow id="Flow_CompanySigned" sourceRef="Gateway_CompanyDecision" targetRef="Task_ApplyCompanySignature" />
 
     <bpmn:sequenceFlow id="Flow_CompanyDeclined" sourceRef="Gateway_CompanyDecision" targetRef="EndEvent_DeclinedByCompany">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${signDecision == 'declined'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${signDecision == 'declined'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
 
     <bpmn:serviceTask id="Task_ApplyCompanySignature" name="Apply Company Signature">
@@ -81,14 +75,14 @@
       <bpmn:outgoing>Flow_CompanySigToJoin</bpmn:outgoing>
     </bpmn:serviceTask>
 
-    <!-- Parallel Join -->
+    
     <bpmn:parallelGateway id="Gateway_SigningJoin" name="Synchronize Signatures">
       <bpmn:incoming>Flow_CustomerSigToJoin</bpmn:incoming>
       <bpmn:incoming>Flow_CompanySigToJoin</bpmn:incoming>
       <bpmn:outgoing>Flow_JoinToArchive</bpmn:outgoing>
     </bpmn:parallelGateway>
 
-    <!-- Archive Task -->
+    
     <bpmn:serviceTask id="Task_ArchiveContract" name="Archive Contract">
       <bpmn:extensionElements>
         <operaton:delegateExpression>${archiveContractDelegate}</operaton:delegateExpression>
@@ -97,210 +91,210 @@
       <bpmn:outgoing>Flow_ArchiveToEnd</bpmn:outgoing>
     </bpmn:serviceTask>
 
-    <!-- End Events -->
+    
     <bpmn:endEvent id="EndEvent_ContractExecuted" name="Contract Executed">
       <bpmn:incoming>Flow_ArchiveToEnd</bpmn:incoming>
     </bpmn:endEvent>
 
     <bpmn:endEvent id="EndEvent_DeclinedByCustomer" name="Declined by Customer">
       <bpmn:incoming>Flow_CustomerDeclined</bpmn:incoming>
-      <bpmn:terminateEventDefinition/>
+      <bpmn:terminateEventDefinition />
     </bpmn:endEvent>
 
     <bpmn:endEvent id="EndEvent_DeclinedByCompany" name="Declined by Company">
       <bpmn:incoming>Flow_CompanyDeclined</bpmn:incoming>
-      <bpmn:terminateEventDefinition/>
+      <bpmn:terminateEventDefinition />
     </bpmn:endEvent>
 
-    <!-- Sequence Flows -->
-    <bpmn:sequenceFlow id="Flow_ContractToFork" sourceRef="StartEvent_ContractUpload" targetRef="Gateway_SigningFork"/>
-    <bpmn:sequenceFlow id="Flow_ToCustomerSign" sourceRef="Gateway_SigningFork" targetRef="Task_CustomerSign"/>
-    <bpmn:sequenceFlow id="Flow_ToCompanySign" sourceRef="Gateway_SigningFork" targetRef="Task_CompanySign"/>
-    <bpmn:sequenceFlow id="Flow_CustomerSignToDecision" sourceRef="Task_CustomerSign" targetRef="Gateway_CustomerDecision"/>
-    <bpmn:sequenceFlow id="Flow_CompanySignToDecision" sourceRef="Task_CompanySign" targetRef="Gateway_CompanyDecision"/>
-    <bpmn:sequenceFlow id="Flow_CustomerSigToJoin" sourceRef="Task_ApplyCustomerSignature" targetRef="Gateway_SigningJoin"/>
-    <bpmn:sequenceFlow id="Flow_CompanySigToJoin" sourceRef="Task_ApplyCompanySignature" targetRef="Gateway_SigningJoin"/>
-    <bpmn:sequenceFlow id="Flow_JoinToArchive" sourceRef="Gateway_SigningJoin" targetRef="Task_ArchiveContract"/>
-    <bpmn:sequenceFlow id="Flow_ArchiveToEnd" sourceRef="Task_ArchiveContract" targetRef="EndEvent_ContractExecuted"/>
+    
+    <bpmn:sequenceFlow id="Flow_ContractToFork" sourceRef="StartEvent_ContractUpload" targetRef="Gateway_SigningFork" />
+    <bpmn:sequenceFlow id="Flow_ToCustomerSign" sourceRef="Gateway_SigningFork" targetRef="Task_CustomerSign" />
+    <bpmn:sequenceFlow id="Flow_ToCompanySign" sourceRef="Gateway_SigningFork" targetRef="Task_CompanySign" />
+    <bpmn:sequenceFlow id="Flow_CustomerSignToDecision" sourceRef="Task_CustomerSign" targetRef="Gateway_CustomerDecision" />
+    <bpmn:sequenceFlow id="Flow_CompanySignToDecision" sourceRef="Task_CompanySign" targetRef="Gateway_CompanyDecision" />
+    <bpmn:sequenceFlow id="Flow_CustomerSigToJoin" sourceRef="Task_ApplyCustomerSignature" targetRef="Gateway_SigningJoin" />
+    <bpmn:sequenceFlow id="Flow_CompanySigToJoin" sourceRef="Task_ApplyCompanySignature" targetRef="Gateway_SigningJoin" />
+    <bpmn:sequenceFlow id="Flow_JoinToArchive" sourceRef="Gateway_SigningJoin" targetRef="Task_ArchiveContract" />
+    <bpmn:sequenceFlow id="Flow_ArchiveToEnd" sourceRef="Task_ArchiveContract" targetRef="EndEvent_ContractExecuted" />
 
   </bpmn:process>
 
-  <!-- BPMN Diagram with DI -->
+  
   <bpmndi:BPMNDiagram id="BPMNDiagram_ContractSigning">
     <bpmndi:BPMNPlane id="BPMNPlane_ContractSigning" bpmnElement="contract-signing">
 
-      <!-- Start Event -->
+      
       <bpmndi:BPMNShape id="StartEvent_ContractUpload_di" bpmnElement="StartEvent_ContractUpload">
-        <dc:Bounds x="100" y="245" width="36" height="36"/>
+        <dc:Bounds x="100" y="245" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="75" y="281" width="86" height="14"/>
+          <dc:Bounds x="75" y="281" width="86" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Parallel Fork Gateway -->
+      
       <bpmndi:BPMNShape id="Gateway_SigningFork_di" bpmnElement="Gateway_SigningFork">
-        <dc:Bounds x="185" y="240" width="50" height="50"/>
+        <dc:Bounds x="185" y="240" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="160" y="300" width="100" height="27"/>
+          <dc:Bounds x="160" y="300" width="100" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Customer Sign Task -->
+      
       <bpmndi:BPMNShape id="Task_CustomerSign_di" bpmnElement="Task_CustomerSign">
-        <dc:Bounds x="290" y="120" width="120" height="80"/>
+        <dc:Bounds x="290" y="120" width="120" height="80" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="302" y="146" width="96" height="27"/>
+          <dc:Bounds x="302" y="146" width="96" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Company Sign Task -->
+      
       <bpmndi:BPMNShape id="Task_CompanySign_di" bpmnElement="Task_CompanySign">
-        <dc:Bounds x="290" y="330" width="120" height="80"/>
+        <dc:Bounds x="290" y="330" width="120" height="80" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="302" y="356" width="96" height="27"/>
+          <dc:Bounds x="302" y="356" width="96" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Customer Decision Gateway -->
+      
       <bpmndi:BPMNShape id="Gateway_CustomerDecision_di" bpmnElement="Gateway_CustomerDecision">
-        <dc:Bounds x="465" y="135" width="50" height="50"/>
+        <dc:Bounds x="465" y="135" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="455" y="95" width="70" height="14"/>
+          <dc:Bounds x="455" y="95" width="70" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Company Decision Gateway -->
+      
       <bpmndi:BPMNShape id="Gateway_CompanyDecision_di" bpmnElement="Gateway_CompanyDecision">
-        <dc:Bounds x="465" y="345" width="50" height="50"/>
+        <dc:Bounds x="465" y="345" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="455" y="305" width="70" height="14"/>
+          <dc:Bounds x="455" y="305" width="70" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Apply Customer Signature Task -->
+      
       <bpmndi:BPMNShape id="Task_ApplyCustomerSignature_di" bpmnElement="Task_ApplyCustomerSignature">
-        <dc:Bounds x="580" y="120" width="120" height="80"/>
+        <dc:Bounds x="580" y="120" width="120" height="80" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="591" y="146" width="98" height="27"/>
+          <dc:Bounds x="591" y="146" width="98" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Apply Company Signature Task -->
+      
       <bpmndi:BPMNShape id="Task_ApplyCompanySignature_di" bpmnElement="Task_ApplyCompanySignature">
-        <dc:Bounds x="580" y="330" width="120" height="80"/>
+        <dc:Bounds x="580" y="330" width="120" height="80" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="591" y="356" width="98" height="27"/>
+          <dc:Bounds x="591" y="356" width="98" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Parallel Join Gateway -->
+      
       <bpmndi:BPMNShape id="Gateway_SigningJoin_di" bpmnElement="Gateway_SigningJoin">
-        <dc:Bounds x="755" y="240" width="50" height="50"/>
+        <dc:Bounds x="755" y="240" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="733" y="300" width="94" height="14"/>
+          <dc:Bounds x="733" y="300" width="94" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Archive Contract Task -->
+      
       <bpmndi:BPMNShape id="Task_ArchiveContract_di" bpmnElement="Task_ArchiveContract">
-        <dc:Bounds x="860" y="225" width="120" height="80"/>
+        <dc:Bounds x="860" y="225" width="120" height="80" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="885" y="251" width="70" height="27"/>
+          <dc:Bounds x="885" y="251" width="70" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- End Event - Contract Executed -->
+      
       <bpmndi:BPMNShape id="EndEvent_ContractExecuted_di" bpmnElement="EndEvent_ContractExecuted">
-        <dc:Bounds x="1032" y="252" width="36" height="36"/>
+        <dc:Bounds x="1032" y="252" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1007" y="288" width="86" height="14"/>
+          <dc:Bounds x="1007" y="288" width="86" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- End Event - Declined by Customer -->
+      
       <bpmndi:BPMNShape id="EndEvent_DeclinedByCustomer_di" bpmnElement="EndEvent_DeclinedByCustomer">
-        <dc:Bounds x="612" y="0" width="36" height="36"/>
+        <dc:Bounds x="612" y="0" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="569" y="-35" width="122" height="27"/>
+          <dc:Bounds x="569" y="-35" width="122" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- End Event - Declined by Company -->
+      
       <bpmndi:BPMNShape id="EndEvent_DeclinedByCompany_di" bpmnElement="EndEvent_DeclinedByCompany">
-        <dc:Bounds x="612" y="482" width="36" height="36"/>
+        <dc:Bounds x="612" y="482" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="569" y="517" width="122" height="27"/>
+          <dc:Bounds x="569" y="517" width="122" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
-      <!-- Sequence Flow Edges -->
+      
       <bpmndi:BPMNEdge id="Flow_ContractToFork_di" bpmnElement="Flow_ContractToFork">
-        <di:waypoint x="136" y="263"/>
-        <di:waypoint x="185" y="265"/>
+        <di:waypoint x="136" y="263" />
+        <di:waypoint x="185" y="265" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_ToCustomerSign_di" bpmnElement="Flow_ToCustomerSign">
-        <di:waypoint x="210" y="240"/>
-        <di:waypoint x="210" y="160"/>
-        <di:waypoint x="290" y="160"/>
+        <di:waypoint x="210" y="240" />
+        <di:waypoint x="210" y="160" />
+        <di:waypoint x="290" y="160" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_ToCompanySign_di" bpmnElement="Flow_ToCompanySign">
-        <di:waypoint x="210" y="290"/>
-        <di:waypoint x="210" y="370"/>
-        <di:waypoint x="290" y="370"/>
+        <di:waypoint x="210" y="290" />
+        <di:waypoint x="210" y="370" />
+        <di:waypoint x="290" y="370" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_CustomerSignToDecision_di" bpmnElement="Flow_CustomerSignToDecision">
-        <di:waypoint x="410" y="160"/>
-        <di:waypoint x="465" y="160"/>
+        <di:waypoint x="410" y="160" />
+        <di:waypoint x="465" y="160" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_CompanySignToDecision_di" bpmnElement="Flow_CompanySignToDecision">
-        <di:waypoint x="410" y="370"/>
-        <di:waypoint x="465" y="370"/>
+        <di:waypoint x="410" y="370" />
+        <di:waypoint x="465" y="370" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_CustomerSigned_di" bpmnElement="Flow_CustomerSigned">
-        <di:waypoint x="515" y="160"/>
-        <di:waypoint x="580" y="160"/>
+        <di:waypoint x="515" y="160" />
+        <di:waypoint x="580" y="160" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_CustomerDeclined_di" bpmnElement="Flow_CustomerDeclined">
-        <di:waypoint x="490" y="135"/>
-        <di:waypoint x="630" y="36"/>
+        <di:waypoint x="490" y="135" />
+        <di:waypoint x="630" y="36" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_CompanySigned_di" bpmnElement="Flow_CompanySigned">
-        <di:waypoint x="515" y="370"/>
-        <di:waypoint x="580" y="370"/>
+        <di:waypoint x="515" y="370" />
+        <di:waypoint x="580" y="370" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_CompanyDeclined_di" bpmnElement="Flow_CompanyDeclined">
-        <di:waypoint x="490" y="395"/>
-        <di:waypoint x="630" y="518"/>
+        <di:waypoint x="490" y="395" />
+        <di:waypoint x="630" y="518" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_CustomerSigToJoin_di" bpmnElement="Flow_CustomerSigToJoin">
-        <di:waypoint x="700" y="160"/>
-        <di:waypoint x="780" y="160"/>
-        <di:waypoint x="780" y="240"/>
+        <di:waypoint x="700" y="160" />
+        <di:waypoint x="780" y="160" />
+        <di:waypoint x="780" y="240" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_CompanySigToJoin_di" bpmnElement="Flow_CompanySigToJoin">
-        <di:waypoint x="700" y="370"/>
-        <di:waypoint x="780" y="370"/>
-        <di:waypoint x="780" y="290"/>
+        <di:waypoint x="700" y="370" />
+        <di:waypoint x="780" y="370" />
+        <di:waypoint x="780" y="290" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_JoinToArchive_di" bpmnElement="Flow_JoinToArchive">
-        <di:waypoint x="805" y="265"/>
-        <di:waypoint x="860" y="265"/>
+        <di:waypoint x="805" y="265" />
+        <di:waypoint x="860" y="265" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Flow_ArchiveToEnd_di" bpmnElement="Flow_ArchiveToEnd">
-        <di:waypoint x="980" y="265"/>
-        <di:waypoint x="1032" y="270"/>
+        <di:waypoint x="980" y="265" />
+        <di:waypoint x="1032" y="270" />
       </bpmndi:BPMNEdge>
 
     </bpmndi:BPMNPlane>

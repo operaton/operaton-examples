@@ -1,91 +1,93 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" targetNamespace="http://www.operaton.org/examples" exporter="operaton modeler" exporterVersion="1.0">
-  <error id="PaymentFailed" name="Payment Failed" errorCode="PAYMENT_FAILED" />
-  <collaboration id="Collaboration_OrderFulfillment">
-    <participant id="Pool_OrderFulfillment" name="Order Fulfillment" processRef="order-fulfillment" />
-  </collaboration>
-  <process id="order-fulfillment" name="Order Fulfillment" isExecutable="true" operaton:historyTimeToLive="P30D" operaton:candidateStarterGroups="sales,operaton-admin">
-    <laneSet id="LaneSet_1">
-      <lane id="Lane_Sales" name="sales">
-        <flowNodeRef>StartEvent_1</flowNodeRef>
-      </lane>
-      <lane id="Lane_Warehouse" name="warehouse">
-        <flowNodeRef>Task_PackShip</flowNodeRef>
-      </lane>
-      <lane id="Lane_System" name="System">
-        <flowNodeRef>Task_NotifyBackorder</flowNodeRef>
-        <flowNodeRef>EndEvent_Failed</flowNodeRef>
-        <flowNodeRef>Task_ChargePayment</flowNodeRef>
-        <flowNodeRef>Gateway_InStock</flowNodeRef>
-        <flowNodeRef>Task_ValidateInventory</flowNodeRef>
-        <flowNodeRef>Task_NotifyCustomer</flowNodeRef>
-        <flowNodeRef>EndEvent_Shipped</flowNodeRef>
-        <flowNodeRef>EndEvent_Backordered</flowNodeRef>
-        <flowNodeRef>ErrorBoundary_Payment</flowNodeRef>
-      </lane>
-    </laneSet>
-    <startEvent id="StartEvent_1" name="Order Placed">
-      <outgoing>Flow_start_to_inventory</outgoing>
-    </startEvent>
-    <userTask id="Task_PackShip" name="Pack &#38; Ship" operaton:candidateGroups="warehouse">
-      <incoming>Flow_payment_to_pack</incoming>
-      <outgoing>Flow_pack_to_notify</outgoing>
-    </userTask>
-    <sequenceFlow id="Flow_start_to_inventory" sourceRef="StartEvent_1" targetRef="Task_ValidateInventory" />
-    <sequenceFlow id="Flow_inventory_to_gw" sourceRef="Task_ValidateInventory" targetRef="Gateway_InStock" />
-    <sequenceFlow id="Flow_in_stock" name="in stock" sourceRef="Gateway_InStock" targetRef="Task_ChargePayment">
-      <conditionExpression xsi:type="tFormalExpression">${available == true}</conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="Flow_out_of_stock" name="out of stock" sourceRef="Gateway_InStock" targetRef="Task_NotifyBackorder">
-      <conditionExpression xsi:type="tFormalExpression">${available == false}</conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="Flow_payment_to_pack" sourceRef="Task_ChargePayment" targetRef="Task_PackShip" />
-    <sequenceFlow id="Flow_pack_to_notify" sourceRef="Task_PackShip" targetRef="Task_NotifyCustomer" />
-    <sequenceFlow id="Flow_notify_to_shipped" sourceRef="Task_NotifyCustomer" targetRef="EndEvent_Shipped" />
-    <sequenceFlow id="Flow_backorder_to_end" sourceRef="Task_NotifyBackorder" targetRef="EndEvent_Backordered" />
-    <sequenceFlow id="Flow_error_to_failed" sourceRef="ErrorBoundary_Payment" targetRef="EndEvent_Failed">
-      <extensionElements>
-        <operaton:executionListener event="take" expression="${execution.setVariable(&#39;orderStatus&#39;, &#39;FAILED&#39;)}" />
-      </extensionElements>
-    </sequenceFlow>
-    <serviceTask id="Task_NotifyBackorder" name="Notify Backorder" operaton:delegateExpression="${notifyBackorderDelegate}">
-      <incoming>Flow_out_of_stock</incoming>
-      <outgoing>Flow_backorder_to_end</outgoing>
-    </serviceTask>
-    <endEvent id="EndEvent_Failed" name="Notify Customer of Failure">
-      <incoming>Flow_error_to_failed</incoming>
-    </endEvent>
-    <serviceTask id="Task_ChargePayment" name="Charge Payment" operaton:delegateExpression="${paymentDelegate}" operaton:asyncBefore="true">
-      <extensionElements>
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://www.operaton.org/examples" exporter="operaton modeler" exporterVersion="1.0">
+  <bpmn:error id="PaymentFailed" name="Payment Failed" errorCode="PAYMENT_FAILED" />
+  <bpmn:collaboration id="Collaboration_OrderFulfillment">
+    <bpmn:participant id="Pool_OrderFulfillment" name="Order Fulfillment" processRef="order-fulfillment" />
+  </bpmn:collaboration>
+  <bpmn:process id="order-fulfillment" name="Order Fulfillment" isExecutable="true" operaton:historyTimeToLive="P30D" operaton:candidateStarterGroups="sales,operaton-admin">
+    <bpmn:documentation>A self-contained Operaton example for order fulfillment orchestration across inventory, payment, warehouse, and customer-notification steps.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Sales" name="sales">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Warehouse" name="warehouse">
+        <bpmn:flowNodeRef>Task_PackShip</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_System" name="System">
+        <bpmn:flowNodeRef>Task_NotifyBackorder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Failed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ChargePayment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_InStock</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ValidateInventory</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_NotifyCustomer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Shipped</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Backordered</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ErrorBoundary_Payment</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_1" name="Order Placed">
+      <bpmn:outgoing>Flow_start_to_inventory</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Task_PackShip" name="Pack &amp; Ship" operaton:candidateGroups="warehouse">
+      <bpmn:incoming>Flow_payment_to_pack</bpmn:incoming>
+      <bpmn:outgoing>Flow_pack_to_notify</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_start_to_inventory" sourceRef="StartEvent_1" targetRef="Task_ValidateInventory" />
+    <bpmn:sequenceFlow id="Flow_inventory_to_gw" sourceRef="Task_ValidateInventory" targetRef="Gateway_InStock" />
+    <bpmn:sequenceFlow id="Flow_in_stock" name="in stock" sourceRef="Gateway_InStock" targetRef="Task_ChargePayment">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${available == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_out_of_stock" name="out of stock" sourceRef="Gateway_InStock" targetRef="Task_NotifyBackorder">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${available == false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_payment_to_pack" sourceRef="Task_ChargePayment" targetRef="Task_PackShip" />
+    <bpmn:sequenceFlow id="Flow_pack_to_notify" sourceRef="Task_PackShip" targetRef="Task_NotifyCustomer" />
+    <bpmn:sequenceFlow id="Flow_notify_to_shipped" sourceRef="Task_NotifyCustomer" targetRef="EndEvent_Shipped" />
+    <bpmn:sequenceFlow id="Flow_backorder_to_end" sourceRef="Task_NotifyBackorder" targetRef="EndEvent_Backordered" />
+    <bpmn:sequenceFlow id="Flow_error_to_failed" sourceRef="ErrorBoundary_Payment" targetRef="EndEvent_Failed">
+      <bpmn:extensionElements>
+        <operaton:executionListener event="take" expression="${execution.setVariable('orderStatus', 'FAILED')}" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Task_NotifyBackorder" name="Notify Backorder" operaton:delegateExpression="${notifyBackorderDelegate}">
+      <bpmn:incoming>Flow_out_of_stock</bpmn:incoming>
+      <bpmn:outgoing>Flow_backorder_to_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_Failed" name="Notify Customer of Failure">
+      <bpmn:incoming>Flow_error_to_failed</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_ChargePayment" name="Charge Payment" operaton:delegateExpression="${paymentDelegate}" operaton:asyncBefore="true">
+      <bpmn:extensionElements>
         <operaton:failedJobRetryTimeCycle>R3/PT10S</operaton:failedJobRetryTimeCycle>
-      </extensionElements>
-      <incoming>Flow_in_stock</incoming>
-      <outgoing>Flow_payment_to_pack</outgoing>
-    </serviceTask>
-    <boundaryEvent id="ErrorBoundary_Payment" attachedToRef="Task_ChargePayment">
-      <outgoing>Flow_error_to_failed</outgoing>
-      <errorEventDefinition errorRef="PaymentFailed" />
-    </boundaryEvent>
-    <exclusiveGateway id="Gateway_InStock" name="In Stock?">
-      <incoming>Flow_inventory_to_gw</incoming>
-      <outgoing>Flow_in_stock</outgoing>
-      <outgoing>Flow_out_of_stock</outgoing>
-    </exclusiveGateway>
-    <serviceTask id="Task_ValidateInventory" name="Validate Inventory" operaton:delegateExpression="${inventoryDelegate}">
-      <incoming>Flow_start_to_inventory</incoming>
-      <outgoing>Flow_inventory_to_gw</outgoing>
-    </serviceTask>
-    <serviceTask id="Task_NotifyCustomer" name="Notify Customer" operaton:delegateExpression="${notifyCustomerDelegate}">
-      <incoming>Flow_pack_to_notify</incoming>
-      <outgoing>Flow_notify_to_shipped</outgoing>
-    </serviceTask>
-    <endEvent id="EndEvent_Shipped" name="Order Shipped">
-      <incoming>Flow_notify_to_shipped</incoming>
-    </endEvent>
-    <endEvent id="EndEvent_Backordered" name="Order Backordered">
-      <incoming>Flow_backorder_to_end</incoming>
-    </endEvent>
-  </process>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_in_stock</bpmn:incoming>
+      <bpmn:outgoing>Flow_payment_to_pack</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="ErrorBoundary_Payment" attachedToRef="Task_ChargePayment">
+      <bpmn:outgoing>Flow_error_to_failed</bpmn:outgoing>
+      <bpmn:errorEventDefinition errorRef="PaymentFailed" />
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="Gateway_InStock" name="In Stock?">
+      <bpmn:incoming>Flow_inventory_to_gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_in_stock</bpmn:outgoing>
+      <bpmn:outgoing>Flow_out_of_stock</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_ValidateInventory" name="Validate Inventory" operaton:delegateExpression="${inventoryDelegate}">
+      <bpmn:incoming>Flow_start_to_inventory</bpmn:incoming>
+      <bpmn:outgoing>Flow_inventory_to_gw</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_NotifyCustomer" name="Notify Customer" operaton:delegateExpression="${notifyCustomerDelegate}">
+      <bpmn:incoming>Flow_pack_to_notify</bpmn:incoming>
+      <bpmn:outgoing>Flow_notify_to_shipped</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_Shipped" name="Order Shipped">
+      <bpmn:incoming>Flow_notify_to_shipped</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_Backordered" name="Order Backordered">
+      <bpmn:incoming>Flow_backorder_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_OrderFulfillment">
       <bpmndi:BPMNShape id="Pool_OrderFulfillment_di" bpmnElement="Pool_OrderFulfillment" isHorizontal="true">
@@ -197,4 +199,4 @@
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
-</definitions>
+</bpmn:definitions>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_ValidateOrder" targetNamespace="http://operaton.org/examples">
   <bpmn:process id="validate-order" name="Validate Order" isExecutable="true" operaton:historyTimeToLive="P30D">
+    <bpmn:documentation>A reusable child process that validates an order, called from the order-orchestration parent process as a call activity demonstrating process composition via callActivity with variable mappings.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation>
     <bpmn:startEvent id="StartEvent_Validate" name="Start validation">
       <bpmn:outgoing>Flow_Start_ValidateTask</bpmn:outgoing>
     </bpmn:startEvent>

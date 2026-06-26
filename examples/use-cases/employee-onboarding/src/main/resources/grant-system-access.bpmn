@@ -1,21 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_GrantSystemAccess"
-                  targetNamespace="http://operaton.org/examples">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_GrantSystemAccess" targetNamespace="http://operaton.org/examples">
 
-  <bpmn:process id="grant-system-access" name="Grant System Access" isExecutable="true"
-                operaton:historyTimeToLive="P30D">
+  <bpmn:process id="grant-system-access" name="Grant System Access" isExecutable="true" operaton:historyTimeToLive="P30D">
 
-    <bpmn:startEvent id="StartEvent_AccessRequest" name="Access request">
+    <bpmn:documentation>Demonstrates call activity process composition: a parent process orchestrates two reusable child process definitions, including a parallel multi-instance call activity that provisions a list of equipment items concurrently.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_AccessRequest" name="Access request">
       <bpmn:outgoing>Flow_Start_Grant</bpmn:outgoing>
     </bpmn:startEvent>
 
-    <bpmn:serviceTask id="Task_GrantAccess" name="Grant access for role"
-                      operaton:delegateExpression="${grantAccessDelegate}">
+    <bpmn:serviceTask id="Task_GrantAccess" name="Grant access for role" operaton:delegateExpression="${grantAccessDelegate}">
       <bpmn:incoming>Flow_Start_Grant</bpmn:incoming>
       <bpmn:outgoing>Flow_Grant_End</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -24,32 +18,28 @@
       <bpmn:incoming>Flow_Grant_End</bpmn:incoming>
     </bpmn:endEvent>
 
-    <bpmn:sequenceFlow id="Flow_Start_Grant"
-                       sourceRef="StartEvent_AccessRequest"
-                       targetRef="Task_GrantAccess"/>
-    <bpmn:sequenceFlow id="Flow_Grant_End"
-                       sourceRef="Task_GrantAccess"
-                       targetRef="EndEvent_AccessResult"/>
+    <bpmn:sequenceFlow id="Flow_Start_Grant" sourceRef="StartEvent_AccessRequest" targetRef="Task_GrantAccess" />
+    <bpmn:sequenceFlow id="Flow_Grant_End" sourceRef="Task_GrantAccess" targetRef="EndEvent_AccessResult" />
   </bpmn:process>
 
   <bpmndi:BPMNDiagram id="BPMNDiagram_GrantSystemAccess">
     <bpmndi:BPMNPlane id="BPMNPlane_GrantSystemAccess" bpmnElement="grant-system-access">
       <bpmndi:BPMNShape id="Shape_StartEvent_AccessRequest" bpmnElement="StartEvent_AccessRequest">
-        <dc:Bounds x="152" y="72" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="130" y="115" width="80" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="152" y="72" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="130" y="115" width="80" height="27" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Task_GrantAccess" bpmnElement="Task_GrantAccess">
-        <dc:Bounds x="240" y="50" width="100" height="80"/>
+        <dc:Bounds x="240" y="50" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_EndEvent_AccessResult" bpmnElement="EndEvent_AccessResult">
-        <dc:Bounds x="402" y="72" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="380" y="115" width="80" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="402" y="72" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="380" y="115" width="80" height="27" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Start_Grant" bpmnElement="Flow_Start_Grant">
-        <di:waypoint x="188" y="90"/><di:waypoint x="240" y="90"/>
+        <di:waypoint x="188" y="90" /><di:waypoint x="240" y="90" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Grant_End" bpmnElement="Flow_Grant_End">
-        <di:waypoint x="340" y="90"/><di:waypoint x="402" y="90"/>
+        <di:waypoint x="340" y="90" /><di:waypoint x="402" y="90" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

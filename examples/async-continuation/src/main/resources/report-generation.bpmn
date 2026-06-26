@@ -12,6 +12,10 @@
                 isExecutable="true"
                 operaton:historyTimeToLive="P30D">
 
+    <bpmn:documentation>Demonstrates async continuations in Operaton: service tasks are marked with operaton:asyncBefore to introduce transaction boundaries, and jobs are driven manually in tests via ManagementService.executeJob(). Configures retry behaviour with operaton:failedJobRetryTimeCycle.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation>
+
     <bpmn:startEvent id="StartEvent_ReportRequested" name="Report requested">
       <bpmn:outgoing>Flow_Start_Fetch</bpmn:outgoing>
     </bpmn:startEvent>

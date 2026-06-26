@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_InsuranceClaim" targetNamespace="http://operaton.org/examples">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_InsuranceClaim" targetNamespace="http://operaton.org/examples">
   <bpmn:process id="insurance-claim" name="Insurance Claim" isExecutable="true" operaton:historyTimeToLive="P30D">
-    <bpmn:startEvent id="StartEvent_ClaimSubmitted" name="Claim submitted">
+    <bpmn:documentation>This example demonstrates the inclusive (OR) gateway in Operaton: multiple outgoing sequence flows can be active simultaneously when their conditions are true, and the corresponding joining gateway waits for all active tokens before continuing.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_ClaimSubmitted" name="Claim submitted">
       <bpmn:outgoing>Flow_Start_Route</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:inclusiveGateway id="Gateway_Route" name="Route claim" default="Flow_Default_Rejected">
@@ -35,10 +37,10 @@
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_Start_Route" sourceRef="StartEvent_ClaimSubmitted" targetRef="Gateway_Route" />
     <bpmn:sequenceFlow id="Flow_Medical" name="medical or both" sourceRef="Gateway_Route" targetRef="Task_ReviewMedical">
-      <bpmn:conditionExpression xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="bpmn:tFormalExpression">${claimType == 'medical' || claimType == 'both'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${claimType == 'medical' || claimType == 'both'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_Property" name="property or both" sourceRef="Gateway_Route" targetRef="Task_ReviewProperty">
-      <bpmn:conditionExpression xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="bpmn:tFormalExpression">${claimType == 'property' || claimType == 'both'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${claimType == 'property' || claimType == 'both'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_Default_Rejected" name="no match" sourceRef="Gateway_Route" targetRef="EndEvent_Rejected" />
     <bpmn:sequenceFlow id="Flow_Medical_Join" sourceRef="Task_ReviewMedical" targetRef="Gateway_Join" />

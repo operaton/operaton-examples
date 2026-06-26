@@ -1,29 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
-                  id="Definitions_OrderProcessing"
-                  targetNamespace="http://operaton.org/examples/order-processing">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" id="Definitions_OrderProcessing" targetNamespace="http://operaton.org/examples/order-processing">
 
-  <bpmn:process id="order-processing"
-                name="Order Processing"
-                isExecutable="true"
-                operaton:historyTimeToLive="P30D">
+  <bpmn:process id="order-processing" name="Order Processing" isExecutable="true" operaton:historyTimeToLive="P30D">
 
-    <bpmn:startEvent id="StartEvent_1" name="Order received">
+    <bpmn:documentation>This example demonstrates how to trigger an Operaton process from a Kafka message and publish results back to Kafka from a JavaDelegate, using Testcontainers Kafka for integration testing.
+
+Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</bpmn:documentation><bpmn:startEvent id="StartEvent_1" name="Order received">
       <bpmn:outgoing>Flow_Start_Process</bpmn:outgoing>
     </bpmn:startEvent>
 
-    <bpmn:serviceTask id="Task_ProcessOrder" name="Process order"
-                      operaton:expression="${execution.setVariable('status', 'processing')}">
+    <bpmn:serviceTask id="Task_ProcessOrder" name="Process order" operaton:expression="${execution.setVariable('status', 'processing')}">
       <bpmn:incoming>Flow_Start_Process</bpmn:incoming>
       <bpmn:outgoing>Flow_Process_Publish</bpmn:outgoing>
     </bpmn:serviceTask>
 
-    <bpmn:serviceTask id="Task_PublishResult" name="Publish order result"
-                      operaton:delegateExpression="${publishOrderResultDelegate}">
+    <bpmn:serviceTask id="Task_PublishResult" name="Publish order result" operaton:delegateExpression="${publishOrderResultDelegate}">
       <bpmn:incoming>Flow_Process_Publish</bpmn:incoming>
       <bpmn:outgoing>Flow_Publish_End</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -32,9 +23,9 @@
       <bpmn:incoming>Flow_Publish_End</bpmn:incoming>
     </bpmn:endEvent>
 
-    <bpmn:sequenceFlow id="Flow_Start_Process" sourceRef="StartEvent_1" targetRef="Task_ProcessOrder"/>
-    <bpmn:sequenceFlow id="Flow_Process_Publish" sourceRef="Task_ProcessOrder" targetRef="Task_PublishResult"/>
-    <bpmn:sequenceFlow id="Flow_Publish_End" sourceRef="Task_PublishResult" targetRef="EndEvent_1"/>
+    <bpmn:sequenceFlow id="Flow_Start_Process" sourceRef="StartEvent_1" targetRef="Task_ProcessOrder" />
+    <bpmn:sequenceFlow id="Flow_Process_Publish" sourceRef="Task_ProcessOrder" targetRef="Task_PublishResult" />
+    <bpmn:sequenceFlow id="Flow_Publish_End" sourceRef="Task_PublishResult" targetRef="EndEvent_1" />
 
   </bpmn:process>
 
@@ -42,36 +33,36 @@
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="order-processing">
 
       <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_1">
-        <dc:Bounds x="152" y="162" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="130" y="205" width="80" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="152" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="130" y="205" width="80" height="14" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_Process" bpmnElement="Task_ProcessOrder">
-        <dc:Bounds x="250" y="140" width="100" height="80"/>
+        <dc:Bounds x="250" y="140" width="100" height="80" />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_Publish" bpmnElement="Task_PublishResult">
-        <dc:Bounds x="420" y="140" width="100" height="80"/>
+        <dc:Bounds x="420" y="140" width="100" height="80" />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="Shape_End" bpmnElement="EndEvent_1">
-        <dc:Bounds x="582" y="162" width="36" height="36"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="558" y="205" width="84" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="582" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="558" y="205" width="84" height="14" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNEdge id="Edge_Start_Process" bpmnElement="Flow_Start_Process">
-        <di:waypoint x="188" y="180"/>
-        <di:waypoint x="250" y="180"/>
+        <di:waypoint x="188" y="180" />
+        <di:waypoint x="250" y="180" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Edge_Process_Publish" bpmnElement="Flow_Process_Publish">
-        <di:waypoint x="350" y="180"/>
-        <di:waypoint x="420" y="180"/>
+        <di:waypoint x="350" y="180" />
+        <di:waypoint x="420" y="180" />
       </bpmndi:BPMNEdge>
 
       <bpmndi:BPMNEdge id="Edge_Publish_End" bpmnElement="Flow_Publish_End">
-        <di:waypoint x="520" y="180"/>
-        <di:waypoint x="582" y="180"/>
+        <di:waypoint x="520" y="180" />
+        <di:waypoint x="582" y="180" />
       </bpmndi:BPMNEdge>
 
     </bpmndi:BPMNPlane>
