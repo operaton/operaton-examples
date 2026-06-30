@@ -19,7 +19,7 @@ public class DataInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         createGroupIfAbsent("logistics", "Logistics Team", "WORKFLOW");
-        createGroupIfAbsent("customer-service", "Customer Service", "WORKFLOW");
+        createGroupIfAbsent("customerService", "Customer Service", "WORKFLOW");
 
         if (identityService.createUserQuery().userId("alice").count() == 0) {
             createUser("alice", "Alice", "Logistics", "alice@example.com", "alice");
@@ -27,7 +27,7 @@ public class DataInitializer implements ApplicationRunner {
         }
         if (identityService.createUserQuery().userId("bob").count() == 0) {
             createUser("bob", "Bob", "Service", "bob@example.com", "bob");
-            identityService.createMembership("bob", "customer-service");
+            identityService.createMembership("bob", "customerService");
         }
     }
 
