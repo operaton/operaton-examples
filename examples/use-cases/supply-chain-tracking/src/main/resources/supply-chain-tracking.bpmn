@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="Definitions_SupplyChainTracking"
+                  targetNamespace="http://bpmn.io/schema/bpmn"
+                  exporter="bpmn.io modeler"
+                  exporterVersion="1.0">
+
+  <bpmn:message id="Message_PackageDelivered" name="PackageDelivered"/>
+  <bpmn:message id="Message_CustomsDelay" name="CustomsDelay"/>
+
+  <bpmn:process id="supply-chain-tracking"
+                name="Supply Chain Tracking"
+                isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="Start" name="Order placed">
+      <bpmn:outgoing>flow_start_dispatch</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="DispatchOrder"
+                      name="Dispatch order"
+                      operaton:delegateExpression="${dispatchOrderDelegate}">
+      <bpmn:incoming>flow_start_dispatch</bpmn:incoming>
+      <bpmn:outgoing>flow_dispatch_gateway</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:eventBasedGateway id="WaitForEvent" name="Wait for event">
+      <bpmn:incoming>flow_dispatch_gateway</bpmn:incoming>
+      <bpmn:incoming>flow_delay_gateway</bpmn:incoming>
+      <bpmn:outgoing>flow_gateway_delivered</bpmn:outgoing>
+      <bpmn:outgoing>flow_gateway_delay</bpmn:outgoing>
+      <bpmn:outgoing>flow_gateway_timer</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+
+    <bpmn:intermediateCatchEvent id="CatchPackageDelivered" name="Package delivered">
+      <bpmn:incoming>flow_gateway_delivered</bpmn:incoming>
+      <bpmn:outgoing>flow_delivered_confirm</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="def_delivered" messageRef="Message_PackageDelivered"/>
+    </bpmn:intermediateCatchEvent>
+
+    <bpmn:serviceTask id="ConfirmDelivery"
+                      name="Confirm delivery"
+                      operaton:delegateExpression="${confirmDeliveryDelegate}">
+      <bpmn:incoming>flow_delivered_confirm</bpmn:incoming>
+      <bpmn:outgoing>flow_confirm_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndDelivered" name="Delivered">
+      <bpmn:incoming>flow_confirm_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:intermediateCatchEvent id="CatchCustomsDelay" name="Customs delay">
+      <bpmn:incoming>flow_gateway_delay</bpmn:incoming>
+      <bpmn:outgoing>flow_delay_record</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="def_delay" messageRef="Message_CustomsDelay"/>
+    </bpmn:intermediateCatchEvent>
+
+    <bpmn:serviceTask id="RecordCustomsDelay"
+                      name="Record customs delay"
+                      operaton:delegateExpression="${recordCustomsDelayDelegate}">
+      <bpmn:incoming>flow_delay_record</bpmn:incoming>
+      <bpmn:outgoing>flow_delay_gateway</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:intermediateCatchEvent id="CatchTimer" name="7-day timeout">
+      <bpmn:incoming>flow_gateway_timer</bpmn:incoming>
+      <bpmn:outgoing>flow_timer_followup</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="def_timer">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P7D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+
+    <bpmn:serviceTask id="CustomerServiceFollowup"
+                      name="Customer service follow-up"
+                      operaton:delegateExpression="${customerServiceFollowupDelegate}">
+      <bpmn:incoming>flow_timer_followup</bpmn:incoming>
+      <bpmn:outgoing>flow_followup_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndFollowup" name="Follow-up required">
+      <bpmn:incoming>flow_followup_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="flow_start_dispatch" sourceRef="Start" targetRef="DispatchOrder"/>
+    <bpmn:sequenceFlow id="flow_dispatch_gateway" sourceRef="DispatchOrder" targetRef="WaitForEvent"/>
+    <bpmn:sequenceFlow id="flow_gateway_delivered" sourceRef="WaitForEvent" targetRef="CatchPackageDelivered"/>
+    <bpmn:sequenceFlow id="flow_delivered_confirm" sourceRef="CatchPackageDelivered" targetRef="ConfirmDelivery"/>
+    <bpmn:sequenceFlow id="flow_confirm_end" sourceRef="ConfirmDelivery" targetRef="EndDelivered"/>
+    <bpmn:sequenceFlow id="flow_gateway_delay" sourceRef="WaitForEvent" targetRef="CatchCustomsDelay"/>
+    <bpmn:sequenceFlow id="flow_delay_record" sourceRef="CatchCustomsDelay" targetRef="RecordCustomsDelay"/>
+    <bpmn:sequenceFlow id="flow_delay_gateway" sourceRef="RecordCustomsDelay" targetRef="WaitForEvent"/>
+    <bpmn:sequenceFlow id="flow_gateway_timer" sourceRef="WaitForEvent" targetRef="CatchTimer"/>
+    <bpmn:sequenceFlow id="flow_timer_followup" sourceRef="CatchTimer" targetRef="CustomerServiceFollowup"/>
+    <bpmn:sequenceFlow id="flow_followup_end" sourceRef="CustomerServiceFollowup" targetRef="EndFollowup"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="supply-chain-tracking">
+
+      <!-- Start -->
+      <bpmndi:BPMNShape id="Start_di" bpmnElement="Start">
+        <dc:Bounds x="142" y="182" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="128" y="225" width="64" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Dispatch order task -->
+      <bpmndi:BPMNShape id="DispatchOrder_di" bpmnElement="DispatchOrder">
+        <dc:Bounds x="230" y="160" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <!-- Event-based gateway -->
+      <bpmndi:BPMNShape id="WaitForEvent_di" bpmnElement="WaitForEvent" isMarkerVisible="true">
+        <dc:Bounds x="385" y="175" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="365" y="232" width="90" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Catch: PackageDelivered (top path) -->
+      <bpmndi:BPMNShape id="CatchPackageDelivered_di" bpmnElement="CatchPackageDelivered">
+        <dc:Bounds x="492" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="468" y="125" width="84" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Confirm delivery task -->
+      <bpmndi:BPMNShape id="ConfirmDelivery_di" bpmnElement="ConfirmDelivery">
+        <dc:Bounds x="590" y="60" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <!-- End: Delivered -->
+      <bpmndi:BPMNShape id="EndDelivered_di" bpmnElement="EndDelivered">
+        <dc:Bounds x="752" y="82" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="741" y="125" width="58" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Catch: CustomsDelay (middle path) -->
+      <bpmndi:BPMNShape id="CatchCustomsDelay_di" bpmnElement="CatchCustomsDelay">
+        <dc:Bounds x="492" y="182" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="468" y="225" width="84" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Record customs delay task -->
+      <bpmndi:BPMNShape id="RecordCustomsDelay_di" bpmnElement="RecordCustomsDelay">
+        <dc:Bounds x="590" y="160" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <!-- Catch: Timer (bottom path) -->
+      <bpmndi:BPMNShape id="CatchTimer_di" bpmnElement="CatchTimer">
+        <dc:Bounds x="492" y="292" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="468" y="335" width="84" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Customer service follow-up task -->
+      <bpmndi:BPMNShape id="CustomerServiceFollowup_di" bpmnElement="CustomerServiceFollowup">
+        <dc:Bounds x="590" y="270" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+
+      <!-- End: Follow-up required -->
+      <bpmndi:BPMNShape id="EndFollowup_di" bpmnElement="EndFollowup">
+        <dc:Bounds x="752" y="292" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="728" y="335" width="84" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Edges -->
+      <bpmndi:BPMNEdge id="flow_start_dispatch_di" bpmnElement="flow_start_dispatch">
+        <di:waypoint x="178" y="200"/>
+        <di:waypoint x="230" y="200"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_dispatch_gateway_di" bpmnElement="flow_dispatch_gateway">
+        <di:waypoint x="330" y="200"/>
+        <di:waypoint x="385" y="200"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- gateway -> PackageDelivered: go up then right -->
+      <bpmndi:BPMNEdge id="flow_gateway_delivered_di" bpmnElement="flow_gateway_delivered">
+        <di:waypoint x="410" y="175"/>
+        <di:waypoint x="410" y="100"/>
+        <di:waypoint x="492" y="100"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- gateway -> CustomsDelay: straight across -->
+      <bpmndi:BPMNEdge id="flow_gateway_delay_di" bpmnElement="flow_gateway_delay">
+        <di:waypoint x="435" y="200"/>
+        <di:waypoint x="492" y="200"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- gateway -> Timer: go down then right -->
+      <bpmndi:BPMNEdge id="flow_gateway_timer_di" bpmnElement="flow_gateway_timer">
+        <di:waypoint x="410" y="225"/>
+        <di:waypoint x="410" y="310"/>
+        <di:waypoint x="492" y="310"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_delivered_confirm_di" bpmnElement="flow_delivered_confirm">
+        <di:waypoint x="528" y="100"/>
+        <di:waypoint x="590" y="100"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_confirm_end_di" bpmnElement="flow_confirm_end">
+        <di:waypoint x="690" y="100"/>
+        <di:waypoint x="752" y="100"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_delay_record_di" bpmnElement="flow_delay_record">
+        <di:waypoint x="528" y="200"/>
+        <di:waypoint x="590" y="200"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- RecordCustomsDelay -> gateway: loop back below via waypoints -->
+      <bpmndi:BPMNEdge id="flow_delay_gateway_di" bpmnElement="flow_delay_gateway">
+        <di:waypoint x="640" y="240"/>
+        <di:waypoint x="640" y="260"/>
+        <di:waypoint x="410" y="260"/>
+        <di:waypoint x="410" y="225"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_timer_followup_di" bpmnElement="flow_timer_followup">
+        <di:waypoint x="528" y="310"/>
+        <di:waypoint x="590" y="310"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_followup_end_di" bpmnElement="flow_followup_end">
+        <di:waypoint x="690" y="310"/>
+        <di:waypoint x="752" y="310"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
