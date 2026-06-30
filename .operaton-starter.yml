@@ -1589,6 +1589,45 @@ examples:
     documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/procurement-collaboration/README.md"
     lastUpdated: "2026-06-22"
 
+  - id: supply-chain-tracking
+    title: "Supply Chain Tracking"
+    icon: "📦"
+    path: examples/use-cases/supply-chain-tracking
+    shortDescription: >
+      Event-based gateway races two async Kafka messages (PackageDelivered, CustomsDelay)
+      against a 7-day timer, correlated to the right running instance by tracking number.
+    longDescription: |
+      A long-running shipment tracking process parks at an event-based gateway waiting for
+      one of three possible events: a PackageDelivered message, a CustomsDelay message, or
+      a 7-day timer. The CustomsDelay branch loops back into the gateway, re-arming the
+      timer from the moment of re-entry.
+
+      - **Event-based gateway** — selecting between two messages and a timer
+      - **Kafka message correlation** — `ShipmentEventListener` correlates by business key (tracking number)
+      - **Timer re-arm subtlety** — P7D restarts on each loop, not from dispatch time
+      - **MismatchingMessageCorrelationException** handling — stale/unknown events are dropped safely
+      - **Testcontainers** — real PostgreSQL + real Kafka (KRaft mode) in every IT
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.2"
+    javaVersion: "21"
+    complexity: intermediate
+    tags:
+      - { label: "Event-Based Gateway", category: concept }
+      - { label: "Message Correlation", category: concept }
+      - { label: "Kafka", category: integration }
+      - { label: "Timer", category: concept }
+    integrations: [postgres, kafka]
+    bpmnConcepts: [event-based-gateway, message-catch, timer-catch]
+    requires: "Java 21+, Docker"
+    screenshots:
+      - examples/use-cases/supply-chain-tracking/src/main/resources/supply-chain-tracking.png
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/supply-chain-tracking/README.md"
+    lastUpdated: "2026-06-30"
+
   - id: integration-keycloak
     title: "Keycloak Identity Provider"
     icon: "🔐"

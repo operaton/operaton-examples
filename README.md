@@ -93,6 +93,7 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | [complaint-resolution](examples/use-cases/complaint-resolution) | Customer complaint | Escalation events: non-interrupting throw + boundary (parallel approval), interrupting end event + boundary (specialist reroute) |
 | [employee-onboarding](examples/use-cases/employee-onboarding) | Employee HR onboarding | Call activity orchestration: parallel MI for equipment provisioning, single call activity for system access, in/out variable mapping |
 | [procurement-collaboration](examples/use-cases/procurement-collaboration) | Buyer ↔ Supplier procurement | Two-pool collaboration, three correlated messages, async continuation decoupling |
+| [supply-chain-tracking](examples/use-cases/supply-chain-tracking) | Shipment tracking | Event-based gateway, async Kafka message correlation by business key, P7D timer re-arm |
 
 ## Anatomy of every example
 
