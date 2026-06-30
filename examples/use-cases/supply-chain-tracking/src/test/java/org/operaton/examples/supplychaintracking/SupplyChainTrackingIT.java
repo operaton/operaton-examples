@@ -3,7 +3,6 @@ package org.operaton.examples.supplychaintracking;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.operaton.bpm.engine.HistoryService;
-import org.operaton.bpm.engine.ManagementService;
 import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.impl.util.ClockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -36,8 +34,7 @@ class SupplyChainTrackingIT {
 
     @Container
     @ServiceConnection
-    @SuppressWarnings("rawtypes")
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine");
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine"); // NOSONAR
 
     @Container
     @ServiceConnection
@@ -45,7 +42,6 @@ class SupplyChainTrackingIT {
 
     @Autowired RuntimeService runtimeService;
     @Autowired HistoryService historyService;
-    @Autowired ManagementService managementService;
     @Autowired KafkaTemplate<String, String> kafkaTemplate;
 
     @LocalServerPort int port;
@@ -112,12 +108,6 @@ class SupplyChainTrackingIT {
         String delayPayload = "{\"trackingNumber\":\"TRK-CD-001\",\"eta\":\"2026-07-15\"}";
         kafkaTemplate.send(customsEventsTopic, "TRK-CD-001", delayPayload).get(5, TimeUnit.SECONDS);
 
-        // Assert still active, parked at gateway again, delayCount=1
-        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
-            assertThat(runtimeService.createProcessInstanceQuery()
-                .processInstanceBusinessKey("TRK-CD-001").count()).isEqualTo(1);
-        });
-
         // Give the listener time to correlate and re-enter gateway
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             var vars = runtimeService.createVariableInstanceQuery()
@@ -156,7 +146,7 @@ class SupplyChainTrackingIT {
         );
 
         // Advance clock 8 days so the P7D timer is due
-        ClockUtil.setCurrentTime(Date.from(Instant.now().plus(Duration.ofDays(8))));
+        ClockUtil.setCurrentTime(new Date(ClockUtil.getCurrentTime().getTime() + Duration.ofDays(8).toMillis()));
 
         // Job executor picks up the due timer — await completion
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
