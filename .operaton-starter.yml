@@ -1621,7 +1621,7 @@ examples:
     bpmnConcepts: [event-based-gateway, message-catch, timer-catch]
     requires: "Java 21+, Docker"
     screenshots:
-      - src/main/resources/supply-chain-tracking.png
+      - examples/use-cases/supply-chain-tracking/src/main/resources/supply-chain-tracking.png
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
