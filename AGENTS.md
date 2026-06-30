@@ -30,7 +30,11 @@ writing anything; it is the binding definition of done.
 7. **Minimalism.** Before finishing, actively remove: unused dependencies,
    dead code, gratuitous abstraction layers, configuration that restates
    defaults.
-8. **Evidence before claims.** Paste the tail of the passing build output in
+8. **Concept vs use-case scope.** Concept examples (`examples/NN-*`) demonstrate
+   one primary Operaton concept. Use-case examples (`examples/use-cases/*`)
+   demonstrate one business topic and may combine several concepts. Both must be
+   minimal — no element that does not serve the demonstrated purpose.
+9. **Evidence before claims.** Paste the tail of the passing build output in
    your summary. "Should work" is a failure state.
 
 ## Workflow for a new example
