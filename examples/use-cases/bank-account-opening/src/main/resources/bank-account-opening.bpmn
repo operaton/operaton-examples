@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  id="Definitions_BankAccountOpening"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="bank-account-opening"
+                name="Bank Account Opening"
+                isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received">
+      <bpmn:extensionElements>
+        <operaton:formData>
+          <operaton:formField id="fullName" label="Full name" type="string"/>
+          <operaton:formField id="email" label="Email address" type="string"/>
+          <operaton:formField id="dateOfBirth" label="Date of birth" type="date"/>
+          <operaton:formField id="gender" label="Gender" type="enum">
+            <operaton:value id="F" name="Female"/>
+            <operaton:value id="M" name="Male"/>
+            <operaton:value id="D" name="Diverse"/>
+          </operaton:formField>
+          <operaton:formField id="nationality" label="Nationality" type="string"/>
+          <operaton:formField id="countryOfResidence" label="Country of residence" type="string"/>
+          <operaton:formField id="annualIncome" label="Annual income (EUR)" type="long"/>
+          <operaton:formField id="employmentStatus" label="Employment status" type="enum">
+            <operaton:value id="EMPLOYED" name="Employed"/>
+            <operaton:value id="SELF_EMPLOYED" name="Self-employed"/>
+            <operaton:value id="UNEMPLOYED" name="Unemployed"/>
+            <operaton:value id="RETIRED" name="Retired"/>
+            <operaton:value id="STUDENT" name="Student"/>
+          </operaton:formField>
+          <operaton:formField id="occupation" label="Occupation" type="string"/>
+          <operaton:formField id="sourceOfFunds" label="Source of funds" type="enum">
+            <operaton:value id="SALARY" name="Salary"/>
+            <operaton:value id="SAVINGS" name="Savings"/>
+            <operaton:value id="INVESTMENT" name="Investment"/>
+            <operaton:value id="INHERITANCE" name="Inheritance"/>
+            <operaton:value id="BUSINESS" name="Business income"/>
+          </operaton:formField>
+          <operaton:formField id="idDocumentType" label="ID document type" type="enum">
+            <operaton:value id="PASSPORT" name="Passport"/>
+            <operaton:value id="ID_CARD" name="National ID card"/>
+            <operaton:value id="DRIVERS_LICENSE" name="Driver&apos;s license"/>
+          </operaton:formField>
+          <operaton:formField id="idDocumentNumber" label="ID document number" type="string"/>
+          <operaton:formField id="requestedAccountType" label="Account type" type="enum">
+            <operaton:value id="CHECKING" name="Checking account"/>
+            <operaton:value id="SAVINGS" name="Savings account"/>
+          </operaton:formField>
+        </operaton:formData>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_start_register</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="ServiceTask_RegisterApplication" name="Register application"
+                      operaton:delegateExpression="${registerApplicationDelegate}">
+      <bpmn:incoming>Flow_start_register</bpmn:incoming>
+      <bpmn:outgoing>Flow_register_fork</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:parallelGateway id="ParallelGateway_KycFork" name="Start KYC checks">
+      <bpmn:incoming>Flow_register_fork</bpmn:incoming>
+      <bpmn:outgoing>Flow_fork_identity</bpmn:outgoing>
+      <bpmn:outgoing>Flow_fork_background</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:serviceTask id="ServiceTask_ValidateIdentity" name="Validate identity"
+                      operaton:type="external"
+                      operaton:topic="identity-validation">
+      <bpmn:incoming>Flow_fork_identity</bpmn:incoming>
+      <bpmn:outgoing>Flow_identity_join</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="ServiceTask_RunBackgroundCheck" name="Run background check">
+      <bpmn:extensionElements>
+        <operaton:connector>
+          <operaton:connectorId>http-connector</operaton:connectorId>
+          <operaton:inputOutput>
+            <operaton:inputParameter name="url">${llmProperties.chatCompletionsUrl}</operaton:inputParameter>
+            <operaton:inputParameter name="method">POST</operaton:inputParameter>
+            <operaton:inputParameter name="headers">
+              <operaton:map>
+                <operaton:entry key="Content-Type">application/json</operaton:entry>
+                <operaton:entry key="Authorization">${llmProperties.authorizationHeader}</operaton:entry>
+              </operaton:map>
+            </operaton:inputParameter>
+            <operaton:inputParameter name="payload">${promptBuilder.backgroundCheckRequest(nationality, countryOfResidence, annualIncome, employmentStatus, occupation, sourceOfFunds, gender)}</operaton:inputParameter>
+            <operaton:outputParameter name="backgroundRisk">${responseParser.risk(response)}</operaton:outputParameter>
+            <operaton:outputParameter name="rationale">${responseParser.rationale(response)}</operaton:outputParameter>
+          </operaton:inputOutput>
+        </operaton:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_fork_background</bpmn:incoming>
+      <bpmn:outgoing>Flow_background_join</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:parallelGateway id="ParallelGateway_KycJoin" name="KYC checks complete">
+      <bpmn:incoming>Flow_identity_join</bpmn:incoming>
+      <bpmn:incoming>Flow_background_join</bpmn:incoming>
+      <bpmn:outgoing>Flow_join_assess</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:businessRuleTask id="BusinessRuleTask_AssessRisk" name="Assess risk"
+                           operaton:decisionRef="account-risk"
+                           operaton:mapDecisionResult="singleEntry"
+                           operaton:resultVariable="decision">
+      <bpmn:incoming>Flow_join_assess</bpmn:incoming>
+      <bpmn:outgoing>Flow_assess_decision</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+
+    <bpmn:exclusiveGateway id="ExclusiveGateway_OnDecision" name="Decision?"
+                           default="Flow_decision_manual">
+      <bpmn:incoming>Flow_assess_decision</bpmn:incoming>
+      <bpmn:outgoing>Flow_decision_approve</bpmn:outgoing>
+      <bpmn:outgoing>Flow_decision_reject</bpmn:outgoing>
+      <bpmn:outgoing>Flow_decision_manual</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:userTask id="UserTask_ComplianceReview" name="Compliance review"
+                   operaton:candidateGroups="compliance">
+      <bpmn:extensionElements>
+        <operaton:formData>
+          <operaton:formField id="backgroundRisk" label="Background risk" type="string">
+            <operaton:property id="readonly" value="true"/>
+          </operaton:formField>
+          <operaton:formField id="rationale" label="Risk rationale" type="string">
+            <operaton:property id="readonly" value="true"/>
+          </operaton:formField>
+          <operaton:formField id="reviewOutcome" label="Decision" type="enum">
+            <operaton:value id="APPROVE" name="Approve"/>
+            <operaton:value id="REJECT" name="Reject"/>
+          </operaton:formField>
+        </operaton:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_decision_manual</bpmn:incoming>
+      <bpmn:outgoing>Flow_review_outcome</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:exclusiveGateway id="ExclusiveGateway_OnReviewOutcome" name="Review outcome?"
+                           default="Flow_review_reject">
+      <bpmn:incoming>Flow_review_outcome</bpmn:incoming>
+      <bpmn:outgoing>Flow_review_approve</bpmn:outgoing>
+      <bpmn:outgoing>Flow_review_reject</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- Converging gateways carry no conditions -->
+    <bpmn:exclusiveGateway id="ExclusiveGateway_ApproveMerge" name="Approve paths merge">
+      <bpmn:incoming>Flow_decision_approve</bpmn:incoming>
+      <bpmn:incoming>Flow_review_approve</bpmn:incoming>
+      <bpmn:outgoing>Flow_approve_open</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:exclusiveGateway id="ExclusiveGateway_RejectMerge" name="Reject paths merge">
+      <bpmn:incoming>Flow_decision_reject</bpmn:incoming>
+      <bpmn:incoming>Flow_review_reject</bpmn:incoming>
+      <bpmn:outgoing>Flow_reject_notify</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:serviceTask id="ServiceTask_OpenAccount" name="Open account"
+                      operaton:delegateExpression="${openAccountDelegate}">
+      <bpmn:incoming>Flow_approve_open</bpmn:incoming>
+      <bpmn:outgoing>Flow_open_notify</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="ServiceTask_NotifyApproval" name="Notify applicant: account opened"
+                      operaton:delegateExpression="${notifyApprovalDelegate}">
+      <bpmn:incoming>Flow_open_notify</bpmn:incoming>
+      <bpmn:outgoing>Flow_notify_end_opened</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="ServiceTask_NotifyRejection" name="Notify applicant: application declined"
+                      operaton:delegateExpression="${notifyRejectionDelegate}">
+      <bpmn:incoming>Flow_reject_notify</bpmn:incoming>
+      <bpmn:outgoing>Flow_notify_end_rejected</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_AccountOpened" name="Account opened">
+      <bpmn:incoming>Flow_notify_end_opened</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_ApplicationRejected" name="Application rejected">
+      <bpmn:incoming>Flow_notify_end_rejected</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Sequence flows -->
+    <bpmn:sequenceFlow id="Flow_start_register"   sourceRef="StartEvent_ApplicationReceived"   targetRef="ServiceTask_RegisterApplication"/>
+    <bpmn:sequenceFlow id="Flow_register_fork"    sourceRef="ServiceTask_RegisterApplication"   targetRef="ParallelGateway_KycFork"/>
+    <bpmn:sequenceFlow id="Flow_fork_identity"    name="Identity check"   sourceRef="ParallelGateway_KycFork"  targetRef="ServiceTask_ValidateIdentity"/>
+    <bpmn:sequenceFlow id="Flow_fork_background"  name="Background check" sourceRef="ParallelGateway_KycFork"  targetRef="ServiceTask_RunBackgroundCheck"/>
+    <bpmn:sequenceFlow id="Flow_identity_join"    sourceRef="ServiceTask_ValidateIdentity"      targetRef="ParallelGateway_KycJoin"/>
+    <bpmn:sequenceFlow id="Flow_background_join"  sourceRef="ServiceTask_RunBackgroundCheck"    targetRef="ParallelGateway_KycJoin"/>
+    <bpmn:sequenceFlow id="Flow_join_assess"      sourceRef="ParallelGateway_KycJoin"           targetRef="BusinessRuleTask_AssessRisk"/>
+    <bpmn:sequenceFlow id="Flow_assess_decision"  sourceRef="BusinessRuleTask_AssessRisk"       targetRef="ExclusiveGateway_OnDecision"/>
+    <bpmn:sequenceFlow id="Flow_decision_approve" name="APPROVE"        sourceRef="ExclusiveGateway_OnDecision"    targetRef="ExclusiveGateway_ApproveMerge">
+      <bpmn:conditionExpression>${decision == 'APPROVE'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_decision_reject"  name="REJECT"         sourceRef="ExclusiveGateway_OnDecision"    targetRef="ExclusiveGateway_RejectMerge">
+      <bpmn:conditionExpression>${decision == 'REJECT'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_decision_manual"  name="MANUAL_REVIEW"  sourceRef="ExclusiveGateway_OnDecision"    targetRef="UserTask_ComplianceReview"/>
+    <bpmn:sequenceFlow id="Flow_review_outcome"   sourceRef="UserTask_ComplianceReview"         targetRef="ExclusiveGateway_OnReviewOutcome"/>
+    <bpmn:sequenceFlow id="Flow_review_approve"   name="APPROVE"        sourceRef="ExclusiveGateway_OnReviewOutcome" targetRef="ExclusiveGateway_ApproveMerge">
+      <bpmn:conditionExpression>${reviewOutcome == 'APPROVE'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_review_reject"    name="REJECT"         sourceRef="ExclusiveGateway_OnReviewOutcome" targetRef="ExclusiveGateway_RejectMerge"/>
+    <bpmn:sequenceFlow id="Flow_approve_open"     sourceRef="ExclusiveGateway_ApproveMerge"     targetRef="ServiceTask_OpenAccount"/>
+    <bpmn:sequenceFlow id="Flow_open_notify"      sourceRef="ServiceTask_OpenAccount"           targetRef="ServiceTask_NotifyApproval"/>
+    <bpmn:sequenceFlow id="Flow_reject_notify"    sourceRef="ExclusiveGateway_RejectMerge"      targetRef="ServiceTask_NotifyRejection"/>
+    <bpmn:sequenceFlow id="Flow_notify_end_opened"   sourceRef="ServiceTask_NotifyApproval"     targetRef="EndEvent_AccountOpened"/>
+    <bpmn:sequenceFlow id="Flow_notify_end_rejected" sourceRef="ServiceTask_NotifyRejection"    targetRef="EndEvent_ApplicationRejected"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="bank-account-opening">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_ApplicationReceived">
+        <dc:Bounds x="152" y="282" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="128" y="325" width="84" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Register" bpmnElement="ServiceTask_RegisterApplication">
+        <dc:Bounds x="240" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Fork" bpmnElement="ParallelGateway_KycFork" isMarkerVisible="true">
+        <dc:Bounds x="395" y="275" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="378" y="332" width="85" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Identity" bpmnElement="ServiceTask_ValidateIdentity">
+        <dc:Bounds x="510" y="170" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Background" bpmnElement="ServiceTask_RunBackgroundCheck">
+        <dc:Bounds x="510" y="370" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Join" bpmnElement="ParallelGateway_KycJoin" isMarkerVisible="true">
+        <dc:Bounds x="675" y="275" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="653" y="332" width="95" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Assess" bpmnElement="BusinessRuleTask_AssessRisk">
+        <dc:Bounds x="790" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Decision" bpmnElement="ExclusiveGateway_OnDecision" isMarkerVisible="true">
+        <dc:Bounds x="965" y="275" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="964" y="332" width="52" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Review" bpmnElement="UserTask_ComplianceReview">
+        <dc:Bounds x="1090" y="170" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ReviewGw" bpmnElement="ExclusiveGateway_OnReviewOutcome" isMarkerVisible="true">
+        <dc:Bounds x="1265" y="185" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1248" y="242" width="85" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ApproveMerge" bpmnElement="ExclusiveGateway_ApproveMerge" isMarkerVisible="true">
+        <dc:Bounds x="1385" y="275" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1363" y="332" width="95" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_RejectMerge" bpmnElement="ExclusiveGateway_RejectMerge" isMarkerVisible="true">
+        <dc:Bounds x="1385" y="425" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1363" y="482" width="95" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Open" bpmnElement="ServiceTask_OpenAccount">
+        <dc:Bounds x="1500" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_NotifyApproval" bpmnElement="ServiceTask_NotifyApproval">
+        <dc:Bounds x="1660" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_NotifyRejection" bpmnElement="ServiceTask_NotifyRejection">
+        <dc:Bounds x="1500" y="410" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndOpened" bpmnElement="EndEvent_AccountOpened">
+        <dc:Bounds x="1822" y="282" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1798" y="325" width="84" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndRejected" bpmnElement="EndEvent_ApplicationRejected">
+        <dc:Bounds x="1662" y="432" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1636" y="475" width="88" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_start_register"   bpmnElement="Flow_start_register"><di:waypoint x="188" y="300"/><di:waypoint x="240" y="300"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_register_fork"    bpmnElement="Flow_register_fork"><di:waypoint x="340" y="300"/><di:waypoint x="395" y="300"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_fork_identity"    bpmnElement="Flow_fork_identity"><di:waypoint x="420" y="275"/><di:waypoint x="420" y="210"/><di:waypoint x="510" y="210"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_fork_background"  bpmnElement="Flow_fork_background"><di:waypoint x="420" y="325"/><di:waypoint x="420" y="410"/><di:waypoint x="510" y="410"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_identity_join"    bpmnElement="Flow_identity_join"><di:waypoint x="610" y="210"/><di:waypoint x="700" y="210"/><di:waypoint x="700" y="275"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_background_join"  bpmnElement="Flow_background_join"><di:waypoint x="610" y="410"/><di:waypoint x="700" y="410"/><di:waypoint x="700" y="325"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_join_assess"      bpmnElement="Flow_join_assess"><di:waypoint x="725" y="300"/><di:waypoint x="790" y="300"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_assess_decision"  bpmnElement="Flow_assess_decision"><di:waypoint x="890" y="300"/><di:waypoint x="965" y="300"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_decision_approve" bpmnElement="Flow_decision_approve"><di:waypoint x="1015" y="300"/><di:waypoint x="1385" y="300"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_decision_reject"  bpmnElement="Flow_decision_reject"><di:waypoint x="990" y="325"/><di:waypoint x="990" y="450"/><di:waypoint x="1385" y="450"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_decision_manual"  bpmnElement="Flow_decision_manual"><di:waypoint x="990" y="275"/><di:waypoint x="990" y="210"/><di:waypoint x="1090" y="210"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_review_outcome"   bpmnElement="Flow_review_outcome"><di:waypoint x="1190" y="210"/><di:waypoint x="1265" y="210"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_review_approve"   bpmnElement="Flow_review_approve"><di:waypoint x="1315" y="210"/><di:waypoint x="1410" y="210"/><di:waypoint x="1410" y="275"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_review_reject"    bpmnElement="Flow_review_reject"><di:waypoint x="1290" y="235"/><di:waypoint x="1290" y="450"/><di:waypoint x="1385" y="450"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_approve_open"     bpmnElement="Flow_approve_open"><di:waypoint x="1435" y="300"/><di:waypoint x="1500" y="300"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_open_notify"      bpmnElement="Flow_open_notify"><di:waypoint x="1600" y="300"/><di:waypoint x="1660" y="300"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_reject_notify"    bpmnElement="Flow_reject_notify"><di:waypoint x="1435" y="450"/><di:waypoint x="1500" y="450"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_notify_end_opened"   bpmnElement="Flow_notify_end_opened"><di:waypoint x="1760" y="300"/><di:waypoint x="1822" y="300"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_notify_end_rejected" bpmnElement="Flow_notify_end_rejected"><di:waypoint x="1600" y="450"/><di:waypoint x="1662" y="450"/></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
