@@ -2,11 +2,12 @@
 <definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
              xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
              xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:operaton="http://operaton.org/schema/1.0/dmn"
              id="Definitions_AccountRisk"
              name="Account Risk"
              namespace="http://operaton.org/schema/1.0/dmn">
 
-  <decision id="account-risk" name="Account risk decision">
+  <decision id="account-risk" name="Account risk decision" operaton:historyTimeToLive="P30D">
     <decisionTable id="decisionTable_AccountRisk" hitPolicy="UNIQUE">
       <input id="input_IdentityVerified" label="Identity verified">
         <inputExpression id="inputExpr_Verified" typeRef="boolean">
