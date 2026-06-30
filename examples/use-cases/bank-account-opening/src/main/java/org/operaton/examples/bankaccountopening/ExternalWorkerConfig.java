@@ -14,15 +14,6 @@ public class ExternalWorkerConfig {
     @Value("${operaton.worker.base-url:http://localhost:8080/engine-rest}")
     private String baseUrl;
 
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-
-    public boolean isEnabled() {
-        // This bean is only created when the property is true (or missing), so always true here
-        return true;
-    }
-
     @Bean(destroyMethod = "stop")
     public ExternalTaskClient externalTaskClient(IdentityValidationWorker identityValidationWorker) {
         ExternalTaskClient client = ExternalTaskClient.create()

@@ -22,6 +22,7 @@ public class NotifyRejectionDelegate implements JavaDelegate {
         String reason = (rationale != null && !rationale.isBlank())
             ? rationale
             : "Your application did not meet our current requirements.";
+        execution.setVariable("status", "REJECTED");
         notificationService.sendRejection(email, fullName, reason);
     }
 }

@@ -61,37 +61,39 @@ export LLM_MODEL=gpt-4o-mini
 
 ## Walk through it
 
-**Happy path (account opened):**
+### Happy path (account opened)
 
-```bash
-curl -s -X POST http://localhost:8080/accounts \
-  -H "Content-Type: application/json" \
-  -d '{
-    "fullName": "Alice Müller",
-    "email": "alice@example.com",
-    "dateOfBirth": "1985-06-15",
-    "gender": "F",
-    "nationality": "DE",
-    "countryOfResidence": "DE",
-    "annualIncome": 65000,
-    "employmentStatus": "EMPLOYED",
-    "occupation": "Software Engineer",
-    "sourceOfFunds": "SALARY",
-    "idDocumentType": "PASSPORT",
-    "idDocumentNumber": "AB123456",
-    "requestedAccountType": "CHECKING"
-  }'
-```
+1. Submit an application for a low-risk applicant:
 
-Watch the instance flow through in Cockpit. Open http://localhost:8025 — an
-approval email with the generated IBAN will arrive in the Mailpit inbox.
+   ```bash
+   curl -s -X POST http://localhost:8080/accounts \
+     -H "Content-Type: application/json" \
+     -d '{
+       "fullName": "Alice Müller",
+       "email": "alice@example.com",
+       "dateOfBirth": "1985-06-15",
+       "gender": "F",
+       "nationality": "DE",
+       "countryOfResidence": "DE",
+       "annualIncome": 65000,
+       "employmentStatus": "EMPLOYED",
+       "occupation": "Software Engineer",
+       "sourceOfFunds": "SALARY",
+       "idDocumentType": "PASSPORT",
+       "idDocumentNumber": "AB123456",
+       "requestedAccountType": "CHECKING"
+     }'
+   ```
 
-**Manual review path:**
+2. Watch the instance flow through Cockpit at http://localhost:8080.
+3. Open http://localhost:8025 — an approval email with the generated IBAN will arrive in the Mailpit inbox.
 
-Submit an application with `"nationality": "SY"` (triggers HIGH risk from the LLM).
-The process parks at **Compliance review**. Log in to Tasklist as `alice` / `alice`
-(group `compliance`), claim the task, and approve or reject. The appropriate email
-appears in Mailpit.
+### Manual review path
+
+1. Submit an application with `"nationality": "SY"` (triggers HIGH risk from the LLM).
+2. The process parks at the **Compliance review** user task.
+3. Log in to Tasklist as `alice` / `alice` (group `compliance`), claim the task, and approve or reject.
+4. The appropriate email appears in Mailpit.
 
 ## How it works
 
