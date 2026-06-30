@@ -31,7 +31,6 @@ public class ShipmentEventListener {
         try {
             runtimeService.createMessageCorrelation("PackageDelivered")
                 .processInstanceBusinessKey(trackingNumber)
-                .setVariable("deliveryPayload", payload)
                 .correlate();
             log.info("Correlated PackageDelivered for tracking number {}", trackingNumber);
         } catch (MismatchingMessageCorrelationException e) {
@@ -46,7 +45,6 @@ public class ShipmentEventListener {
         try {
             runtimeService.createMessageCorrelation("CustomsDelay")
                 .processInstanceBusinessKey(trackingNumber)
-                .setVariable("customsPayload", payload)
                 .correlate();
             log.info("Correlated CustomsDelay for tracking number {}", trackingNumber);
         } catch (MismatchingMessageCorrelationException e) {
