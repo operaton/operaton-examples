@@ -1667,3 +1667,49 @@ examples:
     screenshots:
       - examples/integration-keycloak/docs/topology.png
     lastUpdated: "2026-06-23"
+
+  - id: bank-account-opening
+    title: "Use Case — Bank Account Opening"
+    icon: "🏦"
+    path: examples/use-cases/bank-account-opening
+    shortDescription: >
+      Full KYC flow with parallel identity and AI background checks, DMN risk decision,
+      compliance officer user task, and email notification of the outcome.
+    longDescription: |
+      A realistic bank account opening use case that combines several Operaton concepts
+      in service of a single business topic.
+
+      - **Parallel gateway** — identity validation and AI background check run concurrently;
+        the join waits for both before the risk decision
+      - **External task** — `IdentityValidationWorker` subscribes to the `identity-validation`
+        topic, decoupled from the engine
+      - **HTTP connector** — background check calls an OpenAI-compatible LLM via `http-connector`;
+        `PromptBuilder` builds the request and `ResponseParser` extracts the risk rating
+      - **DMN business rule task** — `account-risk.dmn` with UNIQUE hit policy maps
+        `identityVerified`, `identityScore`, and `backgroundRisk` to APPROVE / REJECT / MANUAL_REVIEW
+      - **User task with candidateGroups** — borderline cases route to the `compliance` group
+        for manual review; seed users `alice` and `bob` can claim and complete the task
+      - **Spring Mail send tasks** — approval mail includes the generated IBAN; rejection mail
+        includes the LLM rationale; Mailpit catches both in tests and locally
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: advanced
+    tags:
+      - { label: "KYC", category: concept }
+      - { label: "Parallel Gateway", category: concept }
+      - { label: "External Task", category: concept }
+      - { label: "LLM", category: integration }
+      - { label: "DMN", category: concept }
+      - { label: "Email", category: integration }
+    integrations: [postgres, ollama, wiremock, mailpit]
+    bpmnConcepts: [parallel-gateway, external-task, connector, business-rule-task, user-task, exclusive-gateway]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/bank-account-opening/README.md"
+    screenshots:
+      - examples/use-cases/bank-account-opening/src/main/resources/bank-account-opening.png
+    lastUpdated: "2026-06-30"

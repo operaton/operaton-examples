@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:operaton="http://operaton.org/schema/1.0/dmn"
+             id="Definitions_AccountRisk"
+             name="Account Risk"
+             namespace="http://operaton.org/schema/1.0/dmn">
+
+  <decision id="account-risk" name="Account risk decision" operaton:historyTimeToLive="P30D">
+    <decisionTable id="decisionTable_AccountRisk" hitPolicy="UNIQUE">
+      <input id="input_IdentityVerified" label="Identity verified">
+        <inputExpression id="inputExpr_Verified" typeRef="boolean">
+          <text>identityVerified</text>
+        </inputExpression>
+      </input>
+      <input id="input_IdentityScore" label="Identity score">
+        <inputExpression id="inputExpr_Score" typeRef="integer">
+          <text>identityScore</text>
+        </inputExpression>
+      </input>
+      <input id="input_BackgroundRisk" label="Background risk">
+        <inputExpression id="inputExpr_Risk" typeRef="string">
+          <text>backgroundRisk</text>
+        </inputExpression>
+      </input>
+      <output id="output_Decision" label="Decision" name="decision" typeRef="string"/>
+
+      <!-- Rule 1: Identity not verified → always reject -->
+      <rule id="rule_reject_no_identity">
+        <description>Identity could not be verified</description>
+        <inputEntry id="ie1_verified"><text>false</text></inputEntry>
+        <inputEntry id="ie1_score"><text></text></inputEntry>
+        <inputEntry id="ie1_risk"><text></text></inputEntry>
+        <outputEntry id="oe1"><text>"REJECT"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 2: Low identity score → manual review regardless of background risk -->
+      <rule id="rule_manual_low_score">
+        <description>Low identity score requires compliance review</description>
+        <inputEntry id="ie2_verified"><text>true</text></inputEntry>
+        <inputEntry id="ie2_score"><text>&lt; 60</text></inputEntry>
+        <inputEntry id="ie2_risk"><text></text></inputEntry>
+        <outputEntry id="oe2"><text>"MANUAL_REVIEW"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 3: Good identity score but elevated background risk → manual review -->
+      <rule id="rule_manual_elevated_risk">
+        <description>Elevated background risk requires compliance review</description>
+        <inputEntry id="ie3_verified"><text>true</text></inputEntry>
+        <inputEntry id="ie3_score"><text>&gt;= 60</text></inputEntry>
+        <inputEntry id="ie3_risk"><text>not("LOW")</text></inputEntry>
+        <outputEntry id="oe3"><text>"MANUAL_REVIEW"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 4: Good identity score and low background risk → approve -->
+      <rule id="rule_approve">
+        <description>Strong identity and low background risk — auto-approve</description>
+        <inputEntry id="ie4_verified"><text>true</text></inputEntry>
+        <inputEntry id="ie4_score"><text>&gt;= 60</text></inputEntry>
+        <inputEntry id="ie4_risk"><text>"LOW"</text></inputEntry>
+        <outputEntry id="oe4"><text>"APPROVE"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="account-risk">
+        <dc:Bounds height="80" width="180" x="160" y="100"/>
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

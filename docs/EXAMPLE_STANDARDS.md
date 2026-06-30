@@ -10,12 +10,15 @@ not a substitute — passing the checklist does not waive any section.
 
 ## 1. Scope
 
-- One example demonstrates **one** primary Operaton concept (named in the
-  README's first sentence). Secondary concepts are allowed only when required
-  by the primary one.
+- **Concept examples** (`examples/NN-*`): each demonstrates **one** primary
+  Operaton concept (named in the README's first sentence). Secondary concepts
+  are allowed only when required by the primary one.
+- **Use-case examples** (`examples/use-cases/*`): each demonstrates **one
+  business topic** and MAY combine several Operaton concepts in service of that
+  topic.
 - Minimal: no code, dependency, or model element that does not serve the
-  demonstrated concept. If a class can be deleted and the example still
-  demonstrates its concept, delete it.
+  demonstrated concept or topic. If a class can be deleted and the example still
+  demonstrates its purpose, delete it.
 - Self-contained: an example never depends on another example or on a shared
   parent module. Copy, don't share — examples are read in isolation.
 

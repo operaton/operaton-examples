@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "contains": "Nationality: DE" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [
+        {
+          "message": {
+            "role": "assistant",
+            "content": "{\"risk\": \"LOW\", \"rationale\": \"Stable employment and residency in a low-risk jurisdiction.\"}"
+          }
+        }
+      ]
+    }
+  }
+}
