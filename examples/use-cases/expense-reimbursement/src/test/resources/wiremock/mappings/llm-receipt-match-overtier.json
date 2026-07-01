@@ -1,0 +1,20 @@
+{
+  "priority": 5,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [{ "contains": "Requester: Charlie Weiss" }]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [{
+        "message": {
+          "role": "assistant",
+          "content": "{\"matchResult\": \"MATCH\", \"extractedName\": \"TechStore GmbH\", \"extractedCost\": 1200.0, \"analysisNotes\": \"Receipt confirms stated purchase amount.\"}"
+        }
+      }]
+    }
+  }
+}

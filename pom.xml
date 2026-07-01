@@ -51,6 +51,7 @@
     <module>examples/use-cases/employee-onboarding</module>
     <module>examples/use-cases/candidate-screening</module>
     <module>examples/use-cases/bank-account-opening</module>
+    <module>examples/use-cases/expense-reimbursement</module>
     <module>examples/use-cases/procurement-collaboration</module>
     <module>examples/use-cases/supply-chain-tracking</module>
     <module>examples/xslt-script-task</module>

@@ -1,0 +1,20 @@
+{
+  "priority": 5,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [{ "contains": "Requester: Bob Richter" }]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [{
+        "message": {
+          "role": "assistant",
+          "content": "{\"matchResult\": \"UNRELATED\", \"extractedName\": \"\", \"extractedCost\": 0.0, \"analysisNotes\": \"Image does not appear to be a valid expense receipt.\"}"
+        }
+      }]
+    }
+  }
+}

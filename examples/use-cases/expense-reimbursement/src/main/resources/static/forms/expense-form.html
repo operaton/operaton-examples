@@ -1,0 +1,36 @@
+<form role="form">
+  <div class="form-group">
+    <label>Your Name</label>
+    <input cam-variable-name="requesterName" cam-variable-type="String"
+           class="form-control" required placeholder="Full name">
+  </div>
+  <div class="form-group">
+    <label>Your Email</label>
+    <input cam-variable-name="requesterEmail" cam-variable-type="String"
+           type="email" class="form-control" required>
+  </div>
+  <div class="form-group">
+    <label>Expense Kind</label>
+    <select cam-variable-name="kind" cam-variable-type="String" class="form-control">
+      <option value="MEALS">Meals</option>
+      <option value="TRAVEL">Travel</option>
+      <option value="ACCOMMODATION">Accommodation</option>
+      <option value="EQUIPMENT">Equipment</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Amount (EUR)</label>
+    <input cam-variable-name="statedCost" cam-variable-type="Double"
+           type="number" step="0.01" class="form-control" required>
+  </div>
+  <div class="form-group">
+    <label>Reason</label>
+    <input cam-variable-name="reason" cam-variable-type="String"
+           class="form-control" required placeholder="Brief description">
+  </div>
+  <div class="form-group">
+    <label>Receipt Image</label>
+    <input cam-variable-name="receipt" cam-variable-type="File"
+           type="file" accept="image/*" class="form-control" required>
+  </div>
+</form>

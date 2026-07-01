@@ -1713,3 +1713,35 @@ examples:
     screenshots:
       - examples/use-cases/bank-account-opening/src/main/resources/bank-account-opening.png
     lastUpdated: "2026-06-30"
+
+  - id: expense-reimbursement
+    title: "Use Case — Expense Reimbursement"
+    icon: "🧾"
+    path: examples/use-cases/expense-reimbursement
+    shortDescription: >
+      Vision LLM verifies a receipt image, DMN decides whether finance approval is required,
+      simulated payment, and an outcome email notification.
+    longDescription: |
+      Demonstrates multimodal receipt verification via Java delegates (Base64 FileValue),
+      a FIRST-hit DMN approval decision, an optional finance user task, simulated payment,
+      and LLM-drafted email notifications.
+    buildSystem: maven
+    runtime: spring-boot
+    operatonVersion: "2.1.1"
+    javaVersion: "21"
+    complexity: intermediate
+    tags:
+      - { label: "LLM", category: integration }
+      - { label: "DMN", category: concept }
+      - { label: "User Task", category: concept }
+      - { label: "Email", category: integration }
+    integrations: [postgres, ollama, wiremock, mailpit]
+    bpmnConcepts: [service-task, business-rule-task, exclusive-gateway, user-task, send-task]
+    requires: "Java 21+, Docker"
+    authors:
+      - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
+    license: "Apache-2.0"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/expense-reimbursement/README.md"
+    screenshots:
+      - examples/use-cases/expense-reimbursement/src/main/resources/expense-reimbursement.png
+    lastUpdated: "2026-07-01"

@@ -1,0 +1,20 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [{ "contains": "approved for reimbursement" }]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [{
+        "message": {
+          "role": "assistant",
+          "content": "Dear Requester,\n\nYour expense reimbursement has been approved and payment has been initiated.\n\nKind regards,\nFinance Team"
+        }
+      }]
+    }
+  }
+}
