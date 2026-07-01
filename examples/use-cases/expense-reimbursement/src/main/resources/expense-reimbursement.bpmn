@@ -40,6 +40,11 @@
 
     <bpmn:userTask id="UserTask_ApproveReimbursement" name="Approve Reimbursement"
                    operaton:candidateGroups="finance">
+      <bpmn:extensionElements>
+        <operaton:formData>
+          <operaton:formField id="approved" label="Approve reimbursement?" type="boolean"/>
+        </operaton:formData>
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_needs_approval</bpmn:incoming>
       <bpmn:outgoing>Flow_user_to_approved_gw</bpmn:outgoing>
     </bpmn:userTask>
