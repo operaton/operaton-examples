@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [{ "contains": "reimbursement request has been rejected" }]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [{
+        "message": {
+          "role": "assistant",
+          "content": "Dear Requester,\n\nUnfortunately, your expense reimbursement request could not be approved at this time.\n\nKind regards,\nFinance Team"
+        }
+      }]
+    }
+  }
+}

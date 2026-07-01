@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [{ "contains": "Requester: Alice Berger" }]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "choices": [{
+        "message": {
+          "role": "assistant",
+          "content": "{\"matchResult\": \"MATCH\", \"extractedName\": \"Restaurant Bella Italia\", \"extractedCost\": 35.0, \"analysisNotes\": \"Receipt confirms stated amount and payee.\"}"
+        }
+      }]
+    }
+  }
+}
