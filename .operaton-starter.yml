@@ -1713,3 +1713,17 @@ examples:
     screenshots:
       - examples/use-cases/bank-account-opening/src/main/resources/bank-account-opening.png
     lastUpdated: "2026-06-30"
+
+  - id: expense-reimbursement
+    name: "Expense Reimbursement"
+    description: "Vision LLM verifies a receipt image, DMN decides approval, simulated payment, LLM-drafted email notification."
+    tags:
+      - use-case
+      - llm
+      - dmn
+      - user-task
+      - email
+    path: examples/use-cases/expense-reimbursement
+    screenshots:
+      - examples/use-cases/expense-reimbursement/src/main/resources/expense-reimbursement.png
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/use-cases/expense-reimbursement/README.md"
