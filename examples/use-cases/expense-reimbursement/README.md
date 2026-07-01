@@ -11,7 +11,7 @@ records the transaction, and the **LLM drafts a personalised email** sent via Sp
   and building a structured prompt with `PromptBuilder`
 - How **process variables of type file** work: uploading via the embedded start form, reading bytes
   in `ReceiptAnalyzer`, and the fail-safe fallback to `UNRELATED` on any exception
-- How a **three-way match result** (`MATCH` / `PARTIAL` / `UNRELATED`) feeds into a DMN decision
+- How a **three-way match result** (`MATCH` / `MISMATCH` / `UNRELATED`) feeds into a DMN decision
   to produce `approvalRequired`
 - How a **DMN table with FIRST hit policy** works: the `UNRELATED` override row fires before the
   per-kind threshold rows, ensuring unverifiable receipts always route to a human
