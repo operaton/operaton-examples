@@ -56,24 +56,30 @@ docker compose up -d
 ## Walk through it
 
 The start form is at http://localhost:8080 — open Tasklist, click **Start process**, then choose
-**Expense Reimbursement**. Alternatively use the REST API below.
+**Expense Reimbursement**. If you use the REST API, include a `receipt` file variable (Base64);
+otherwise `ReceiptAnalyzer` falls back to `matchResult=UNRELATED` and the DMN will require approval.
 
 ### Happy path — receipt matches, within tier (auto-approved)
 
-```bash
-# Submit a MEALS expense for €35 — below the €50 auto-approval threshold
-curl -s -X POST http://localhost:8080/engine-rest/process-definition/key/expense-reimbursement/start \
-  -u demo:demo \
-  -H "Content-Type: application/json" \
-  -d '{
-    "variables": {
-      "requesterName":  { "value": "Alice Berger",          "type": "String" },
-      "requesterEmail": { "value": "alice@example.com",     "type": "String" },
-      "kind":           { "value": "MEALS",                 "type": "String" },
-      "statedCost":     { "value": 35.0,                    "type": "Double" },
-      "reason":         { "value": "Team lunch",            "type": "String" }
-    }
-  }' | jq .id
+    # Submit a MEALS expense for €35 — below the €50 auto-approval threshold
+    # Replace <BASE64_JPEG> with: base64 -w0 receipt.jpg
+    curl -s -X POST http://localhost:8080/engine-rest/process-definition/key/expense-reimbursement/start \
+      -u demo:demo \
+      -H "Content-Type: application/json" \
+      -d '{
+        "variables": {
+          "requesterName":  { "value": "Alice Berger",       "type": "String" },
+          "requesterEmail": { "value": "alice@example.com", "type": "String" },
+          "kind":           { "value": "MEALS",             "type": "String" },
+          "statedCost":     { "value": 35.0,                 "type": "Double" },
+          "reason":         { "value": "Team lunch",         "type": "String" },
+          "receipt": {
+            "value": "<BASE64_JPEG>",
+            "type": "File",
+            "valueInfo": { "filename": "receipt.jpg", "mimeType": "image/jpeg", "encoding": "Base64" }
+          }
+        }
+      }' | jq .id
 ```
 
 The process completes automatically: `matchResult=MATCH`, `approvalRequired=false`, payment
