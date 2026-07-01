@@ -17,6 +17,12 @@ public class LlmProperties {
     public String getModel() { return model; }
     public void setModel(String model) { this.model = model; }
 
-    public String getChatCompletionsUrl() { return baseUrl + "/v1/chat/completions"; }
+    public String getChatCompletionsUrl() {
+        if (baseUrl == null || baseUrl.isBlank()) {
+            throw new IllegalStateException("llm.base-url must be configured");
+        }
+        String normalized = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+        return normalized + "/v1/chat/completions";
+    }
     public String getAuthorizationHeader() { return "Bearer " + apiKey; }
 }
