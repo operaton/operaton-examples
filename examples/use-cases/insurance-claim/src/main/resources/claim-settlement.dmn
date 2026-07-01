@@ -1,9 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <dmn:definitions xmlns:dmn="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:operaton="http://operaton.org/schema/1.0/dmn" id="claim-settlement-definitions" name="Claim Settlement" namespace="http://operaton.org/examples/insurance-claim">
 
-  <descriptions>Demonstrates the event-based gateway — a race between a message event (documents
-
-Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</descriptions><dmn:decision id="claim-settlement" name="Claim Settlement" operaton:historyTimeToLive="30">
+  <dmn:decision id="claim-settlement" name="Claim Settlement" operaton:historyTimeToLive="30">
     <dmn:decisionTable id="decisionTable_settlement" hitPolicy="FIRST">
 
       <dmn:input id="input_fraud" label="Fraud suspected">

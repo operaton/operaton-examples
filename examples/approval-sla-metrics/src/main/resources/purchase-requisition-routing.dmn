@@ -1,8 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <dmn:definitions xmlns:dmn="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:operaton="http://operaton.org/schema/1.0/dmn" id="purchase-requisition-routing-definitions" name="Purchase Requisition Routing" namespace="http://operaton.org/examples/approval-sla-metrics">
-    <descriptions>Demonstrates observing a BPMN process in real time: a purchase-requisition
-
-Copyright 2026 the Operaton contributors. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0</descriptions><dmn:description>sds</dmn:description>
+    <dmn:description>sds</dmn:description>
     <dmn:decision id="purchase-requisition-routing" name="Purchase Requisition Routing" operaton:historyTimeToLive="30">
         <dmn:decisionTable id="decisionTable_routing" hitPolicy="FIRST">
             <dmn:input id="input_amount" label="Amount">

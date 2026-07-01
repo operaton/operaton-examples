@@ -36,7 +36,7 @@ Copyright 2026 the Operaton contributors. Licensed under the Apache License, Ver
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_start_to_credit" sourceRef="StartEvent_1" targetRef="Task_CreditScore" />
     <bpmn:sequenceFlow id="Flow_medium" name="medium" sourceRef="Gateway_Risk" targetRef="Task_UnderwriterReview">
-      <bpmn:conditionExpression xsi:type="tFormalExpression">${riskLevel == 'medium'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${riskLevel == 'medium'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_medium_end" sourceRef="Task_UnderwriterReview" targetRef="EndEvent_UnderwriterPending">
       <bpmn:extensionElements>
@@ -60,10 +60,10 @@ Copyright 2026 the Operaton contributors. Licensed under the Apache License, Ver
     <bpmn:sequenceFlow id="Flow_credit_to_dmn" sourceRef="Task_CreditScore" targetRef="Task_RiskAssessment" />
     <bpmn:sequenceFlow id="Flow_dmn_to_gw" sourceRef="Task_RiskAssessment" targetRef="Gateway_Risk" />
     <bpmn:sequenceFlow id="Flow_low" name="low" sourceRef="Gateway_Risk" targetRef="Task_AutoApprove">
-      <bpmn:conditionExpression xsi:type="tFormalExpression">${riskLevel == 'low'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${riskLevel == 'low'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_high" name="high" sourceRef="Gateway_Risk" targetRef="Task_AutoReject">
-      <bpmn:conditionExpression xsi:type="tFormalExpression">${riskLevel == 'high'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${riskLevel == 'high'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_approve_end" sourceRef="Task_AutoApprove" targetRef="EndEvent_Approved" />
     <bpmn:sequenceFlow id="Flow_reject_end" sourceRef="Task_AutoReject" targetRef="EndEvent_Rejected" />
