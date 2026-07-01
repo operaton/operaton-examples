@@ -198,7 +198,7 @@ Every example README contains, in this order:
 - [ ] §7 app conventions: demo/demo admin user, named seed users, application.yaml
 - [ ] No dead code, no unused dependencies, no TODO/stub delegates
 - [ ] The example is registered in `.operaton-starter.yml`
-- [ ] Thhe example is registered in the `README.md` in the repository root
+- [ ] The example is registered in the `README.md` in the repository root
 ```
 
 ## 11. Platform Integration Examples
