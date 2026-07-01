@@ -159,7 +159,6 @@ Every example README contains, in this order:
    ![Process diagram](src/main/resources/<process-name>.png)
    ```
    Commit the `.png` and the updated README together.
-   Register the PNG path in `.operaton-starter.yml` under `screenshots`.
    Prerequisites: `npm install -g bpmn-to-image`.
 4. **Prerequisites** — JDK 21, Docker; exact versions.
 5. **Run it** — `docker compose up -d`, then both
@@ -174,6 +173,10 @@ Every example README contains, in this order:
 
 - Code comments only where the code cannot speak (e.g. why an async
   continuation is placed where it is).
+- Update `.operaton-starter.yml`:
+  - Register the example
+  - Register the BPMN PNG path under `screenshots`.
+- Update main README: Add the example to Catalog and BPMN Concept Reference
 
 ## 9. Quality gate (CI)
 
@@ -194,6 +197,8 @@ Every example README contains, in this order:
 - [ ] Versions match pom.xml == build.gradle.kts == root README table
 - [ ] §7 app conventions: demo/demo admin user, named seed users, application.yaml
 - [ ] No dead code, no unused dependencies, no TODO/stub delegates
+- [ ] The example is registered in `.operaton-starter.yml`
+- [ ] Thhe example is registered in the `README.md` in the repository root
 ```
 
 ## 11. Platform Integration Examples
