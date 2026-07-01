@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:operaton="http://operaton.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="Definitions_ExpenseReimbursement"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="expense-reimbursement" name="Expense Reimbursement"
+                isExecutable="true"
+                operaton:historyTimeToLive="P30D">
+
+    <bpmn:startEvent id="StartEvent_ExpenseSubmitted" name="Expense Submitted"
+                     operaton:formKey="embedded:app:forms/expense-form.html">
+      <bpmn:outgoing>Flow_start_to_analyze</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="ServiceTask_AnalyzeReceipt" name="Analyze Receipt"
+                      operaton:delegateExpression="${receiptAnalyzer}">
+      <bpmn:incoming>Flow_start_to_analyze</bpmn:incoming>
+      <bpmn:outgoing>Flow_analyze_to_decide</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:businessRuleTask id="BusinessRuleTask_DecideApproval" name="Decide on Approval"
+                           operaton:decisionRef="reimbursement-approval"
+                           operaton:mapDecisionResult="singleEntry"
+                           operaton:resultVariable="approvalRequired">
+      <bpmn:incoming>Flow_analyze_to_decide</bpmn:incoming>
+      <bpmn:outgoing>Flow_decide_to_gw</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+
+    <bpmn:exclusiveGateway id="Gateway_NeedsApproval" name="Needs Approval?"
+                           default="Flow_auto">
+      <bpmn:incoming>Flow_decide_to_gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_needs_approval</bpmn:outgoing>
+      <bpmn:outgoing>Flow_auto</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:userTask id="UserTask_ApproveReimbursement" name="Approve Reimbursement"
+                   operaton:candidateGroups="finance">
+      <bpmn:incoming>Flow_needs_approval</bpmn:incoming>
+      <bpmn:outgoing>Flow_user_to_approved_gw</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:exclusiveGateway id="Gateway_Approved" name="Approved?"
+                           default="Flow_rejected">
+      <bpmn:incoming>Flow_user_to_approved_gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_rejected</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:exclusiveGateway id="Gateway_PaymentReady">
+      <bpmn:incoming>Flow_auto</bpmn:incoming>
+      <bpmn:incoming>Flow_approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_to_payment</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:serviceTask id="ServiceTask_PerformPayment" name="Perform Payment"
+                      operaton:delegateExpression="${paymentService}">
+      <bpmn:incoming>Flow_to_payment</bpmn:incoming>
+      <bpmn:outgoing>Flow_payment_to_draft</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="ServiceTask_DraftApprovalEmail" name="Draft Approval Email"
+                      operaton:delegateExpression="${approvalEmailDrafter}">
+      <bpmn:incoming>Flow_payment_to_draft</bpmn:incoming>
+      <bpmn:outgoing>Flow_draft_to_send_approval</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:sendTask id="SendTask_NotifyApproval" name="Notify Requester"
+                   operaton:delegateExpression="${emailDispatcher}">
+      <bpmn:incoming>Flow_draft_to_send_approval</bpmn:incoming>
+      <bpmn:outgoing>Flow_send_approval_to_end</bpmn:outgoing>
+    </bpmn:sendTask>
+
+    <bpmn:endEvent id="EndEvent_Reimbursed" name="Expense Reimbursed">
+      <bpmn:incoming>Flow_send_approval_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:serviceTask id="ServiceTask_DraftRejectionEmail" name="Draft Rejection Email"
+                      operaton:delegateExpression="${rejectionEmailDrafter}">
+      <bpmn:incoming>Flow_rejected</bpmn:incoming>
+      <bpmn:outgoing>Flow_draft_to_send_rejection</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:sendTask id="SendTask_NotifyRejection" name="Notify Requester"
+                   operaton:delegateExpression="${emailDispatcher}">
+      <bpmn:incoming>Flow_draft_to_send_rejection</bpmn:incoming>
+      <bpmn:outgoing>Flow_send_rejection_to_end</bpmn:outgoing>
+    </bpmn:sendTask>
+
+    <bpmn:endEvent id="EndEvent_Rejected" name="Expense Rejected">
+      <bpmn:incoming>Flow_send_rejection_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_start_to_analyze"
+      sourceRef="StartEvent_ExpenseSubmitted" targetRef="ServiceTask_AnalyzeReceipt"/>
+    <bpmn:sequenceFlow id="Flow_analyze_to_decide"
+      sourceRef="ServiceTask_AnalyzeReceipt" targetRef="BusinessRuleTask_DecideApproval"/>
+    <bpmn:sequenceFlow id="Flow_decide_to_gw"
+      sourceRef="BusinessRuleTask_DecideApproval" targetRef="Gateway_NeedsApproval"/>
+    <bpmn:sequenceFlow id="Flow_needs_approval" name="approval required"
+      sourceRef="Gateway_NeedsApproval" targetRef="UserTask_ApproveReimbursement">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${approvalRequired == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_auto" name="auto-approved"
+      sourceRef="Gateway_NeedsApproval" targetRef="Gateway_PaymentReady"/>
+    <bpmn:sequenceFlow id="Flow_user_to_approved_gw"
+      sourceRef="UserTask_ApproveReimbursement" targetRef="Gateway_Approved"/>
+    <bpmn:sequenceFlow id="Flow_approved" name="approved"
+      sourceRef="Gateway_Approved" targetRef="Gateway_PaymentReady">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${approved == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_rejected" name="rejected"
+      sourceRef="Gateway_Approved" targetRef="ServiceTask_DraftRejectionEmail"/>
+    <bpmn:sequenceFlow id="Flow_to_payment"
+      sourceRef="Gateway_PaymentReady" targetRef="ServiceTask_PerformPayment"/>
+    <bpmn:sequenceFlow id="Flow_payment_to_draft"
+      sourceRef="ServiceTask_PerformPayment" targetRef="ServiceTask_DraftApprovalEmail"/>
+    <bpmn:sequenceFlow id="Flow_draft_to_send_approval"
+      sourceRef="ServiceTask_DraftApprovalEmail" targetRef="SendTask_NotifyApproval"/>
+    <bpmn:sequenceFlow id="Flow_send_approval_to_end"
+      sourceRef="SendTask_NotifyApproval" targetRef="EndEvent_Reimbursed"/>
+    <bpmn:sequenceFlow id="Flow_draft_to_send_rejection"
+      sourceRef="ServiceTask_DraftRejectionEmail" targetRef="SendTask_NotifyRejection"/>
+    <bpmn:sequenceFlow id="Flow_send_rejection_to_end"
+      sourceRef="SendTask_NotifyRejection" targetRef="EndEvent_Rejected"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="expense-reimbursement">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_ExpenseSubmitted">
+        <dc:Bounds x="162" y="182" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="148" y="225" width="65" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_AnalyzeReceipt" bpmnElement="ServiceTask_AnalyzeReceipt">
+        <dc:Bounds x="248" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_DecideApproval" bpmnElement="BusinessRuleTask_DecideApproval">
+        <dc:Bounds x="418" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GW_NeedsApproval" bpmnElement="Gateway_NeedsApproval" isMarkerVisible="true">
+        <dc:Bounds x="593" y="175" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="573" y="232" width="91" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_UserTask" bpmnElement="UserTask_ApproveReimbursement">
+        <dc:Bounds x="668" y="80" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GW_Approved" bpmnElement="Gateway_Approved" isMarkerVisible="true">
+        <dc:Bounds x="843" y="95" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="845" y="152" width="47" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_DraftRejection" bpmnElement="ServiceTask_DraftRejectionEmail">
+        <dc:Bounds x="948" y="80" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SendRejection" bpmnElement="SendTask_NotifyRejection">
+        <dc:Bounds x="1118" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndRejected" bpmnElement="EndEvent_Rejected">
+        <dc:Bounds x="1270" y="102" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1252" y="145" width="72" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GW_PaymentReady" bpmnElement="Gateway_PaymentReady" isMarkerVisible="true">
+        <dc:Bounds x="843" y="275" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PerformPayment" bpmnElement="ServiceTask_PerformPayment">
+        <dc:Bounds x="948" y="260" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_DraftApproval" bpmnElement="ServiceTask_DraftApprovalEmail">
+        <dc:Bounds x="1118" y="260" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SendApproval" bpmnElement="SendTask_NotifyApproval">
+        <dc:Bounds x="1288" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndReimbursed" bpmnElement="EndEvent_Reimbursed">
+        <dc:Bounds x="1440" y="282" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1416" y="325" width="84" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <!-- Edges -->
+      <bpmndi:BPMNEdge id="Edge_start" bpmnElement="Flow_start_to_analyze">
+        <di:waypoint x="198" y="200"/><di:waypoint x="248" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_analyze" bpmnElement="Flow_analyze_to_decide">
+        <di:waypoint x="368" y="200"/><di:waypoint x="418" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_decide" bpmnElement="Flow_decide_to_gw">
+        <di:waypoint x="538" y="200"/><di:waypoint x="593" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_needs" bpmnElement="Flow_needs_approval">
+        <di:waypoint x="618" y="175"/><di:waypoint x="618" y="120"/><di:waypoint x="668" y="120"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="622" y="143" width="79" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_auto" bpmnElement="Flow_auto">
+        <di:waypoint x="618" y="225"/><di:waypoint x="618" y="300"/><di:waypoint x="843" y="300"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="692" y="282" width="73" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_user_gw" bpmnElement="Flow_user_to_approved_gw">
+        <di:waypoint x="788" y="120"/><di:waypoint x="843" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_approved" bpmnElement="Flow_approved">
+        <di:waypoint x="868" y="145"/><di:waypoint x="868" y="275"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="877" y="207" width="44" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_rejected" bpmnElement="Flow_rejected">
+        <di:waypoint x="893" y="120"/><di:waypoint x="948" y="120"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="908" y="102" width="40" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_to_pay" bpmnElement="Flow_to_payment">
+        <di:waypoint x="893" y="300"/><di:waypoint x="948" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_pay_draft" bpmnElement="Flow_payment_to_draft">
+        <di:waypoint x="1068" y="300"/><di:waypoint x="1118" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_draft_send_a" bpmnElement="Flow_draft_to_send_approval">
+        <di:waypoint x="1238" y="300"/><di:waypoint x="1288" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_send_end_a" bpmnElement="Flow_send_approval_to_end">
+        <di:waypoint x="1388" y="300"/><di:waypoint x="1440" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_draft_send_r" bpmnElement="Flow_draft_to_send_rejection">
+        <di:waypoint x="1068" y="120"/><di:waypoint x="1118" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_send_end_r" bpmnElement="Flow_send_rejection_to_end">
+        <di:waypoint x="1218" y="120"/><di:waypoint x="1270" y="120"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

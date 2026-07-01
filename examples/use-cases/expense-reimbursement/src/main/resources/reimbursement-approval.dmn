@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:operaton="http://operaton.org/schema/1.0/dmn"
+             id="Definitions_ReimbursementApproval"
+             name="Reimbursement Approval"
+             namespace="http://operaton.org/schema/1.0/dmn">
+
+  <decision id="reimbursement-approval" name="Reimbursement Approval Decision"
+            operaton:historyTimeToLive="P30D">
+    <decisionTable id="dt_reimbursementApproval" hitPolicy="FIRST">
+      <input id="in_MatchResult" label="Match Result">
+        <inputExpression id="ie_MatchResult" typeRef="string">
+          <text>matchResult</text>
+        </inputExpression>
+      </input>
+      <input id="in_Kind" label="Expense Kind">
+        <inputExpression id="ie_Kind" typeRef="string">
+          <text>kind</text>
+        </inputExpression>
+      </input>
+      <input id="in_StatedCost" label="Stated Cost">
+        <inputExpression id="ie_StatedCost" typeRef="double">
+          <text>statedCost</text>
+        </inputExpression>
+      </input>
+      <output id="out_ApprovalRequired" label="Approval Required"
+              name="approvalRequired" typeRef="boolean"/>
+
+      <rule id="r_unrelated">
+        <description>Receipt cannot be related to stated expense — always requires approval</description>
+        <inputEntry id="r_unrelated_match"><text>"UNRELATED"</text></inputEntry>
+        <inputEntry id="r_unrelated_kind"><text></text></inputEntry>
+        <inputEntry id="r_unrelated_cost"><text></text></inputEntry>
+        <outputEntry id="r_unrelated_out"><text>true</text></outputEntry>
+      </rule>
+      <rule id="r_meals_auto">
+        <description>Meals within auto-approval threshold</description>
+        <inputEntry id="r_meals_match"><text></text></inputEntry>
+        <inputEntry id="r_meals_kind"><text>"MEALS"</text></inputEntry>
+        <inputEntry id="r_meals_cost"><text>&lt;= 50</text></inputEntry>
+        <outputEntry id="r_meals_out"><text>false</text></outputEntry>
+      </rule>
+      <rule id="r_travel_auto">
+        <description>Travel within auto-approval threshold</description>
+        <inputEntry id="r_travel_match"><text></text></inputEntry>
+        <inputEntry id="r_travel_kind"><text>"TRAVEL"</text></inputEntry>
+        <inputEntry id="r_travel_cost"><text>&lt;= 250</text></inputEntry>
+        <outputEntry id="r_travel_out"><text>false</text></outputEntry>
+      </rule>
+      <rule id="r_accomm_auto">
+        <description>Accommodation within auto-approval threshold</description>
+        <inputEntry id="r_accomm_match"><text></text></inputEntry>
+        <inputEntry id="r_accomm_kind"><text>"ACCOMMODATION"</text></inputEntry>
+        <inputEntry id="r_accomm_cost"><text>&lt;= 400</text></inputEntry>
+        <outputEntry id="r_accomm_out"><text>false</text></outputEntry>
+      </rule>
+      <rule id="r_equip_auto">
+        <description>Equipment within auto-approval threshold</description>
+        <inputEntry id="r_equip_match"><text></text></inputEntry>
+        <inputEntry id="r_equip_kind"><text>"EQUIPMENT"</text></inputEntry>
+        <inputEntry id="r_equip_cost"><text>&lt;= 1000</text></inputEntry>
+        <outputEntry id="r_equip_out"><text>false</text></outputEntry>
+      </rule>
+      <rule id="r_otherwise">
+        <description>Over threshold or unknown kind — requires approval</description>
+        <inputEntry id="r_oth_match"><text></text></inputEntry>
+        <inputEntry id="r_oth_kind"><text></text></inputEntry>
+        <inputEntry id="r_oth_cost"><text></text></inputEntry>
+        <outputEntry id="r_oth_out"><text>true</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="reimbursement-approval">
+        <dc:Bounds height="80" width="180" x="160" y="100"/>
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
