@@ -36,10 +36,10 @@ Copyright 2026 the Operaton contributors. Licensed under the Apache License, Ver
     <bpmn:sequenceFlow id="Flow_start_to_inventory" sourceRef="StartEvent_1" targetRef="Task_ValidateInventory" />
     <bpmn:sequenceFlow id="Flow_inventory_to_gw" sourceRef="Task_ValidateInventory" targetRef="Gateway_InStock" />
     <bpmn:sequenceFlow id="Flow_in_stock" name="in stock" sourceRef="Gateway_InStock" targetRef="Task_ChargePayment">
-      <bpmn:conditionExpression xsi:type="tFormalExpression">${available == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${available == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_out_of_stock" name="out of stock" sourceRef="Gateway_InStock" targetRef="Task_NotifyBackorder">
-      <bpmn:conditionExpression xsi:type="tFormalExpression">${available == false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${available == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_payment_to_pack" sourceRef="Task_ChargePayment" targetRef="Task_PackShip" />
     <bpmn:sequenceFlow id="Flow_pack_to_notify" sourceRef="Task_PackShip" targetRef="Task_NotifyCustomer" />

@@ -94,4 +94,55 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- Auto-activates on machines running Rancher Desktop instead of Docker Desktop -->
+    <profile>
+      <id>docker-alternative-rancher</id>
+      <activation>
+        <file>
+          <exists>${user.home}/.rd/docker.sock</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <environmentVariables>
+                <DOCKER_HOST>unix://${user.home}/.rd/docker.sock</DOCKER_HOST>
+                <TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>/var/run/docker.sock</TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>
+                <TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+              </environmentVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!-- Auto-activates on machines running Colima instead of Docker Desktop -->
+    <profile>
+      <id>docker-alternative-colima</id>
+      <activation>
+        <file>
+          <exists>${user.home}/.colima/default/docker.sock</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <environmentVariables>
+                <DOCKER_HOST>unix://${user.home}/.colima/default/docker.sock</DOCKER_HOST>
+                <TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>/var/run/docker.sock</TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>
+                <TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+              </environmentVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

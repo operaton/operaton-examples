@@ -46,10 +46,10 @@ Copyright 2026 the Operaton contributors. Licensed under the Apache License, Ver
     <bpmn:sequenceFlow id="Flow_triage_to_gw" sourceRef="Task_FirstLineTriage" targetRef="Gateway_Resolved" />
     <bpmn:sequenceFlow id="Flow_timer_to_secondline" sourceRef="BoundaryTimer_Escalate" targetRef="Task_SecondLine" />
     <bpmn:sequenceFlow id="Flow_resolved" name="resolved" sourceRef="Gateway_Resolved" targetRef="Task_CloseTicket">
-      <bpmn:conditionExpression xsi:type="tFormalExpression">${resolved == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resolved == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_not_resolved" name="not resolved" sourceRef="Gateway_Resolved" targetRef="Task_SecondLine">
-      <bpmn:conditionExpression xsi:type="tFormalExpression">${resolved != true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resolved != true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_close_end" sourceRef="Task_CloseTicket" targetRef="EndEvent_Closed" />
     <bpmn:sequenceFlow id="Flow_secondline_postmortem" sourceRef="Task_SecondLine" targetRef="Task_PostMortem" />
@@ -75,7 +75,7 @@ Copyright 2026 the Operaton contributors. Licensed under the Apache License, Ver
     <bpmn:boundaryEvent id="BoundaryTimer_Escalate" name="SLA Timer" attachedToRef="Task_FirstLineTriage">
       <bpmn:outgoing>Flow_timer_to_secondline</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1">
-        <bpmn:timeDuration xsi:type="tFormalExpression">${timerDuration}</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">${timerDuration}</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
     <bpmn:exclusiveGateway id="Gateway_Resolved" name="Resolved?">
