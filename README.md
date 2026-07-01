@@ -94,7 +94,7 @@ docker compose up -d --wait # start PostgreSQL (and example-specific services)
 | [employee-onboarding](examples/use-cases/employee-onboarding) | Employee HR onboarding | Call activity orchestration: parallel MI for equipment provisioning, single call activity for system access, in/out variable mapping |
 | [procurement-collaboration](examples/use-cases/procurement-collaboration) | Buyer ↔ Supplier procurement | Two-pool collaboration, three correlated messages, async continuation decoupling |
 | [supply-chain-tracking](examples/use-cases/supply-chain-tracking) | Shipment tracking | Event-based gateway, async Kafka message correlation by business key, P7D timer re-arm |
-| [Expense Reimbursement](examples/use-cases/expense-reimbursement) | Vision LLM receipt verification | Multimodal vision LLM via delegate, three-way match verification, FIRST-hit DMN, LLM-drafted email |
+| [expense-reimbursement](examples/use-cases/expense-reimbursement) | Vision LLM receipt verification | Multimodal vision LLM via delegate, three-way match verification, FIRST-hit DMN, LLM-drafted email |
 
 ## Anatomy of every example
 

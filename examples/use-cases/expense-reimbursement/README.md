@@ -15,8 +15,8 @@ records the transaction, and the **LLM drafts a personalised email** sent via Sp
   to produce `approvalRequired`
 - How a **DMN table with FIRST hit policy** works: the `UNRELATED` override row fires before the
   per-kind threshold rows, ensuring unverifiable receipts always route to a human
-- How a **user task with `candidateGroups`** parks the process for the finance team and how the
-  `approved` variable drives the downstream gateway
+- How an **LLM drafts outcome emails** — two separate prompt strategies (approval vs. rejection
+  tone) produce personalised email bodies sent via Spring Mail to Mailpit
 
 ## Process model
 
