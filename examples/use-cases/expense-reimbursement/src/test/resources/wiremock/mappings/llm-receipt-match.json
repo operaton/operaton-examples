@@ -1,4 +1,5 @@
 {
+  "priority": 5,
   "request": {
     "method": "POST",
     "urlPath": "/v1/chat/completions",
