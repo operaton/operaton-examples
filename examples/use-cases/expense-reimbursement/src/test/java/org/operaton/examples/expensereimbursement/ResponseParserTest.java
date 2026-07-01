@@ -15,18 +15,10 @@ class ResponseParserTest {
         parser = new ResponseParser(new ObjectMapper());
     }
 
-    private String wrap(String content) {
-        return "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":" +
-            new ObjectMapper().createObjectNode().put("x", content).get("x").toString() + "}}]}";
-    }
-
     @Test
     void matchResult_parsesMatchCorrectly() {
-        String response = wrap("{\\\"matchResult\\\": \\\"MATCH\\\", \\\"extractedName\\\": \\\"Cafe\\\", \\\"extractedCost\\\": 12.5, \\\"analysisNotes\\\": \\\"ok\\\"}");
-        // Build proper nested JSON
         String inner = "{\"matchResult\": \"MATCH\", \"extractedName\": \"Cafe\", \"extractedCost\": 12.5, \"analysisNotes\": \"ok\"}";
-        String outer = "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":" +
-            new ObjectMapper().createObjectNode().put("v", inner).get("v").toString() + "}}]}";
+        String outer = buildResponse(inner);
         assertThat(parser.matchResult(outer)).isEqualTo("MATCH");
         assertThat(parser.extractedName(outer)).isEqualTo("Cafe");
         assertThat(parser.extractedCost(outer)).isEqualTo(12.5);
