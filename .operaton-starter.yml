@@ -14,7 +14,7 @@ examples:
   - id: getting-started
     title: "Getting Started"
     icon: "🚀"
-    path: examples/getting-started
+    path: examples/core-examples/getting-started
     shortDescription: >
       Embedded engine, service task delegate, user task, exclusive gateway — the minimal
       working Operaton application on Spring Boot.
@@ -44,13 +44,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/getting-started/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/getting-started/README.md"
     lastUpdated: "2026-06-15"
 
   - id: service-tasks
     title: "Service Tasks"
     icon: "⚙️"
-    path: examples/service-tasks
+    path: examples/core-examples/service-tasks
     shortDescription: >
       Java delegates, expression delegates, BpmnError propagation, and job retry configuration
       on a single Spring Boot example.
@@ -80,15 +80,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/service-tasks/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/service-tasks/README.md"
     screenshots:
-      - examples/service-tasks/src/main/resources/payment-processing.png
+      - examples/core-examples/service-tasks/src/main/resources/payment-processing.png
     lastUpdated: "2026-06-15"
 
   - id: external-task-worker
     title: "External Task Worker"
     icon: "🔌"
-    path: examples/external-task-worker
+    path: examples/core-examples/external-task-worker
     shortDescription: >
       Long-polling external task worker that fetches-and-locks work items from a topic
       and completes them asynchronously.
@@ -118,15 +118,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/external-task-worker/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/external-task-worker/README.md"
     screenshots:
-      - examples/external-task-worker/src/main/resources/order-fulfillment.png
+      - examples/core-examples/external-task-worker/src/main/resources/order-fulfillment.png
     lastUpdated: "2026-06-15"
 
   - id: user-task-forms
     title: "User Task Forms"
     icon: "📋"
-    path: examples/user-task-forms
+    path: examples/core-examples/user-task-forms
     shortDescription: >
       User tasks with embedded Operaton forms, task lifecycle management (claim, complete),
       and form variable handling via the Task API.
@@ -155,13 +155,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/user-task-forms/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/user-task-forms/README.md"
     lastUpdated: "2026-06-15"
 
   - id: dmn-decision
     title: "DMN Decision"
     icon: "📊"
-    path: examples/dmn-decision
+    path: examples/core-examples/dmn-decision
     shortDescription: >
       DMN decision tables and a Decision Requirements Diagram evaluated from a Business
       Rule Task inside a BPMN process.
@@ -190,15 +190,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/dmn-decision/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/dmn-decision/README.md"
     screenshots:
-      - examples/dmn-decision/src/main/resources/loan-application.png
+      - examples/core-examples/dmn-decision/src/main/resources/loan-application.png
     lastUpdated: "2026-06-15"
 
   - id: message-events
     title: "Message Events"
     icon: "✉️"
-    path: examples/message-events
+    path: examples/core-examples/message-events
     shortDescription: >
       Message start event, intermediate message catch, and business-key correlation —
       integrating external systems by sending named messages.
@@ -227,15 +227,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/message-events/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/message-events/README.md"
     screenshots:
-      - examples/message-events/src/main/resources/order-shipment.png
+      - examples/core-examples/message-events/src/main/resources/order-shipment.png
     lastUpdated: "2026-06-15"
 
   - id: timer-events
     title: "Timer Events"
     icon: "⏱️"
-    path: examples/timer-events
+    path: examples/core-examples/timer-events
     shortDescription: >
       Timer boundary event for SLA escalation, testing timers via job manipulation,
       and failedJobRetryTimeCycle configuration.
@@ -266,13 +266,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/timer-events/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/timer-events/README.md"
     lastUpdated: "2026-06-15"
 
   - id: error-compensation
     title: "Error Compensation"
     icon: "↩️"
-    path: examples/error-compensation
+    path: examples/core-examples/error-compensation
     shortDescription: >
       BPMN compensation (saga pattern) with compensation handlers and BpmnError-triggered rollback.
     longDescription: |
@@ -303,13 +303,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/error-compensation/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/error-compensation/README.md"
     lastUpdated: "2026-06-15"
 
   - id: multi-instance
     title: "Multi-Instance"
     icon: "🔀"
-    path: examples/multi-instance
+    path: examples/core-examples/multi-instance
     shortDescription: >
       Parallel multi-instance user tasks over a collection, with a completion condition that
       terminates early once enough approvals are received.
@@ -341,13 +341,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/multi-instance/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/multi-instance/README.md"
     lastUpdated: "2026-06-15"
 
   - id: integration-rest
     title: "Integration — REST"
     icon: "🌐"
-    path: examples/integration-rest
+    path: examples/core-examples/integration-rest
     shortDescription: >
       REST service calls via RestTemplate, 4xx/5xx response mapped to BpmnError, and WireMock
       Testcontainers for full integration testing.
@@ -381,13 +381,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/integration-rest/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/integration-rest/README.md"
     lastUpdated: "2026-06-15"
 
   - id: integration-mail
     title: "Integration — Mail"
     icon: "📧"
-    path: examples/integration-mail
+    path: examples/core-examples/integration-mail
     shortDescription: >
       Sending emails from process delegates via Spring Mail, with Mailpit Testcontainers
       verifying message delivery over SMTP and the REST API.
@@ -418,13 +418,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/integration-mail/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/integration-mail/README.md"
     lastUpdated: "2026-06-15"
 
   - id: integration-kafka
     title: "Integration — Kafka"
     icon: "📨"
-    path: examples/integration-kafka
+    path: examples/core-examples/integration-kafka
     shortDescription: >
       Kafka listener starts a process instance, a delegate publishes a result event, and
       Awaitility assertions verify end-to-end async delivery.
@@ -456,13 +456,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/integration-kafka/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/integration-kafka/README.md"
     lastUpdated: "2026-06-15"
 
   - id: call-activity
     title: "Call Activity"
     icon: "🔗"
-    path: examples/call-activity
+    path: examples/core-examples/call-activity
     shortDescription: >
       Process composition via call activity with variable in/out mappings and verification
       of child process history.
@@ -493,13 +493,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/call-activity/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/call-activity/README.md"
     lastUpdated: "2026-06-15"
 
   - id: signal-events
     title: "Signal Events"
     icon: "📡"
-    path: examples/signal-events
+    path: examples/core-examples/signal-events
     shortDescription: >
       Signal broadcast vs. message point-to-point — intermediate catch/throw events and
       multi-subscriber fan-out.
@@ -533,15 +533,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/signal-events/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/signal-events/README.md"
     screenshots:
-      - examples/signal-events/src/main/resources/inventory-manager.png
+      - examples/core-examples/signal-events/src/main/resources/inventory-manager.png
     lastUpdated: "2026-06-15"
 
   - id: event-subprocess
     title: "Event Subprocess"
     icon: "🔔"
-    path: examples/event-subprocess
+    path: examples/core-examples/event-subprocess
     shortDescription: >
       Non-interrupting signal audit subprocess for cross-cutting concerns and interrupting
       error handler subprocess for global error handling.
@@ -573,13 +573,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/event-subprocess/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/event-subprocess/README.md"
     lastUpdated: "2026-06-15"
 
   - id: inclusive-gateway
     title: "Inclusive Gateway"
     icon: "🔵"
-    path: examples/inclusive-gateway
+    path: examples/core-examples/inclusive-gateway
     shortDescription: >
       Inclusive (OR) gateway — multiple concurrent paths activated when conditions are true,
       join waits for all active tokens before continuing.
@@ -609,13 +609,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/inclusive-gateway/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/inclusive-gateway/README.md"
     lastUpdated: "2026-06-15"
 
   - id: async-continuation
     title: "Async Continuation"
     icon: "⚡"
-    path: examples/async-continuation
+    path: examples/core-examples/async-continuation
     shortDescription: >
       asyncBefore/asyncAfter transaction boundaries, manual job execution in tests, and
       failedJobRetryTimeCycle for resilient retry scheduling.
@@ -652,7 +652,7 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/async-continuation/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/core-examples/async-continuation/README.md"
     lastUpdated: "2026-06-15"
 
   # ── Advanced Engine Features ───────────────────────────────────────────────
@@ -660,7 +660,7 @@ examples:
   - id: engine-plugin
     title: "Process Engine Plugin"
     icon: "🔩"
-    path: examples/engine-plugin
+    path: examples/advanced-features/engine-plugin
     shortDescription: >
       Custom AbstractProcessEnginePlugin that registers a BpmnParseListener to inject a
       TaskListener on every user task — the primary engine extension point for auditing and metrics.
@@ -693,15 +693,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/engine-plugin/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/advanced-features/engine-plugin/README.md"
     screenshots:
-      - examples/engine-plugin/src/main/resources/purchase-request.png
+      - examples/advanced-features/engine-plugin/src/main/resources/purchase-request.png
     lastUpdated: "2026-06-15"
 
   - id: job-retry-profile
     title: "Job Retry Profile"
     icon: "🔁"
-    path: examples/job-retry-profile
+    path: examples/advanced-features/job-retry-profile
     shortDescription: >
       Configure custom job retry behavior with operaton:failedJobRetryTimeCycle on async
       service tasks and observe retry-count decrement on transient failures.
@@ -732,15 +732,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/job-retry-profile/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/advanced-features/job-retry-profile/README.md"
     screenshots:
-      - examples/job-retry-profile/src/main/resources/payment-processing.png
+      - examples/advanced-features/job-retry-profile/src/main/resources/payment-processing.png
     lastUpdated: "2026-06-15"
 
   - id: command-interceptor
     title: "Command Interceptor"
     icon: "🔍"
-    path: examples/command-interceptor
+    path: examples/advanced-features/command-interceptor
     shortDescription: >
       CommandInterceptor wrapping all engine API calls for auditing — records every command
       name and duration in a thread-safe audit log.
@@ -774,15 +774,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/command-interceptor/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/advanced-features/command-interceptor/README.md"
     screenshots:
-      - examples/command-interceptor/src/main/resources/supply-chain-approval.png
+      - examples/advanced-features/command-interceptor/src/main/resources/supply-chain-approval.png
     lastUpdated: "2026-06-15"
 
   - id: process-migration
     title: "Process Migration"
     icon: "🔄"
-    path: examples/process-migration
+    path: examples/advanced-features/process-migration
     shortDescription: >
       Migrate running process instances from v1 to v2 using MigrationPlan and mapEqualActivities()
       — no in-flight state is lost, instances resume on the new definition.
@@ -816,16 +816,16 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/process-migration/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/advanced-features/process-migration/README.md"
     screenshots:
-      - examples/process-migration/src/main/resources/loan-application-v1.png
-      - examples/process-migration/src/main/resources/loan-application-v2.png
+      - examples/advanced-features/process-migration/src/main/resources/loan-application-v1.png
+      - examples/advanced-features/process-migration/src/main/resources/loan-application-v2.png
     lastUpdated: "2026-06-15"
 
   - id: spin-json
     title: "Spin JSON Variables"
     icon: "🔃"
-    path: examples/spin-json
+    path: examples/advanced-features/spin-json
     shortDescription: >
       JSON-typed process variables via Operaton Spin — store Java objects as JSON in the engine
       and read them back as typed instances in delegates.
@@ -857,15 +857,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/spin-json/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/advanced-features/spin-json/README.md"
     screenshots:
-      - examples/spin-json/src/main/resources/loan-application.png
+      - examples/advanced-features/spin-json/src/main/resources/loan-application.png
     lastUpdated: "2026-06-15"
 
   - id: multi-tenancy
     title: "Multi-Tenancy"
     icon: "🏢"
-    path: examples/multi-tenancy
+    path: examples/advanced-features/multi-tenancy
     shortDescription: >
       Tenant-identifier multi-tenancy: multiple tenants share a single engine instance but each
       tenant's deployments, process instances, and tasks are fully isolated.
@@ -901,7 +901,7 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/multi-tenancy/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/advanced-features/multi-tenancy/README.md"
     screenshots:
       - examples/multi-tenancy/src/main/resources/contract-review.png
     lastUpdated: "2026-06-15"
@@ -909,7 +909,7 @@ examples:
   - id: bpmn-model-api-parse
     title: "BPMN Model API — Parse"
     icon: "🔎"
-    path: examples/bpmn-model-api-parse
+    path: examples/advanced-features/bpmn-model-api-parse
     shortDescription: >
       Programmatic inspection of deployed BPMN models — traverse the element tree, read
       extension attributes, and extract a structured report at runtime.
@@ -941,13 +941,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/bpmn-model-api-parse/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/advanced-features/bpmn-model-api-parse/README.md"
     lastUpdated: "2026-06-15"
 
   - id: bpmn-model-api-generate
     title: "BPMN Model API — Generate"
     icon: "⚙️"
-    path: examples/bpmn-model-api-generate
+    path: examples/advanced-features/bpmn-model-api-generate
     shortDescription: >
       Create and deploy BPMN processes entirely in Java — no XML authoring, no modeller,
       using the fluent BPMN Model API builder.
@@ -980,13 +980,13 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/bpmn-model-api-generate/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/advanced-features/bpmn-model-api-generate/README.md"
     lastUpdated: "2026-06-15"
 
   - id: unit-testing
     title: "Unit Testing with JUnit 5"
     icon: "🧪"
-    path: examples/unit-testing
+    path: examples/advanced-features/unit-testing
     shortDescription: >
       Fast, isolated process unit tests using ProcessEngineExtension with in-memory H2,
       complemented by full integration tests on Testcontainers/PostgreSQL.
@@ -1019,9 +1019,9 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/unit-testing/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/advanced-features/unit-testing/README.md"
     screenshots:
-      - examples/unit-testing/src/main/resources/expense-approval.png
+      - examples/advanced-features/unit-testing/src/main/resources/expense-approval.png
     lastUpdated: "2026-06-15"
 
   # ── Platform Integration Examples ─────────────────────────────────────────
@@ -1029,7 +1029,7 @@ examples:
   - id: integration-connectors
     title: "Integration — Connectors"
     icon: "🔧"
-    path: examples/integration-connectors
+    path: examples/platform-integration/integration-connectors
     shortDescription: >
       HTTP connector for declarative REST calls without Java delegates, plus a custom Connector
       SPI implementation with BpmnError propagation.
@@ -1068,15 +1068,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/integration-connectors/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/platform-integration/integration-connectors/README.md"
     screenshots:
-      - examples/integration-connectors/src/main/resources/currency-conversion.png
+      - examples/platform-integration/integration-connectors/src/main/resources/currency-conversion.png
     lastUpdated: "2026-06-15"
 
   - id: runtime-quarkus
     title: "Runtime — Quarkus"
     icon: "☕"
-    path: examples/runtime-quarkus
+    path: examples/platform-integration/runtime-quarkus
     shortDescription: >
       Embedded Operaton engine on Quarkus/CDI — named CDI delegates, process deployment via
       OperatonEngineStartupEvent, and @QuarkusTest integration tests.
@@ -1112,15 +1112,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/runtime-quarkus/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/platform-integration/runtime-quarkus/README.md"
     screenshots:
-      - examples/runtime-quarkus/src/main/resources/order-approval.png
+      - examples/platform-integration/runtime-quarkus/src/main/resources/order-approval.png
     lastUpdated: "2026-06-15"
 
   - id: distribution-tomcat
     title: "Distribution — Tomcat"
     icon: "🐱"
-    path: examples/distribution-tomcat
+    path: examples/platform-integration/distribution-tomcat
     shortDescription: >
       Process-application WAR deployed into the operaton/tomcat Docker image — shared-engine
       model, ServletProcessApplication, and Testcontainers e2e IT.
@@ -1159,15 +1159,15 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/distribution-tomcat/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/platform-integration/distribution-tomcat/README.md"
     screenshots:
-      - examples/distribution-tomcat/src/main/resources/document-approval.png
+      - examples/platform-integration/distribution-tomcat/src/main/resources/document-approval.png
     lastUpdated: "2026-06-15"
 
   - id: distribution-wildfly
     title: "Distribution — WildFly"
     icon: "🔥"
-    path: examples/distribution-wildfly
+    path: examples/platform-integration/distribution-wildfly
     shortDescription: >
       Process-application WAR deployed into the operaton/wildfly Docker image — Operaton
       as a WildFly subsystem, CDI enabled via beans.xml.
@@ -1205,7 +1205,7 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/distribution-wildfly/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/platform-integration/distribution-wildfly/README.md"
     lastUpdated: "2026-06-15"
 
   # ── Use Cases ──────────────────────────────────────────────────────────────
@@ -1631,7 +1631,7 @@ examples:
   - id: integration-keycloak
     title: "Keycloak Identity Provider"
     icon: "🔐"
-    path: examples/integration-keycloak
+    path: examples/platform-integration/integration-keycloak
     shortDescription: >
       Install the operaton-keycloak identity-provider plugin into the operaton/operaton run image
       and authenticate webapp logins against a Keycloak server via the standard login dialog.
@@ -1663,9 +1663,9 @@ examples:
     authors:
       - { name: "Karsten Thoms", url: "https://github.com/kthoms" }
     license: "Apache-2.0"
-    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/integration-keycloak/README.md"
+    documentationUrl: "https://github.com/kthoms/operaton-examples/blob/main/examples/platform-integration/integration-keycloak/README.md"
     screenshots:
-      - examples/integration-keycloak/docs/topology.png
+      - examples/platform-integration/integration-keycloak/docs/topology.png
     lastUpdated: "2026-06-23"
 
   - id: bank-account-opening

@@ -10,7 +10,7 @@ writing anything; it is the binding definition of done.
 1. **Standards first.** `docs/EXAMPLE_STANDARDS.md` overrides your defaults.
    If a request conflicts with it, surface the conflict instead of silently
    deviating.
-2. **Reference example.** `examples/01-getting-started` is the canonical
+2. **Reference example.** `examples/core-examples/getting-started` is the canonical
    shape. When in doubt about structure, build files, test style, README
    layout, or BPMN conventions — mirror it.
 3. **Operaton, not Camunda.** Dependencies are `org.operaton.*`; BPMN/DMN
