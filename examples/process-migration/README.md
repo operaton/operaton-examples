@@ -33,6 +33,9 @@ that activity ID is identical in both versions.
 ## Run it
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d --wait
 ./mvnw spring-boot:run      # or: ./gradlew bootRun
 ```

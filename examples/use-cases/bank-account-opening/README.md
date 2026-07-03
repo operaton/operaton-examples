@@ -30,7 +30,9 @@ applicant is **notified by email** of the outcome.
 Start the local stack (PostgreSQL + Ollama LLM + Mailpit email sink):
 
 ```bash
-cd examples/use-cases/bank-account-opening
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d
 ```
 

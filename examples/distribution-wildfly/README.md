@@ -27,7 +27,9 @@ Demonstrates deploying an Operaton **process application WAR** to the `operaton/
 Build the WAR first:
 
 ```bash
-cd examples/21-distribution-wildfly
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 ./mvnw package -DskipTests
 ```
 

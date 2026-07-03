@@ -33,6 +33,9 @@ records the transaction, and the **LLM drafts a personalised email** sent via Sp
 ## Run it
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d
 ./mvnw spring-boot:run
 # or:

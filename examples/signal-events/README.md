@@ -38,15 +38,14 @@ Start PostgreSQL:
 docker compose up -d
 ```
 
-Run with Maven:
+Run with Maven or Gradle (make wrappers executable first):
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 ./mvnw spring-boot:run
-```
-
-Run with Gradle:
-
-```bash
+# or
 ./gradlew bootRun
 ```
 

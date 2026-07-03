@@ -37,6 +37,9 @@ Single process: `document-processing`
 docker compose up -d
 
 # Start the application (Cockpit + Tasklist at http://localhost:8080, credentials demo/demo)
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 ./mvnw spring-boot:run
 # or
 ./gradlew bootRun

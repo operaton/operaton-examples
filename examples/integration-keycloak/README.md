@@ -35,7 +35,9 @@ against an external Keycloak server via the standard login dialog.
 ## Run it
 
 ```bash
-cd examples/integration-keycloak
+# Make wrappers executable on macOS/Linux (needed for running tests)
+chmod +x mvnw gradlew
+
 docker compose up -d --wait
 ```
 

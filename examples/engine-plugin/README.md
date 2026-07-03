@@ -24,6 +24,9 @@ injects a `TaskListener` on every user task to record completions in an audit lo
 ## Run it
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d --wait
 ./mvnw spring-boot:run      # or: ./gradlew bootRun
 ```

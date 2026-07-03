@@ -25,6 +25,9 @@ by a custom interceptor that records its name and duration in a thread-safe audi
 ## Run it
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d --wait
 ./mvnw spring-boot:run      # or: ./gradlew bootRun
 ```

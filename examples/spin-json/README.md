@@ -25,6 +25,9 @@ as JSON in the process engine and read them back as typed instances in delegates
 ## Run it
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d --wait
 ./mvnw spring-boot:run      # or: ./gradlew bootRun
 ```

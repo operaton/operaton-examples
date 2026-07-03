@@ -28,7 +28,9 @@ Demonstrates deploying an Operaton **process application WAR** to the `operaton/
 Build the WAR first:
 
 ```bash
-cd examples/20-distribution-tomcat
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 ./mvnw package -DskipTests
 ```
 

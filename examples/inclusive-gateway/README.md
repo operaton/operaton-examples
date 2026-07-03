@@ -40,6 +40,9 @@ Elements in the BPMN (`insurance-claim.bpmn`):
 ## Run it
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 # Start PostgreSQL
 docker compose up -d --wait
 

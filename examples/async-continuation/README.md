@@ -34,6 +34,9 @@ docker compose up -d
 Then start the application (either wrapper):
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 ./mvnw spring-boot:run
 # or
 ./gradlew bootRun

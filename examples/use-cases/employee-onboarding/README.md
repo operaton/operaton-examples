@@ -46,6 +46,9 @@ Variable mappings:
 ## Run it
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d
 ./mvnw spring-boot:run   # or: ./gradlew bootRun
 ```

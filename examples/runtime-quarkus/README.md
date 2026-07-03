@@ -25,7 +25,9 @@ Demonstrates the Operaton engine embedded in a **Quarkus/CDI** application — t
 ## Run it
 
 ```bash
-cd examples/19-runtime-quarkus
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d
 ./mvnw quarkus:dev
 # or: ./gradlew quarkusDev

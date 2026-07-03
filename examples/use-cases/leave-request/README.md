@@ -44,6 +44,9 @@ This starts PostgreSQL on port 5432 and Mailpit SMTP on port 1025 (web UI at htt
 ### 2. Run the application
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 ./mvnw spring-boot:run
 # or
 ./gradlew bootRun

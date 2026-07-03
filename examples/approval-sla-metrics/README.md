@@ -68,7 +68,9 @@ anonymous viewer).
 ## Run it
 
 ```bash
-cd examples/approval-sla-metrics
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d            # Postgres + Prometheus + Grafana
 ./mvnw spring-boot:run          # or: ./gradlew bootRun
 ```

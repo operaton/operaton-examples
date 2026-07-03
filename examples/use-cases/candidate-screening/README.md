@@ -36,6 +36,9 @@ The first start downloads the `llama3.2` model (~2 GB) via the `ollama-pull` hel
 Run the application:
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 ./mvnw spring-boot:run
 # or
 ./gradlew bootRun

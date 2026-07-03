@@ -26,7 +26,9 @@ The boundary error event is attached to `ConvertAmount`. Mermaid cannot render b
 ## Run it
 
 ```bash
-cd examples/18-integration-connectors
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d
 ./mvnw spring-boot:run
 # or: ./gradlew bootRun

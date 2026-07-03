@@ -27,6 +27,9 @@ backed by a Java delegate, a **user task** with a candidate group, and an
 ## Run it
 
 ```bash
+# Make wrappers executable on macOS/Linux
+chmod +x mvnw gradlew
+
 docker compose up -d --wait
 ./mvnw spring-boot:run      # or: ./gradlew bootRun
 ```
