@@ -161,9 +161,11 @@ Every example README contains, in this order:
    Commit the `.png` and the updated README together.
    Prerequisites: `npm install -g bpmn-to-image`.
 4. **Prerequisites** — JDK 21, Docker; exact versions.
-5. **Run it** — `docker compose up -d`, then both
-   `./mvnw spring-boot:run` and `./gradlew bootRun`; URLs and credentials
-   for Cockpit/Tasklist (http://localhost:8080, demo/demo).
+5. **Run it** — Include `chmod +x mvnw gradlew` before executing the wrappers
+   (required on macOS/Linux). Then show both `./mvnw spring-boot:run` and
+   `./gradlew bootRun`; include URLs and credentials for Cockpit/Tasklist
+   (http://localhost:8080, demo/demo). Assume the terminal starts at the
+   example root directory (no `cd` needed).
 6. **Walk through it** — numbered manual walkthrough (Tasklist clicks and/or
    `curl` commands) covering the happy path and one alternative path.
 7. **How it works** — short prose linking model elements to code
@@ -194,6 +196,7 @@ Every example README contains, in this order:
 - [ ] ITs use Testcontainers (PostgreSQL + real integrations), no H2, no sleeps
 - [ ] Happy path + alternative path tested end-to-end
 - [ ] README has all 8 sections; `src/main/resources/<name>.png` rendered via `render-bpmn.sh` and referenced
+- [ ] README "Run it" section includes `chmod +x mvnw gradlew` before wrapper commands (macOS/Linux requirement)
 - [ ] Versions match pom.xml == build.gradle.kts == root README table
 - [ ] §7 app conventions: demo/demo admin user, named seed users, application.yaml
 - [ ] No dead code, no unused dependencies, no TODO/stub delegates
