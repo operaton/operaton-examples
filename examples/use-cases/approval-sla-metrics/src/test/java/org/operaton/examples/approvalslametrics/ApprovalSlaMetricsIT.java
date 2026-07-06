@@ -17,7 +17,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Duration;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -93,7 +92,7 @@ class ApprovalSlaMetricsIT {
                         .putValue("amount", 500.0).putValue("requesterId", "emp-1"));
         // < 1000 auto-approves synchronously: no active instance, no user task
         assertThat(runtimeService.createProcessInstanceQuery().processInstanceId(pi.getId()).count())
-                .isEqualTo(0);
+                .isZero();
         assertThat(meterRegistry.find("requisitions_total")
                 .tag("tier", "auto").tag("outcome", "approved").counter().count())
                 .isGreaterThanOrEqualTo(1.0);
@@ -146,7 +145,7 @@ class ApprovalSlaMetricsIT {
         taskService.complete(task.getId(),
                 org.operaton.bpm.engine.variable.Variables.putValue("approved", true));
         assertThat(runtimeService.createProcessInstanceQuery().processInstanceId(pi.getId()).count())
-                .isEqualTo(0);
+                .isZero();
     }
 
     private double breachCount() {

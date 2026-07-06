@@ -23,9 +23,6 @@
     <module>examples/advanced-features/unit-testing</module>
     <module>examples/advanced-features/xslt-script-task</module>
 
-    <!-- approval-sla-metrics -->
-    <module>examples/approval-sla-metrics</module>
-
     <!-- core-examples -->
     <module>examples/core-examples/async-continuation</module>
     <module>examples/core-examples/call-activity</module>
@@ -53,6 +50,7 @@
     <module>examples/platform-integration/runtime-quarkus</module>
 
     <!-- use-cases -->
+    <module>examples/use-cases/approval-sla-metrics</module>
     <module>examples/use-cases/bank-account-opening</module>
     <module>examples/use-cases/candidate-screening</module>
     <module>examples/use-cases/complaint-resolution</module>
