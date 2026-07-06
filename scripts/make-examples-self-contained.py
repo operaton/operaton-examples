@@ -2,6 +2,8 @@
 """
 Make all examples self-contained by removing parent reference
 and adding failsafe + rancher profile configuration.
+
+Uses regex-based XML transformation to work around expat issues.
 """
 import subprocess
 import sys
@@ -9,64 +11,96 @@ import re
 from pathlib import Path
 
 
-def transform_pom(pom_path):
-    """Transform a single pom.xml file using xmllint and string manipulation."""
+def remove_parent_element(content):
+    """Remove parent element if exists."""
+    if '<parent>' not in content:
+        return content, False
 
-    # Read the file
-    with open(pom_path, 'r') as f:
-        content = f.read()
+    # Remove the entire parent block
+    content = re.sub(
+        r'\s*<parent>.*?</parent>\s*',
+        '\n',
+        content,
+        flags=re.DOTALL
+    )
+    return content, True
 
-    # Step 1: Remove parent element if exists
-    if '<parent>' in content:
-        lines = content.split('\n')
-        new_lines = []
-        in_parent = False
-        for line in lines:
-            if '<parent>' in line:
-                in_parent = True
-                continue
-            elif '</parent>' in line:
-                in_parent = False
-                continue
-            elif not in_parent:
-                new_lines.append(line)
 
-        content = '\n'.join(new_lines)
-        print(f"  ✓ Removed parent reference")
+def has_execution_block_for_failsafe(content):
+    """Check if failsafe plugin has at least one execution block using regex."""
+    # Find the failsafe plugin block
+    failsafe_match = re.search(
+        r'<plugin>\s*<groupId>org\.apache\.maven\.plugins</groupId>\s*'
+        r'<artifactId>maven-failsafe-plugin</artifactId>.*?</plugin>',
+        content,
+        re.DOTALL
+    )
+    if not failsafe_match:
+        return False, None
 
-    # Step 2: Update/Add failsafe plugin configuration
-    if 'maven-failsafe-plugin' in content:
-        # Check if version exists
-        has_version_356 = '<artifactId>maven-failsafe-plugin</artifactId>' in content and \
-                          content.find('<version>3.5.6</version>') > content.find('<artifactId>maven-failsafe-plugin</artifactId>') - 500
+    plugin_block = failsafe_match.group(0)
+    has_exec = '<executions>' in plugin_block
+    return has_exec, plugin_block
 
-        if not has_version_356:
 
-            # Find the failsafe plugin block and update it
-            # Pattern: from <plugin> containing maven-failsafe-plugin to </plugin>
-            def replace_failsafe(match):
-                plugin_block = match.group(0)
+def deduplicate_executions_in_plugin_block(plugin_block):
+    """Remove duplicate execution blocks from a plugin, keeping only one."""
+    # Find all <executions> blocks
+    exec_blocks = re.findall(r'<executions>.*?</executions>', plugin_block, re.DOTALL)
 
-                # Check if it has a version
-                if '<version>' not in plugin_block:
-                    # Add version after artifactId
-                    plugin_block = plugin_block.replace(
-                        '<artifactId>maven-failsafe-plugin</artifactId>',
-                        '<artifactId>maven-failsafe-plugin</artifactId>\n        <version>3.5.6</version>'
-                    )
-                else:
-                    # Replace existing version
-                    plugin_block = re.sub(
-                        r'<version>[^<]+</version>',
-                        '<version>3.5.6</version>',
-                        plugin_block,
-                        count=1
-                    )
+    if len(exec_blocks) <= 1:
+        return plugin_block, 0
 
-                # Check if it has executions
-                if '<executions>' not in plugin_block:
-                    # Add executions before </plugin>
-                    executions_block = '''<executions>
+    # Keep only the first one, remove the rest
+    deduplicated = plugin_block
+    for dup_block in exec_blocks[1:]:
+        deduplicated = deduplicated.replace(dup_block, '', 1)
+
+    return deduplicated, len(exec_blocks) - 1
+
+
+def ensure_failsafe_plugin(content):
+    """Ensure failsafe plugin with version and executions exists."""
+    modified = False
+    message = ""
+
+    has_exec, plugin_block = has_execution_block_for_failsafe(content)
+
+    if plugin_block:
+        # Failsafe plugin exists - update it
+        # First, deduplicate any execution blocks
+        deduplicated_block, dup_count = deduplicate_executions_in_plugin_block(plugin_block)
+        if dup_count > 0:
+            content = content.replace(plugin_block, deduplicated_block, 1)
+            plugin_block = deduplicated_block
+            message += f"✓ Removed {dup_count} duplicate execution block(s) "
+            modified = True
+
+        # Ensure version 3.5.6
+        version_match = re.search(r'<version>.*?</version>', plugin_block)
+        if version_match:
+            old_version = version_match.group(0)
+            if old_version != '<version>3.5.6</version>':
+                new_block = plugin_block.replace(old_version, '<version>3.5.6</version>', 1)
+                content = content.replace(plugin_block, new_block, 1)
+                plugin_block = new_block
+                message += "✓ Updated failsafe version "
+                modified = True
+        else:
+            # Add version after artifactId
+            new_block = plugin_block.replace(
+                '<artifactId>maven-failsafe-plugin</artifactId>',
+                '<artifactId>maven-failsafe-plugin</artifactId>\n        <version>3.5.6</version>',
+                1
+            )
+            content = content.replace(plugin_block, new_block, 1)
+            plugin_block = new_block
+            message += "✓ Added failsafe version "
+            modified = True
+
+        # Ensure executions block exists
+        if not has_exec:
+            executions_block = '''<executions>
           <execution>
             <goals>
               <goal>integration-test</goal>
@@ -75,29 +109,23 @@ def transform_pom(pom_path):
           </execution>
         </executions>
         '''
-                    plugin_block = plugin_block.replace(
-                        '      </plugin>',
-                        f'{executions_block}      </plugin>'
-                    )
-                    plugin_block = plugin_block.replace(
-                        '        </plugin>',
-                        f'{executions_block}        </plugin>'
-                    )
+            # Add before </plugin>
+            new_block = plugin_block.replace('      </plugin>', f'{executions_block}      </plugin>', 1)
+            if new_block == plugin_block:
+                new_block = plugin_block.replace('        </plugin>', f'{executions_block}        </plugin>', 1)
 
-                return plugin_block
+            if new_block != plugin_block:
+                content = content.replace(plugin_block, new_block, 1)
+                message += "✓ Added execution block "
+                modified = True
 
-            content = re.sub(
-                r'<plugin>\s*<groupId>org\.apache\.maven\.plugins</groupId>\s*<artifactId>maven-failsafe-plugin</artifactId>.*?</plugin>',
-                replace_failsafe,
-                content,
-                flags=re.MULTILINE | re.DOTALL
-            )
-            print(f"  ✓ Updated failsafe plugin (v3.5.6)")
+        if message:
+            message = "✓ Updated failsafe plugin (v3.5.6) " + message.strip()
         else:
-            print(f"  ⓘ Failsafe plugin already has version 3.5.6")
+            message = "ⓘ Failsafe plugin already correct"
     else:
-        # Add complete failsafe plugin to build/plugins section
-        failsafe_plugin = '''      <plugin>
+        # Create failsafe plugin from scratch
+        failsafe_plugin = '''<plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>3.5.6</version>
@@ -111,23 +139,81 @@ def transform_pom(pom_path):
         </executions>
       </plugin>'''
 
-        # Ensure build section exists
+        # Ensure build/plugins section exists
         if '<build>' not in content:
-            build_plugins = f'''  <build>
+            build_section = f'''<build>
     <plugins>
 {failsafe_plugin}
     </plugins>
   </build>'''
-            content = content.replace('</project>', f"{build_plugins}\n</project>")
+            content = content.replace('</project>', f"\n  {build_section}\n</project>")
+        elif '<plugins>' not in content:
+            plugins_section = f'''<plugins>
+{failsafe_plugin}
+    </plugins>'''
+            build_end = content.find('</build>')
+            content = content[:build_end] + f"\n    {plugins_section}\n  " + content[build_end:]
         else:
-            # Add to existing plugins section
-            content = content.replace('    </plugins>', f"{failsafe_plugin}\n    </plugins>")
+            # Add to existing plugins
+            content = content.replace(
+                '    </plugins>',
+                f'{failsafe_plugin}\n    </plugins>',
+                1
+            )
 
-        print(f"  ✓ Added failsafe plugin (v3.5.6)")
+        message = "✓ Added failsafe plugin (v3.5.6)"
+        modified = True
 
-    # Step 3: Add rancher profile if not exists
-    if 'rancher' not in content or '<profile>' not in content:
-        rancher_profile = '''  <profiles>
+    return content, modified, message
+
+
+def has_rancher_profile(content):
+    """Check if a rancher profile with id=rancher exists (exact match)."""
+    # Look for <profile> containing <id>rancher</id> (exact match, not rancher-desktop)
+    profile_match = re.search(
+        r'<profile>.*?<id>rancher</id>.*?</profile>',
+        content,
+        re.DOTALL
+    )
+    return profile_match is not None
+
+
+def ensure_rancher_profile(content):
+    """Ensure rancher profile exists with correct configuration."""
+    # First, remove any old rancher-related profiles that aren't the standard "rancher" one
+    # This handles the case where old profiles like "rancher-desktop" or "docker-alternative-rancher" exist
+    content = re.sub(
+        r'<profile>\s*(?:<!--.*?-->)?\s*<id>(?!rancher</id>)[^<]*rancher[^<]*</id>.*?</profile>',
+        '',
+        content,
+        flags=re.DOTALL
+    )
+
+    # Remove any empty or duplicate <profiles> sections
+    # Merge all profiles into a single section at the end
+    all_profiles_content = []
+    profiles_matches = list(re.finditer(r'<profiles>(.*?)</profiles>', content, re.DOTALL))
+
+    if profiles_matches:
+        # Collect all profile content from all <profiles> sections
+        for match in profiles_matches:
+            profiles_content = match.group(1)
+            all_profiles_content.append(profiles_content)
+
+        # Remove all old <profiles> sections
+        for match in reversed(profiles_matches):  # reverse to maintain positions
+            content = content[:match.start()] + content[match.end():]
+
+    # Check if rancher profile exists
+    rancher_exists = False
+    for prof_content in all_profiles_content:
+        if '<id>rancher</id>' in prof_content:
+            rancher_exists = True
+            break
+
+    if not rancher_exists:
+        # Add the rancher profile to the collected content
+        all_profiles_content.append('''
     <profile>
       <id>rancher</id>
       <activation>
@@ -152,12 +238,40 @@ def transform_pom(pom_path):
           </plugins>
         </pluginManagement>
       </build>
-    </profile>
-  </profiles>'''
-        content = content.replace('</project>', f"{rancher_profile}\n</project>")
-        print(f"  ✓ Added rancher profile")
+    </profile>''')
+        message = "✓ Added rancher profile"
     else:
-        print(f"  ⓘ Rancher profile already exists")
+        message = "ⓘ Rancher profile already exists"
+
+    # Write merged profiles back (if any content exists)
+    if all_profiles_content:
+        merged = ''.join(all_profiles_content)
+        profiles_block = f'''<profiles>{merged}
+  </profiles>'''
+        content = content.replace('</project>', f"{profiles_block}\n</project>")
+
+    return content, len(profiles_matches) > 0 or not rancher_exists, message
+
+
+def transform_pom(pom_path):
+    """Transform a single pom.xml file."""
+
+    # Read the file
+    with open(pom_path, 'r') as f:
+        content = f.read()
+
+    # Step 1: Remove parent element if exists
+    content, removed_parent = remove_parent_element(content)
+    if removed_parent:
+        print(f"  ✓ Removed parent reference")
+
+    # Step 2: Ensure failsafe plugin configuration
+    content, modified_failsafe, failsafe_msg = ensure_failsafe_plugin(content)
+    print(f"  {failsafe_msg}")
+
+    # Step 3: Ensure rancher profile
+    content, added_profile, profile_msg = ensure_rancher_profile(content)
+    print(f"  {profile_msg}")
 
     # Step 4: Write the modified content back
     with open(pom_path, 'w') as f:
