@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Make all examples self-contained by removing parent reference
-and adding failsafe + rancher profile configuration.
+and adding failsafe + rancher + colima profile configuration.
 
 Uses regex-based XML transformation to work around expat issues.
 """
@@ -178,6 +178,17 @@ def has_rancher_profile(content):
     return profile_match is not None
 
 
+def has_colima_profile(content):
+    """Check if a colima profile with id=colima exists (exact match)."""
+    # Look for <profile> containing <id>colima</id>
+    profile_match = re.search(
+        r'<profile>.*?<id>colima</id>.*?</profile>',
+        content,
+        re.DOTALL
+    )
+    return profile_match is not None
+
+
 def ensure_rancher_profile(content):
     """Ensure rancher profile exists with correct configuration."""
     # First, remove any old rancher-related profiles that aren't the standard "rancher" one
@@ -253,6 +264,54 @@ def ensure_rancher_profile(content):
     return content, len(profiles_matches) > 0 or not rancher_exists, message
 
 
+def ensure_colima_profile(content):
+    """Ensure colima profile exists within the <profiles> section."""
+    # Check if colima profile exists
+    colima_exists = has_colima_profile(content)
+
+    if not colima_exists:
+        # Find the <profiles> closing tag
+        profiles_close_match = re.search(r'</profiles>', content)
+
+        if profiles_close_match:
+            # Add colima profile inside existing <profiles> section
+            colima_profile = '''
+    <profile>
+      <id>colima</id>
+      <activation>
+        <file>
+          <exists>${user.home}/.colima/default/docker.sock</exists>
+        </file>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-failsafe-plugin</artifactId>
+              <configuration>
+                <environmentVariables>
+                  <DOCKER_HOST>unix://${user.home}/.colima/default/docker.sock</DOCKER_HOST>
+                  <TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>${user.home}/.colima/default/docker.sock</TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>
+                  <TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+                </environmentVariables>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>'''
+            content = content.replace('</profiles>', f"{colima_profile}\n  </profiles>", 1)
+            message = "✓ Added colima profile"
+        else:
+            # No <profiles> section exists, which shouldn't happen if rancher was added
+            message = "⚠ Could not find profiles section"
+    else:
+        message = "ⓘ Colima profile already exists"
+
+    return content, not colima_exists, message
+
+
 def transform_pom(pom_path):
     """Transform a single pom.xml file."""
 
@@ -273,11 +332,15 @@ def transform_pom(pom_path):
     content, added_profile, profile_msg = ensure_rancher_profile(content)
     print(f"  {profile_msg}")
 
-    # Step 4: Write the modified content back
+    # Step 4: Ensure colima profile
+    content, added_colima, colima_msg = ensure_colima_profile(content)
+    print(f"  {colima_msg}")
+
+    # Step 5: Write the modified content back
     with open(pom_path, 'w') as f:
         f.write(content)
 
-    # Step 5: Reformat with xmllint for proper indentation
+    # Step 6: Reformat with xmllint for proper indentation
     result = subprocess.run(
         ['xmllint', '--format', '-o', str(pom_path), str(pom_path)],
         capture_output=True,
