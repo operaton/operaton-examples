@@ -11,52 +11,62 @@
   <name>Operaton Examples — Aggregator</name>
 
   <modules>
-    <module>examples/getting-started</module>
-    <module>examples/service-tasks</module>
-    <module>examples/external-task-worker</module>
-    <module>examples/user-task-forms</module>
-    <module>examples/dmn-decision</module>
-    <module>examples/message-events</module>
-    <module>examples/timer-events</module>
-    <module>examples/error-compensation</module>
-    <module>examples/multi-instance</module>
-    <module>examples/integration-rest</module>
-    <module>examples/integration-mail</module>
-    <module>examples/integration-kafka</module>
-    <module>examples/call-activity</module>
-    <module>examples/signal-events</module>
-    <module>examples/event-subprocess</module>
-    <module>examples/inclusive-gateway</module>
-    <module>examples/async-continuation</module>
-    <module>examples/integration-connectors</module>
-    <module>examples/runtime-quarkus</module>
-    <module>examples/distribution-tomcat</module>
-    <module>examples/distribution-wildfly</module>
-    <module>examples/engine-plugin</module>
-    <module>examples/job-retry-profile</module>
-    <module>examples/command-interceptor</module>
-    <module>examples/process-migration</module>
-    <module>examples/spin-json</module>
-    <module>examples/multi-tenancy</module>
-    <module>examples/bpmn-model-api-parse</module>
-    <module>examples/bpmn-model-api-generate</module>
-    <module>examples/unit-testing</module>
+    <!-- advanced-features -->
+    <module>examples/advanced-features/bpmn-model-api-generate</module>
+    <module>examples/advanced-features/bpmn-model-api-parse</module>
+    <module>examples/advanced-features/command-interceptor</module>
+    <module>examples/advanced-features/engine-plugin</module>
+    <module>examples/advanced-features/job-retry-profile</module>
+    <module>examples/advanced-features/multi-tenancy</module>
+    <module>examples/advanced-features/process-migration</module>
+    <module>examples/advanced-features/spin-json</module>
+    <module>examples/advanced-features/unit-testing</module>
+    <module>examples/advanced-features/xslt-script-task</module>
+
+    <!-- approval-sla-metrics -->
+    <module>examples/approval-sla-metrics</module>
+
+    <!-- core-examples -->
+    <module>examples/core-examples/async-continuation</module>
+    <module>examples/core-examples/call-activity</module>
+    <module>examples/core-examples/dmn-decision</module>
+    <module>examples/core-examples/error-compensation</module>
+    <module>examples/core-examples/event-subprocess</module>
+    <module>examples/core-examples/external-task-worker</module>
+    <module>examples/core-examples/getting-started</module>
+    <module>examples/core-examples/inclusive-gateway</module>
+    <module>examples/core-examples/integration-kafka</module>
+    <module>examples/core-examples/integration-mail</module>
+    <module>examples/core-examples/integration-rest</module>
+    <module>examples/core-examples/message-events</module>
+    <module>examples/core-examples/multi-instance</module>
+    <module>examples/core-examples/service-tasks</module>
+    <module>examples/core-examples/signal-events</module>
+    <module>examples/core-examples/timer-events</module>
+    <module>examples/core-examples/user-task-forms</module>
+
+    <!-- platform-integration -->
+    <module>examples/platform-integration/distribution-tomcat</module>
+    <module>examples/platform-integration/distribution-wildfly</module>
+    <module>examples/platform-integration/integration-connectors</module>
+    <module>examples/platform-integration/integration-keycloak</module>
+    <module>examples/platform-integration/runtime-quarkus</module>
+
+    <!-- use-cases -->
+    <module>examples/use-cases/bank-account-opening</module>
+    <module>examples/use-cases/candidate-screening</module>
+    <module>examples/use-cases/complaint-resolution</module>
+    <module>examples/use-cases/contract-signing</module>
+    <module>examples/use-cases/employee-onboarding</module>
+    <module>examples/use-cases/expense-reimbursement</module>
+    <module>examples/use-cases/incident-management</module>
+    <module>examples/use-cases/insurance-claim</module>
     <module>examples/use-cases/leave-request</module>
     <module>examples/use-cases/loan-application</module>
-    <module>examples/use-cases/incident-management</module>
     <module>examples/use-cases/order-fulfillment</module>
-    <module>examples/use-cases/insurance-claim</module>
-    <module>examples/use-cases/travel-booking</module>
-    <module>examples/use-cases/complaint-resolution</module>
-    <module>examples/use-cases/employee-onboarding</module>
-    <module>examples/use-cases/candidate-screening</module>
-    <module>examples/use-cases/bank-account-opening</module>
-    <module>examples/use-cases/expense-reimbursement</module>
     <module>examples/use-cases/procurement-collaboration</module>
     <module>examples/use-cases/supply-chain-tracking</module>
-    <module>examples/xslt-script-task</module>
-    <module>examples/approval-sla-metrics</module>
-    <module>examples/integration-keycloak</module>
+    <module>examples/use-cases/travel-booking</module>
   </modules>
 
   <build>
