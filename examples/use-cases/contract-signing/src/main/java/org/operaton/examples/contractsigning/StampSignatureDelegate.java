@@ -3,6 +3,7 @@ package org.operaton.examples.contractsigning;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.operaton.bpm.engine.delegate.JavaDelegate;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +16,13 @@ import java.time.Instant;
 public class StampSignatureDelegate implements JavaDelegate {
     private final DocumentStore documentStore;
 
+    private Expression signerRole;
+
     public StampSignatureDelegate(DocumentStore documentStore) { this.documentStore = documentStore; }
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        String signerRole = (String) execution.getVariable("signerRole");
+        String signerRole = (String) this.signerRole.getValue(execution);
         String draftKey = (String) execution.getVariable("draftKey");
         InputStream pdfStream = documentStore.get(draftKey);
         byte[] pdfBytes = pdfStream.readAllBytes();
