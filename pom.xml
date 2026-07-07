@@ -113,6 +113,31 @@
         </pluginManagement>
       </build>
     </profile>
+    <profile>
+      <id>colima</id>
+      <activation>
+        <file>
+          <exists>${user.home}/.colima/default/docker.sock</exists>
+        </file>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-failsafe-plugin</artifactId>
+              <configuration>
+                <environmentVariables>
+                  <DOCKER_HOST>unix://${user.home}/.colima/default/docker.sock</DOCKER_HOST>
+                  <TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>${user.home}/.colima/default/docker.sock</TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>
+                  <TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+                </environmentVariables>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
   </profiles>
 
 </project>

@@ -35,9 +35,8 @@ Copyright 2026 the Operaton contributors. Licensed under the Apache License, Ver
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${signDecision == 'declined'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
 
-    <bpmn:serviceTask id="Task_ApplyCustomerSignature" name="Apply Customer Signature">
+    <bpmn:serviceTask id="Task_ApplyCustomerSignature" name="Apply Customer Signature" operaton:delegateExpression="${stampSignatureDelegate}">
       <bpmn:extensionElements>
-        <operaton:delegateExpression>${stampSignatureDelegate}</operaton:delegateExpression>
         <operaton:field name="signerRole">
           <operaton:string>customer</operaton:string>
         </operaton:field>
@@ -64,9 +63,8 @@ Copyright 2026 the Operaton contributors. Licensed under the Apache License, Ver
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${signDecision == 'declined'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
 
-    <bpmn:serviceTask id="Task_ApplyCompanySignature" name="Apply Company Signature">
+    <bpmn:serviceTask id="Task_ApplyCompanySignature" name="Apply Company Signature" operaton:delegateExpression="${stampSignatureDelegate}">
       <bpmn:extensionElements>
-        <operaton:delegateExpression>${stampSignatureDelegate}</operaton:delegateExpression>
         <operaton:field name="signerRole">
           <operaton:string>company</operaton:string>
         </operaton:field>
@@ -83,10 +81,7 @@ Copyright 2026 the Operaton contributors. Licensed under the Apache License, Ver
     </bpmn:parallelGateway>
 
     
-    <bpmn:serviceTask id="Task_ArchiveContract" name="Archive Contract">
-      <bpmn:extensionElements>
-        <operaton:delegateExpression>${archiveContractDelegate}</operaton:delegateExpression>
-      </bpmn:extensionElements>
+    <bpmn:serviceTask id="Task_ArchiveContract" name="Archive Contract" operaton:delegateExpression="${archiveContractDelegate}">
       <bpmn:incoming>Flow_JoinToArchive</bpmn:incoming>
       <bpmn:outgoing>Flow_ArchiveToEnd</bpmn:outgoing>
     </bpmn:serviceTask>
