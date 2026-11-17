@@ -13,13 +13,6 @@ example means testing its processes against real integrations.
 |---|---|
 | JDK | 21 |
 | Docker | any recent version (required for tests and local run) |
-| Distribution images (`operaton/tomcat`, `operaton/wildfly`, `operaton/operaton`) | `2.1.1` |
-| `operaton-keycloak-run` (plugin) | `2.1.0` |
-| AWS SDK v2 | 2.29.0 |
-| Apache PDFBox | 3.0.7 |
-
-Pinned stack (all examples): Spring Boot **4.1.0**, Operaton **2.1.1**,
-Maven Wrapper **3.9.12**, Gradle Wrapper **9.2.0**, PostgreSQL **16**.
 
 ## Using an example
 
@@ -131,33 +124,33 @@ Quick lookup: which example demonstrates each BPMN construct.
 
 ### BPMN Concepts
 
-| BPMN Concept | Example(s) | Notes |
-|---|---|---|
-| Service task | <ul><li>[getting-started](examples/core-examples/getting-started)</li><li>[service-tasks](examples/core-examples/service-tasks)</li></ul> | Java delegate, Spring bean, expression |
-| User task | [user-task-forms](examples/core-examples/user-task-forms) | Forms, candidate groups |
-| Script task | [service-tasks](examples/core-examples/service-tasks) | JavaScript / Groovy inline |
-| Business rule task (DMN) | <ul><li>[dmn-decision](examples/core-examples/dmn-decision)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul> | FEEL expressions, hit policies |
-| Exclusive gateway (XOR) | <ul><li>[getting-started](examples/core-examples/getting-started)</li><li>[dmn-decision](examples/core-examples/dmn-decision)</li></ul> | Default flow, condition expressions |
-| **Parallel gateway (AND)** | **[insurance-claim](examples/use-cases/insurance-claim)** | AND-split / AND-join, concurrent branches |
-| **Event-based gateway** | **[insurance-claim](examples/use-cases/insurance-claim)** | Race between message and timer |
-| Inclusive gateway (OR) | [inclusive-gateway](examples/core-examples/inclusive-gateway) | OR-split / OR-join |
-| Message start event | <ul><li>[message-events](examples/core-examples/message-events)</li><li>[procurement-collaboration](examples/use-cases/procurement-collaboration)</li></ul> | Start by message correlation |
-| Timer start event | [timer-events](examples/core-examples/timer-events) | Cron, cycle, duration |
-| Message intermediate catch | <ul><li>[message-events](examples/core-examples/message-events)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li><li>[procurement-collaboration](examples/use-cases/procurement-collaboration)</li></ul> | Correlation by business key |
-| Timer intermediate catch | <ul><li>[timer-events](examples/core-examples/timer-events)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul> | ISO-8601 duration variable |
-| Signal intermediate catch/throw | [signal-events](examples/core-examples/signal-events) | Broadcast signal |
-| Error boundary event | [error-compensation](examples/core-examples/error-compensation) | Interrupting and non-interrupting |
-| Compensation | <ul><li>[error-compensation](examples/core-examples/error-compensation)</li><li>[travel-booking](examples/use-cases/travel-booking)</li></ul> | Manual throw (error-compensation) vs. transaction-driven (travel-booking) |
-| **Transaction subprocess** | **[travel-booking](examples/use-cases/travel-booking)** | All-or-nothing SAGA; cancel end event triggers auto-compensation |
-| **Cancel event (end + boundary)** | **[travel-booking](examples/use-cases/travel-booking)** | Cancel end event inside transaction + cancel boundary on transaction |
-| Multi-instance | <ul><li>[multi-instance](examples/core-examples/multi-instance)</li><li>[employee-onboarding](examples/use-cases/employee-onboarding)</li></ul> | Sequential and parallel sub-tasks; collection-driven parallel MI call activity |
-| **Call activity** | <ul><li>[call-activity](examples/core-examples/call-activity)</li><li>[employee-onboarding](examples/use-cases/employee-onboarding)</li></ul> | Sub-process reuse, in/out variable mapping, parallel multi-instance over collection |
-| Event sub-process | [event-subprocess](examples/core-examples/event-subprocess) | Error- and message-triggered |
-| External task | [external-task-worker](examples/core-examples/external-task-worker) | Worker API, long polling |
-| Async continuation | <ul><li>[async-continuation](examples/core-examples/async-continuation)</li><li>[procurement-collaboration](examples/use-cases/procurement-collaboration)</li></ul> | `asyncBefore`, exclusive job lock |
-| **Escalation events** | **[complaint-resolution](examples/use-cases/complaint-resolution)** | Non-interrupting throw + boundary (parallel), interrupting end event + boundary (cancel) |
-| **Collaboration / message flow (two pools)** | **[procurement-collaboration](examples/use-cases/procurement-collaboration)** | Two process definitions communicating via message correlation within one engine |
-| **Cross-instance correlation key** | **[procurement-collaboration](examples/use-cases/procurement-collaboration)** | `processInstanceVariableEquals()` routes messages to the correct instance by `requestId` |
+| BPMN Concept                   | Example(s)                                                                                                                                                                                                 | Notes |
+|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---|
+| Service task                   | <ul><li>[getting-started](examples/core-examples/getting-started)</li><li>[service-tasks](examples/core-examples/service-tasks)</li></ul>                                                                  | Java delegate, Spring bean, expression |
+| User task                      | <ul><li>[user-task-forms](examples/core-examples/user-task-forms)</li></ul>                                                                                                                                | Forms, candidate groups |
+| Script task                    | <ul><li>[service-tasks](examples/core-examples/service-tasks)</li></ul>                                                                                                                                    | JavaScript / Groovy inline |
+| Business rule task (DMN)       | <ul><li>[dmn-decision](examples/core-examples/dmn-decision)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul>                                                                        | FEEL expressions, hit policies |
+| Exclusive gateway (XOR)        | <ul><li>[getting-started](examples/core-examples/getting-started)</li><li>[dmn-decision](examples/core-examples/dmn-decision)</li></ul>                                                                    | Default flow, condition expressions |
+| Parallel gateway (AND)         | <ul><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul>                                                                                                                                    | AND-split / AND-join, concurrent branches |
+| Event-based gateway            | <ul><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul>                                                                                                                                    | Race between message and timer |
+| Inclusive gateway (OR)         | <ul><li>[inclusive-gateway](examples/core-examples/inclusive-gateway)</li></ul>                                                                                                                            | OR-split / OR-join |
+| Message start event            | <ul><li>[message-events](examples/core-examples/message-events)</li><li>[procurement-collaboration](examples/use-cases/procurement-collaboration)</li></ul>                                                | Start by message correlation |
+| Timer start event              | [timer-events](examples/core-examples/timer-events)                                                                                                                                                        | Cron, cycle, duration |
+| Message intermediate catch     | <ul><li>[message-events](examples/core-examples/message-events)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li><li>[procurement-collaboration](examples/use-cases/procurement-collaboration)</li></ul> | Correlation by business key |
+| Timer intermediate catch       | <ul><li>[timer-events](examples/core-examples/timer-events)</li><li>[insurance-claim](examples/use-cases/insurance-claim)</li></ul>                                                                        | ISO-8601 duration variable |
+| Signal intermediate catch/throw | [signal-events](examples/core-examples/signal-events)                                                                                                                                                      | Broadcast signal |
+| Error boundary event           | [error-compensation](examples/core-examples/error-compensation)                                                                                                                                            | Interrupting and non-interrupting |
+| Compensation                   | <ul><li>[error-compensation](examples/core-examples/error-compensation)</li><li>[travel-booking](examples/use-cases/travel-booking)</li></ul>                                                              | Manual throw (error-compensation) vs. transaction-driven (travel-booking) |
+| Transaction subprocess         | [travel-booking](examples/use-cases/travel-booking)                                                                                                                                                        | All-or-nothing SAGA; cancel end event triggers auto-compensation |
+| Cancel event (end + boundary   | [travel-booking](examples/use-cases/travel-booking)                                                                                                                                                        | Cancel end event inside transaction + cancel boundary on transaction |
+| Multi-instance                 | <ul><li>[multi-instance](examples/core-examples/multi-instance)</li><li>[employee-onboarding](examples/use-cases/employee-onboarding)</li></ul>                                                            | Sequential and parallel sub-tasks; collection-driven parallel MI call activity |
+| Call activity                  | <ul><li>[call-activity](examples/core-examples/call-activity)</li><li>[employee-onboarding](examples/use-cases/employee-onboarding)</li></ul>                                                              | Sub-process reuse, in/out variable mapping, parallel multi-instance over collection |
+| Event sub-process              | [event-subprocess](examples/core-examples/event-subprocess)                                                                                                                                                | Error- and message-triggered |
+| External task                  | [external-task-worker](examples/core-examples/external-task-worker)                                                                                                                                        | Worker API, long polling |
+| Async continuation             | <ul><li>[async-continuation](examples/core-examples/async-continuation)</li><li>[procurement-collaboration](examples/use-cases/procurement-collaboration)</li></ul>                                        | `asyncBefore`, exclusive job lock |
+| Escalation event               | [complaint-resolution](examples/use-cases/complaint-resolution                                                                                                                                             | Non-interrupting throw + boundary (parallel), interrupting end event + boundary (cancel) |
+| Collaboration / message flow (two pools | [procurement-collaboration](examples/use-cases/procurement-collaboration)                                                                                                                                  | Two process definitions communicating via message correlation within one engine |
+| Cross-instance correlation key | [procurement-collaboration](examples/use-cases/procurement-collaboration)                                                                                                                                  | `processInstanceVariableEquals()` routes messages to the correct instance by `requestId` |
 
 ### Integrations
 
@@ -179,7 +172,6 @@ Quick lookup: which example demonstrates each BPMN construct.
 | Quarkus (embedded) | platform-integration/runtime-quarkus |
 | Tomcat (shared engine) | platform-integration/distribution-tomcat |
 | WildFly (shared engine) | platform-integration/distribution-wildfly |
-| Flowset Control + SSO (Keycloak) | operaton-example-projects / operaton-flowset-sso |
 | Operaton Run + Keycloak plugin (custom image) | platform-integration/integration-keycloak |
 
 ## License

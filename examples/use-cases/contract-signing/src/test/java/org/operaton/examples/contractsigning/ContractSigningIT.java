@@ -9,6 +9,7 @@ import org.operaton.bpm.engine.history.HistoricProcessInstance;
 import org.operaton.bpm.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -40,15 +41,17 @@ class ContractSigningIT {
         .withExposedPorts(9000)
         .withStartupTimeout(java.time.Duration.ofSeconds(60));
 
+    @LocalServerPort
+    private int port;
+
     @Autowired private ProcessEngine processEngine;
     @Autowired private RuntimeService runtimeService;
     @Autowired private TaskService taskService;
     @Autowired private HistoryService historyService;
-    @Autowired private org.springframework.boot.web.server.WebServer webServer;
 
     @BeforeEach
     void setUp() {
-        RestAssured.baseURI = "http://localhost:" + webServer.getPort();
+        RestAssured.baseURI = "http://localhost:" + port;
     }
 
     @DynamicPropertySource
@@ -70,7 +73,7 @@ class ContractSigningIT {
         // Create/upload sample PDF
         Response response = RestAssured
             .given()
-                .multiPart("file", new java.io.File("src/test/resources/sample-contract.pdf"))
+                .multiPart("file", new java.io.File("src/test/resources/sample-contract.pdf"), "application/pdf")
                 .multiPart("customer", "Alice")
                 .multiPart("company", "Operaton GmbH")
             .when()
@@ -142,7 +145,7 @@ class ContractSigningIT {
     void customerDeclines_terminatesInstance_noCompanySigning() throws IOException {
         Response response = RestAssured
             .given()
-                .multiPart("file", new java.io.File("src/test/resources/sample-contract.pdf"))
+                .multiPart("file", new java.io.File("src/test/resources/sample-contract.pdf"), "application/pdf")
                 .multiPart("customer", "Bob")
                 .multiPart("company", "Operaton GmbH")
             .when()
