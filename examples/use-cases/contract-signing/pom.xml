@@ -7,7 +7,7 @@
   <name>Contract Signing Use Case</name>
   <properties>
     <java.version>21</java.version>
-    <operaton.version>2.1.0</operaton.version>
+    <operaton.version>2.1.6</operaton.version>
     <spring-boot.version>4.1.0</spring-boot.version>
     <aws-java-sdk-bom.version>2.29.0</aws-java-sdk-bom.version>
   </properties>
