@@ -29,20 +29,19 @@ jobs:
           fi
 
           # Extract project paths relative to examples/:
-          # - examples/getting-started/... -> getting-started
-          # - examples/use-cases/leave-request/... -> use-cases/leave-request
+          # - examples/core-examples/getting-started/... -> core-examples/getting-started
+          # - examples/use-cases/leave-request/...       -> use-cases/leave-request
+          # Only keep paths that still contain a Maven wrapper (i.e. real examples).
           changed=$(git diff --name-only --diff-filter=d "$base_ref" 2>/dev/null \
-            | grep '^examples/' \
-            | awk -F'/' '{
-                if ($2 == "use-cases" && NF >= 3) print $2"/"$3
-                else if ($2 != "" && $2 != "use-cases") print $2
-              }' \
-            | sort -u | jq -R . | jq -cs . 2>/dev/null || echo "[]")
+            | awk -F'/' '$1 == "examples" && NF >= 4 { print $2"/"$3 }' \
+            | sort -u \
+            | while read -r ex; do if [ -f "examples/$ex/mvnw" ]; then echo "$ex"; fi; done \
+            | jq -R . | jq -cs .)
 
-          # Fall back to all examples when nothing changed (fresh push / workflow change)
+          # Fall back to all examples when no example changed (root/workflow change)
           if [ "$changed" = "[]" ]; then
-            changed=$(find examples -name "mvnw" -mindepth 2 -maxdepth 3 \
-              | sed 's|^examples/||' | sed 's|/mvnw$||' \
+            changed=$(find examples -mindepth 3 -maxdepth 3 -name mvnw \
+              | sed -e 's|^examples/||' -e 's|/mvnw$||' \
               | sort -u | jq -R . | jq -cs .)
           fi
 
@@ -54,7 +53,7 @@ jobs:
           echo "Maven: $maven"
 
           # Gradle: only whitelisted examples that were changed
-          gradle_whitelist='["getting-started"]'
+          gradle_whitelist='["core-examples/getting-started"]'
           gradle=$(printf '%s' "$changed" | jq -c \
             --argjson wl "$gradle_whitelist" \
             '[.[] | select(. as $e | $wl | any(. == $e))]')

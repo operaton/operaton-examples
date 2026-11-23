@@ -23,10 +23,10 @@ public class ContractController {
 
     @PostMapping
     public ResponseEntity<ContractUploadResponse> uploadContract(
-            @RequestParam MultipartFile file,
-            @RequestParam String customer,
-            @RequestParam String company) {
-        if (file.isEmpty() || !file.getContentType().equals("application/pdf")) {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("customer") String customer,
+            @RequestParam("company") String company) {
+        if (file.isEmpty() || !"application/pdf".equals(file.getContentType())) {
             return ResponseEntity.badRequest().build();
         }
         if (file.getSize() > 20 * 1024 * 1024) return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).build();
