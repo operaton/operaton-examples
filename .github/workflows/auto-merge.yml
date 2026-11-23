@@ -2,8 +2,8 @@ name: Auto-Merge Eligible PRs
 
 on:
   schedule:
-    # Run at 4:00 AM UTC daily
-    - cron: '0 4 * * *'
+    - cron: '23 1 * * *'
+    - cron: '47 3 * * *'
   workflow_dispatch:
 
 jobs:
@@ -15,12 +15,14 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Collect and merge eligible PRs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const fs = require('fs');
@@ -140,11 +142,24 @@ jobs:
                 });
 
                 // Get check runs for the commit
-                const { data: checkRuns } = await github.rest.checks.listForRef({
+                const allCheckRuns = await github.paginate(github.rest.checks.listForRef, {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  ref: sha
+                  ref: sha,
+                  per_page: 100
                 });
+
+                // The same check can run several times for one commit (e.g. a labeler run
+                // cancelled by a newer one via concurrency, or a re-run after a flaky failure).
+                // Only the most recent run per check name counts.
+                const latestByName = new Map();
+                for (const run of allCheckRuns) {
+                  const prev = latestByName.get(run.name);
+                  if (!prev || run.id > prev.id) {
+                    latestByName.set(run.name, run);
+                  }
+                }
+                const checkRuns = { check_runs: [...latestByName.values()] };
 
                 // Check combined status and check runs
                 // status.total_count = 0 means no status checks configured
