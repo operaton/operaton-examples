@@ -1,25 +1,26 @@
-# Auto-merge configuration
-# This file defines which dependencies can be automatically merged
-# by the auto-merge workflow after all checks have passed.
-
-# Configuration format:
-# - author: GitHub username (e.g., 'dependabot[bot]')
-#   labels: List of labels that must be present on the PR (optional)
-#   includes: List of dependency patterns to allow (optional, used with labels)
-#            (supports wildcards with *)
-#   excludes: List of dependency patterns to exclude (optional, overrides includes)
-#            (supports wildcards with *)
-#   title: Pattern to match PR titles using wildcards (optional, alternative to includes)
+# Auto-merge configuration (aligned with operaton/operaton-starter)
+# Defines which pull requests the auto-merge workflow may approve and squash-merge
+# once all checks have passed and no review threads are unresolved.
+#
+# Rule format:
+# - author:   GitHub login of the PR author (e.g. 'dependabot[bot]')
+#   labels:   labels that must all be present on the PR (used with includes)
+#   includes: title patterns to allow (wildcards with *)
+#   excludes: title patterns that override includes (wildcards with *)
+#   title:    title pattern, alternative to labels + includes
+#
+# Major updates are ignored in dependabot.yml. Every example is built and its
+# integration tests run against real containers in CI, so a green build is the
+# merge criterion for Maven and Gradle updates.
 
 auto-merge-rules:
   - author: 'dependabot[bot]'
-    labels: ['dependencies']
+    labels: ['dependencies:maven']
     includes:
       - '*'
 
-  # NPM dependencies - all can be merged after successful build
   - author: 'dependabot[bot]'
-    labels: ['dependencies']
+    labels: ['dependencies:gradle']
     includes:
       - '*'
 
@@ -28,4 +29,7 @@ auto-merge-rules:
     labels: ['dependencies:github-action']
     includes:
       - 'actions/*'
+      - 'github-actions group'
 
+# Note: 3rd party GitHub Actions (not actions/*) are NOT allowlisted - they require manual review.
+# Note: Docker image updates are NOT allowlisted - CI does not exercise docker-compose files.
