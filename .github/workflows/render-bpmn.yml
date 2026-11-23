@@ -2,6 +2,7 @@ name: Render BPMN diagrams
 
 on:
   push:
+    branches: [main]
     paths:
       - '**/*.bpmn'
   workflow_dispatch:
@@ -26,6 +27,11 @@ jobs:
 
       - name: Install bpmn-to-image
         run: npm install -g bpmn-to-image@0.10.0  # zizmor: ignore[adhoc-packages] pinned CLI used only for rendering
+
+      # Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor, which
+      # breaks the Chromium sandbox used by bpmn-to-image (puppeteer).
+      - name: Allow Chromium sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
       - name: Render BPMN files to PNG
         run: bash scripts/render-bpmn.sh
