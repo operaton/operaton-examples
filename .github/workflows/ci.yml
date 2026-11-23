@@ -77,8 +77,10 @@ jobs:
       - id: cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ~/.m2/repository
-          key: maven-${{ hashFiles('**/pom.xml') }}
+          path: |
+            ~/.m2/repository
+            ~/.m2/wrapper
+          key: maven-${{ hashFiles('**/pom.xml', '**/maven-wrapper.properties') }}
           restore-keys: maven-
       - name: Resolve dependencies and plugins of all examples
         if: steps.cache.outputs.cache-hit != 'true'
@@ -108,8 +110,10 @@ jobs:
           java-version: 21
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ~/.m2/repository
-          key: maven-${{ hashFiles('**/pom.xml') }}
+          path: |
+            ~/.m2/repository
+            ~/.m2/wrapper
+          key: maven-${{ hashFiles('**/pom.xml', '**/maven-wrapper.properties') }}
           restore-keys: maven-
       - name: Build and test (Maven)
         working-directory: examples/${{ matrix.example }}
