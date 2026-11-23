@@ -35,8 +35,8 @@ updates:
     schedule:
       interval: "daily"
       time: "01:10"
-    cooldown:  # zizmor: ignore[dependabot-cooldown] Operaton and Spring Boot patches wanted immediately (examples track releases)
-      default-days: 3
+    cooldown:  # Operaton and Spring Boot patches are wanted immediately (examples track releases)
+      default-days: 7
       exclude:
         - "org.operaton*"
         - "org.springframework.boot*"
@@ -75,8 +75,8 @@ updates:
     schedule:
       interval: "daily"
       time: "01:10"
-    cooldown:  # zizmor: ignore[dependabot-cooldown] Operaton and Spring Boot patches wanted immediately (examples track releases)
-      default-days: 3
+    cooldown:  # Operaton and Spring Boot patches are wanted immediately (examples track releases)
+      default-days: 7
       exclude:
         - "org.operaton*"
         - "org.springframework.boot*"
