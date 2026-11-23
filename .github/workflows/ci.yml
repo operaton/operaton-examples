@@ -66,6 +66,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      # Maven Central rate-limits (HTTP 429) when ~50 jobs resolve at once,
+      # e.g. for Dependabot PRs that change every POM (dependency cache miss).
+      max-parallel: 8
       matrix:
         example: ${{ fromJson(needs.discover.outputs.maven-examples) }}
     name: ${{ matrix.example }} (maven)
@@ -79,11 +82,10 @@ jobs:
       - name: Build and test (Maven)
         working-directory: examples/${{ matrix.example }}
         env:
-          # ~50 parallel jobs download from Maven Central at once; retry
-          # transient transfer failures (incl. 429/503) instead of failing.
+          # Retry transient Maven Central transfer failures (incl. 429/5xx).
           MAVEN_ARGS: >-
             -Daether.connector.http.retryHandler.count=5
-            -Daether.connector.http.retryHandler.interval=10000
+            -Daether.connector.http.retryHandler.interval=15000
             -Daether.connector.http.retryHandler.serviceUnavailable=429,500,502,503,504
         run: ./mvnw -B -ntp verify
 
