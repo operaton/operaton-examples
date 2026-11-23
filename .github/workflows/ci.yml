@@ -78,6 +78,13 @@ jobs:
           cache: maven
       - name: Build and test (Maven)
         working-directory: examples/${{ matrix.example }}
+        env:
+          # ~50 parallel jobs download from Maven Central at once; retry
+          # transient transfer failures (incl. 429/503) instead of failing.
+          MAVEN_ARGS: >-
+            -Daether.connector.http.retryHandler.count=5
+            -Daether.connector.http.retryHandler.interval=10000
+            -Daether.connector.http.retryHandler.serviceUnavailable=429,500,502,503,504
         run: ./mvnw -B -ntp verify
 
   build-gradle:
