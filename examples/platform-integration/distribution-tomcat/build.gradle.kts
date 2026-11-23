@@ -43,3 +43,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.war {
+    archiveFileName = "distribution-tomcat.war"
+}

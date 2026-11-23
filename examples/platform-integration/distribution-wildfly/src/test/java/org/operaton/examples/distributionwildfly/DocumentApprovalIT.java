@@ -47,7 +47,7 @@ class DocumentApprovalIT {
         .withEnv("DB_PASSWORD", "operaton")
         .withEnv("DB_DRIVER", "org.postgresql.Driver")
         .withCopyFileToContainer(
-            MountableFile.forHostPath("target/distribution-wildfly-0.1.0-SNAPSHOT.war"),
+            MountableFile.forHostPath("target/distribution-wildfly.war"),
             "/operaton/standalone/deployments/document-approval.war"
         )
         .withExposedPorts(8080)

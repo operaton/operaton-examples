@@ -26,4 +26,4 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./target/distribution-tomcat-0.1.0-SNAPSHOT.war:/operaton/webapps/document-approval.war
+      - ./target/distribution-tomcat.war:/operaton/webapps/document-approval.war
