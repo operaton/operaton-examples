@@ -26,7 +26,7 @@ val testcontainersVersion = "2.0.5"
 
 dependencies {
     // Spring Boot BOM provides Spring Framework 7.x version management
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
+    implementation(enforcedPlatform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
     compileOnly(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
     compileOnly("org.operaton.bpm:operaton-engine")
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")

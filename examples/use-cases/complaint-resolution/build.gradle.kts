@@ -21,7 +21,7 @@ repositories {
 val operatonVersion = "2.1.6"
 
 dependencies {
-    implementation(platform(SpringBootPlugin.BOM_COORDINATES))
+    implementation(enforcedPlatform(SpringBootPlugin.BOM_COORDINATES))
     implementation(platform("org.operaton.bpm:operaton-bom:$operatonVersion"))
     testImplementation(platform("org.testcontainers:testcontainers-bom:2.0.5"))
 
