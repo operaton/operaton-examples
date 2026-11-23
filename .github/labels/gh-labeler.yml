@@ -1,0 +1,70 @@
+# Path-based PR label rules for actions/labeler
+# Negative globs (!pattern) exclude paths within a match set.
+# sync-labels: true in the workflow removes stale labels automatically.
+
+lang:java:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*.java'
+
+lang:bpmn:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*.bpmn'
+    - '**/*.dmn'
+    - '**/*.form'
+
+documentation:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*.md'
+    - 'docs/**'
+
+scope:build:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/.mvn/**'
+    - '**/mvnw'
+    - '**/mvnw.cmd'
+    - '**/pom.xml'
+    - '**/gradle/**'
+    - '**/gradlew'
+    - '**/gradlew.bat'
+    - '**/*.gradle.kts'
+    - 'scripts/**'
+
+scope:ci:
+- changed-files:
+  - any-glob-to-any-file:
+    - '.github/**'
+
+scope:docker:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/Dockerfile'
+    - '**/docker-compose*.yml'
+
+scope:tests:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/src/test/**'
+
+scope:core-examples:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'examples/core-examples/**'
+
+scope:advanced-features:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'examples/advanced-features/**'
+
+scope:platform-integration:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'examples/platform-integration/**'
+
+scope:use-cases:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'examples/use-cases/**'
