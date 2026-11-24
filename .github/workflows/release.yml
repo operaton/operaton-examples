@@ -1,0 +1,202 @@
+name: Release
+
+# Releases the examples repository: sets the repository version in every
+# example (pom.xml and build.gradle.kts), commits and tags it, creates the
+# GitHub release and moves main to the next development version.
+#
+# Triggered manually or by scheduled-release.yml after each Operaton release.
+# Pull requests that change the release automation run it as a dry run.
+
+on:
+  workflow_dispatch:
+    inputs:
+      next_version:
+        description: 'The next development version (without -SNAPSHOT). Leave empty to increment the minor version.'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry-Run: build, commit and tag locally, but push nothing and create no release'
+        type: boolean
+        required: true
+        default: true
+  pull_request:
+    paths:
+      - .github/workflows/release.yml
+      - .github/workflows/scheduled-release.yml
+      - .github/scripts/set-project-version.sh
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read  # look up the CI result of the release commit
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      next_version: ${{ steps.version.outputs.next_version }}
+      dry_run: ${{ steps.mode.outputs.dry_run }}
+    steps:
+      - name: Determine mode
+        id: mode
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$INPUT_DRY_RUN" = "false" ]; then
+            if [ "$REF_NAME" != "main" ]; then
+              echo "::error::Releases are made from main only, not from '$REF_NAME'."
+              exit 1
+            fi
+            dry_run=false
+          else
+            dry_run=true
+          fi
+          echo "dry_run=$dry_run" >> "$GITHUB_OUTPUT"
+          echo "Dry run: $dry_run" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Compute release and next development version
+        id: version
+        env:
+          INPUT_NEXT_VERSION: ${{ inputs.next_version }}
+        run: |
+          set -euo pipefail
+          current=$(./mvnw -B -q -N help:evaluate -Dexpression=project.version -DforceStdout 2>/dev/null | tail -n 1)
+          if [[ ! "$current" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-SNAPSHOT$ ]]; then
+            echo "::error::Project version '$current' is not of the form X.Y.Z-SNAPSHOT."
+            exit 1
+          fi
+          version="${current%-SNAPSHOT}"
+          if [ -n "$INPUT_NEXT_VERSION" ]; then
+            next="$INPUT_NEXT_VERSION"
+          else
+            next="${BASH_REMATCH[1]}.$((BASH_REMATCH[2] + 1)).0"
+          fi
+          if [[ ! "$next" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Next version '$next' is not of the form X.Y.Z."
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null; then
+            echo "::error::Tag v$version already exists."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "next_version=$next" >> "$GITHUB_OUTPUT"
+          echo "Releasing $version, next development version $next-SNAPSHOT" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Require a green CI build of the release commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          DRY_RUN: ${{ steps.mode.outputs.dry_run }}
+        run: |
+          set -euo pipefail
+          # Any successful CI run of the commit on main counts: push events, or
+          # workflow_dispatch after auto-merge (GITHUB_TOKEN merges don't push).
+          green=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$SHA&branch=main&status=success&per_page=1" \
+            --jq '.total_count')
+          if [ "$green" -gt 0 ]; then conclusion=success; else conclusion=none; fi
+          echo "Successful CI runs for $SHA on main: $green"
+          if [ "$conclusion" != "success" ]; then
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "::warning::CI of $SHA is '$conclusion'; a real release would stop here."
+            else
+              echo "::error::CI of $SHA is '$conclusion'. Only commits with a green CI build on main are released."
+              exit 1
+            fi
+          fi
+
+  release:
+    name: Perform Release
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    permissions:
+      contents: write  # push the release commits and tag, create the GitHub release
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      NEXT_VERSION: ${{ needs.prepare.outputs.next_version }}-SNAPSHOT
+      DRY_RUN: ${{ needs.prepare.outputs.dry_run }}
+    steps:
+      - name: Check out the code  # zizmor: ignore[artipacked] credentials are needed to push the release commits and tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up JDK
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Configure git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Set release version
+        run: .github/scripts/set-project-version.sh "$VERSION"
+
+      - name: Validate all example builds
+        # Resolves and validates every example's POM with the release version.
+        # The examples themselves are built and tested by CI on the release commit.
+        run: ./mvnw -B -ntp validate
+
+      - name: Commit and tag release
+        run: |
+          git commit -q -am "chore(release): Releasing version $VERSION"
+          git tag -a "v$VERSION" -m "Operaton Examples $VERSION"
+
+      - name: Set next development version
+        run: |
+          .github/scripts/set-project-version.sh "$NEXT_VERSION"
+          git commit -q -am "[releng] Bump version to $NEXT_VERSION"
+
+      - name: Write release notes header
+        run: |
+          set -euo pipefail
+          pom="examples/core-examples/getting-started/pom.xml"
+          operaton=$(git show "v$VERSION:$pom" | sed -n 's:.*<operaton.version>\(.*\)</operaton.version>.*:\1:p')
+          boot=$(git show "v$VERSION:$pom" | sed -n 's:.*<spring-boot.version>\(.*\)</spring-boot.version>.*:\1:p')
+          {
+            echo "Operaton examples built and tested against **Operaton $operaton** and **Spring Boot $boot**."
+            echo
+            echo "Every example under \`examples/\` is a self-contained Maven and Gradle project; download the source archive below and build any example on its own."
+          } > release-notes.md
+          cat release-notes.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Show result
+        run: |
+          git log --oneline -3
+          git show --stat --format='%h %s' "v$VERSION" | tail -n 3
+
+      - name: Push release commits and tag
+        if: env.DRY_RUN == 'false'
+        run: git push --atomic origin HEAD:main "refs/tags/v$VERSION"
+
+      - name: Create GitHub release
+        if: env.DRY_RUN == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v$VERSION" --verify-tag --latest \
+            --title "Operaton Examples $VERSION" \
+            --notes-file release-notes.md --generate-notes

@@ -45,7 +45,10 @@ examples/NN-short-name/
   (`01-getting-started` → `gettingstarted`).
 - Maven coordinates: groupId `org.operaton.examples`,
   artifactId = directory name without ordinal (`getting-started`),
-  version `0.1.0-SNAPSHOT`.
+  version = the repository version of the root `pom.xml` (e.g.
+  `0.1.0-SNAPSHOT`). All examples share it; it is set only by the Release
+  workflow (`.github/scripts/set-project-version.sh`). Never reference the
+  version in file names — use `<finalName>${project.artifactId}</finalName>`.
 - Ordinals are permanent: never renumber existing examples; a new example
   takes the next free ordinal even if it breaks thematic grouping.
 

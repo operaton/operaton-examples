@@ -51,3 +51,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.war {
+    archiveFileName = "distribution-wildfly.war"
+}
