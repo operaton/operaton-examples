@@ -21,7 +21,7 @@ repositories {
 }
 
 val springBootVersion = "4.1.3"
-val operatonVersion = "2.1.6"
+val operatonVersion = "2.2.2"
 val testcontainersVersion = "2.0.5"
 
 dependencies {
