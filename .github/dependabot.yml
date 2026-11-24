@@ -63,11 +63,11 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
       - dependency-name: "org.operaton*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+        update-types: ["version-update:semver-major"]
       - dependency-name: "org.springframework.boot*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+        update-types: ["version-update:semver-major"]
       - dependency-name: "io.quarkus*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "gradle"
     directories:
@@ -98,12 +98,6 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-      - dependency-name: "org.operaton*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "org.springframework.boot*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "io.quarkus*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: "docker-compose"
     directories:
