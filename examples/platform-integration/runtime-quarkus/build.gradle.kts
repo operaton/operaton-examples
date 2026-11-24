@@ -17,7 +17,7 @@ repositories {
 }
 
 val quarkusVersion = "3.33.2.1"
-val operatonVersion = "2.1.2"
+val operatonVersion = "2.1.6"
 
 dependencies {
     implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))

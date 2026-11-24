@@ -18,7 +18,7 @@ repositories {
     mavenCentral()
 }
 
-val operatonVersion = "2.1.1"
+val operatonVersion = "2.1.6"
 
 dependencies {
     implementation(enforcedPlatform(SpringBootPlugin.BOM_COORDINATES))
