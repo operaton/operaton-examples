@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "4.0.10"
+    id("org.springframework.boot") version "4.2.0"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -14,7 +14,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.10")
+        mavenBom("org.springframework.boot:spring-boot-dependencies:4.2.0")
         mavenBom("org.operaton.bpm:operaton-bom:2.2.2")
         mavenBom("software.amazon.awssdk:bom:2.59.2")
     }
