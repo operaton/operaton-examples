@@ -20,7 +20,7 @@ repositories {
     mavenCentral()
 }
 
-val springBootVersion = "4.1.0"
+val springBootVersion = "4.1.3"
 val operatonVersion = "2.1.6"
 val testcontainersVersion = "2.0.5"
 
