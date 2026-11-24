@@ -11,6 +11,7 @@ jobs:
     name: Auto-merge eligible PRs
     runs-on: ubuntu-latest
     permissions:
+      actions: write  # dispatch CI on main after merging
       contents: write
       pull-requests: write
     steps:
@@ -20,6 +21,7 @@ jobs:
           persist-credentials: false
 
       - name: Collect and merge eligible PRs
+        id: merge
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -336,6 +338,7 @@ jobs:
             console.log(`\n\n🎯 Summary: ${eligiblePRs.length} PR(s) eligible for auto-merge`);
 
             // Approve and merge eligible PRs
+            let mergedCount = 0;
             for (const pr of eligiblePRs) {
               console.log(`\n🚀 Processing PR #${pr.number}: ${pr.title}`);
 
@@ -387,10 +390,21 @@ jobs:
                 });
 
                 console.log(`  ✅ Successfully merged PR #${pr.number} using squash`);
+                mergedCount++;
 
               } catch (error) {
                 console.log(`  ❌ Error processing PR #${pr.number}: ${error.message}`);
               }
             }
 
+            core.setOutput('merged', mergedCount);
             console.log(`\n✨ Auto-merge workflow completed`);
+
+      # Merges made with GITHUB_TOKEN do not trigger push workflows, so build
+      # the resulting main explicitly.
+      - name: Build main after merging
+        if: steps.merge.outputs.merged != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: gh workflow run ci.yml --repo "$REPO" --ref main

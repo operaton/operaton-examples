@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Dispatched by auto-merge.yml: merges made with GITHUB_TOKEN do not
+  # trigger push events, so main would otherwise go unbuilt.
+  workflow_dispatch:
 
 permissions: {}
 
