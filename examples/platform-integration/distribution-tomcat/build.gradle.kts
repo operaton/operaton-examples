@@ -20,7 +20,7 @@ repositories {
     mavenCentral()
 }
 
-val operatonVersion = "2.1.2"
+val operatonVersion = "2.1.6"
 val testcontainersVersion = "2.0.5"
 
 dependencies {
