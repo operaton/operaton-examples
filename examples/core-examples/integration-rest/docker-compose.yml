@@ -15,7 +15,7 @@ services:
       retries: 10
 
   wiremock:
-    image: wiremock/wiremock:3.5.4
+    image: wiremock/wiremock:3.13.2-3
     container_name: integration-rest-wiremock
     ports:
       - "8090:8080"
