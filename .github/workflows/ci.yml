@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Dispatched by auto-merge.yml: merges made with GITHUB_TOKEN do not
+  # trigger push events, so main would otherwise go unbuilt.
+  workflow_dispatch:
+
+permissions: {}
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -12,18 +17,24 @@ concurrency:
 jobs:
   discover:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       maven-examples: ${{ steps.discover.outputs.maven }}
       gradle-examples: ${{ steps.discover.outputs.gradle }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - id: discover
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            base_ref="origin/${{ github.base_ref }}"
+          if [ "$EVENT_NAME" == "pull_request" ]; then
+            base_ref="origin/$BASE_REF"
           else
             base_ref="origin/main"
           fi
@@ -66,11 +77,15 @@ jobs:
   # (deduplicated, seeded from the previous cache) for the matrix jobs.
   maven-cache:
     needs: discover
+    permissions:
+      contents: read
     if: needs.discover.outputs.maven-examples != '[]'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: 21
@@ -80,8 +95,8 @@ jobs:
           path: |
             ~/.m2/repository
             ~/.m2/wrapper
-          key: maven-v2-${{ hashFiles('**/pom.xml', '**/maven-wrapper.properties') }}
-          restore-keys: maven-v2-
+          key: maven-v3-${{ hashFiles('**/pom.xml', '**/maven-wrapper.properties') }}
+          restore-keys: maven-v3-
       - name: Resolve dependencies and plugins of all examples
         if: steps.cache.outputs.cache-hit != 'true'
         env:
@@ -92,10 +107,27 @@ jobs:
         # Best effort: anything missed is downloaded by the build job itself.
         # dependency:resolve uses the build's own resolution (incl. dependency
         # management); go-offline resolves unmanaged transitive versions.
-        run: ./mvnw -B -ntp -fae dependency:resolve dependency:resolve-plugins || echo "::warning::Some dependencies could not be resolved up front"
+        # Surefire/Failsafe resolve their JUnit Platform provider only at test
+        # time, so fetch the providers for all effective plugin versions too.
+        run: |
+          ./mvnw -B -ntp -fae dependency:resolve dependency:resolve-plugins \
+            || echo "::warning::Some dependencies could not be resolved up front"
+          ./mvnw -B -ntp -q -fae help:effective-pom -Doutput="$RUNNER_TEMP/effective-pom.xml" || true
+          versions=$(grep -A1 -E '<artifactId>maven-(surefire|failsafe)-plugin</artifactId>' "$RUNNER_TEMP/effective-pom.xml" \
+            | sed -n 's:.*<version>\(.*\)</version>.*:\1:p' | sort -u)
+          for v in $versions; do
+            ./mvnw -B -ntp -q -N dependency:get -Dartifact="org.apache.maven.surefire:surefire-junit-platform:$v" \
+              || echo "::warning::Could not resolve surefire-junit-platform $v"
+          done
+          for v in $(ls ~/.m2/repository/org/junit/platform/junit-platform-engine/ 2>/dev/null); do
+            ./mvnw -B -ntp -q -N dependency:get -Dartifact="org.junit.platform:junit-platform-launcher:$v" \
+              || echo "::warning::Could not resolve junit-platform-launcher $v"
+          done
 
   build-maven:
     needs: [discover, maven-cache]
+    permissions:
+      contents: read
     if: needs.discover.outputs.maven-examples != '[]'
     runs-on: ubuntu-latest
     strategy:
@@ -105,8 +137,10 @@ jobs:
         example: ${{ fromJson(needs.discover.outputs.maven-examples) }}
     name: ${{ matrix.example }} (maven)
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: 21
@@ -115,8 +149,8 @@ jobs:
           path: |
             ~/.m2/repository
             ~/.m2/wrapper
-          key: maven-v2-${{ hashFiles('**/pom.xml', '**/maven-wrapper.properties') }}
-          restore-keys: maven-v2-
+          key: maven-v3-${{ hashFiles('**/pom.xml', '**/maven-wrapper.properties') }}
+          restore-keys: maven-v3-
       - name: Build and test (Maven)
         working-directory: examples/${{ matrix.example }}
         env:
@@ -125,10 +159,29 @@ jobs:
             -Daether.connector.http.retryHandler.count=5
             -Daether.connector.http.retryHandler.interval=15000
             -Daether.connector.http.retryHandler.serviceUnavailable=429,500,502,503,504
-        run: ./mvnw -B -ntp verify
+        # Surefire/Failsafe resolve their test providers only at test time, so
+        # the warm cache cannot hold them. If the build fails on a Maven
+        # Central transfer error (e.g. HTTP 429), wait and retry with -U, which
+        # bypasses the cached resolution failure. Test failures fail at once.
+        run: |
+          set -o pipefail
+          for attempt in 1 2 3; do
+            flags=""; [ "$attempt" -gt 1 ] && flags="-U"
+            if ./mvnw -B -ntp $flags verify 2>&1 | tee "$RUNNER_TEMP/build.log"; then
+              exit 0
+            fi
+            if ! grep -q "Could not transfer artifact" "$RUNNER_TEMP/build.log"; then
+              exit 1
+            fi
+            echo "::warning::Maven Central transfer failure (attempt $attempt), retrying in 60 s"
+            sleep 60
+          done
+          exit 1
 
   build-gradle:
     needs: discover
+    permissions:
+      contents: read
     if: needs.discover.outputs.gradle-examples != '[]'
     runs-on: ubuntu-latest
     strategy:
@@ -136,8 +189,10 @@ jobs:
       matrix:
         example: ${{ fromJson(needs.discover.outputs.gradle-examples) }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: 21

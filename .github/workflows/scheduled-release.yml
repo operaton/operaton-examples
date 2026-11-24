@@ -1,0 +1,97 @@
+name: Scheduled Release
+
+# Releases main once a month, on the Monday after the Operaton release Friday.
+# Operaton publishes its monthly releases on the second-to-last Friday of the
+# month (https://operaton.org/roadmap/). Dependabot picks up the new Operaton
+# version right away (no cooldown for org.operaton*), the auto-merge workflow
+# merges it after a green build, and this workflow releases three days later.
+#
+# main is released when
+#   - three days ago was the Operaton release Friday, and
+#   - it has commits since the last release, i.e. its HEAD is not the
+#     "[releng] Bump version to ..." commit written by the Release workflow.
+#
+# Pull requests changing this workflow run the date check against known dates
+# and evaluate main without dispatching anything.
+
+on:
+  schedule:
+    # Every Monday at 05:17 UTC; the job only proceeds on the Monday after the
+    # second-to-last Friday of the month (cron cannot express that directly).
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dispatch the Release workflow in dry-run mode'
+        type: boolean
+        required: true
+        default: true
+  pull_request:
+    paths:
+      - .github/workflows/scheduled-release.yml
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: Dispatch release
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write  # dispatch release.yml
+      contents: read
+    steps:
+      - name: Dispatch Release workflow for main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          # Scheduled runs are real releases; manual runs default to dry-run;
+          # pull requests never dispatch.
+          DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || inputs.dry_run }}
+        run: |
+          set -euo pipefail
+
+          # Release Friday = second-to-last Friday of the month: one more Friday
+          # follows within the same month, but not two.
+          is_release_friday() {
+            local friday=$1 month
+            month=$(date -u -d "$friday" +%m)
+            [ "$(date -u -d "$friday + 7 days" +%m)" = "$month" ] \
+              && [ "$(date -u -d "$friday + 14 days" +%m)" != "$month" ]
+          }
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            # Self-test of the date logic against known release Fridays
+            for d in 2026-10-23 2026-11-20 2026-12-18 2027-01-22 2027-04-23; do
+              is_release_friday "$d" || { echo "::error::$d should be a release Friday"; exit 1; }
+            done
+            for d in 2026-10-30 2026-11-13 2026-11-27 2026-12-25 2027-01-29; do
+              ! is_release_friday "$d" || { echo "::error::$d should not be a release Friday"; exit 1; }
+            done
+            echo "Date logic self-test passed."
+          elif [ "$EVENT_NAME" = "schedule" ]; then
+            friday=$(date -u -d '3 days ago' +%F)
+            if ! is_release_friday "$friday"; then
+              echo "$friday was not the Operaton release Friday, nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "$friday was the Operaton release Friday, releasing."
+          fi
+
+          head_message=$(gh api "repos/$REPO/commits/main" --jq '.commit.message' | head -n 1)
+          if [[ "$head_message" == "[releng] Bump version to "* ]]; then
+            echo "No changes on main since the last release (HEAD: '$head_message'), skipping." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            echo "main has changes since the last release; a scheduled run would dispatch release.yml." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "Dispatching release of main (dry_run=$DRY_RUN)" | tee -a "$GITHUB_STEP_SUMMARY"
+          gh workflow run release.yml --repo "$REPO" --ref main -f dry_run="$DRY_RUN"

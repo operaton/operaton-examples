@@ -1,0 +1,7 @@
+# Title-based PR label rules for TimonVS/pr-labeler-action
+# Patterns are matched case-insensitively against the PR title.
+# Primarily targets Dependabot bump PRs.
+
+integration:spring-boot: ['*spring-boot*', '*Spring Boot*', '*SpringBoot*']
+
+integration:operaton: ['*org.operaton*', '*operaton-bom*']

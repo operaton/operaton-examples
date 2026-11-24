@@ -14,7 +14,7 @@ services:
       retries: 10
 
   wildfly:
-    image: operaton/wildfly:2.1.1
+    image: operaton/wildfly:2.2.1
     depends_on:
       postgres:
         condition: service_healthy
@@ -24,6 +24,6 @@ services:
       DB_PASSWORD: operaton
       DB_DRIVER: org.postgresql.Driver
     volumes:
-      - ./target/distribution-wildfly-0.1.0-SNAPSHOT.war:/operaton/standalone/deployments/document-approval.war
+      - ./target/distribution-wildfly.war:/operaton/standalone/deployments/document-approval.war
     ports:
       - "8080:8080"

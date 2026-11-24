@@ -1,0 +1,124 @@
+# GitHub labels for operaton-examples (modeled after operaton/operaton)
+# Format: https://github.com/crazy-max/ghaction-github-labeler
+# Synced to the repository by .github/workflows/sync-labels.yml on pushes to main.
+
+# Issue type
+- name: "bug"
+  color: "#d73a4a"
+  description: "Something isn't working"
+
+- name: "enhancement"
+  color: "#a2eeef"
+  description: "New feature or request"
+
+- name: "documentation"
+  color: "#0075ca"
+  description: "Improvements or additions to documentation"
+
+- name: "question"
+  color: "#d876e3"
+  description: "Further information is requested"
+
+# Community
+- name: "good first issue"
+  color: "#7057ff"
+  description: "Good for newcomers"
+
+- name: "help wanted"
+  color: "#008672"
+  description: "Extra attention is needed"
+
+# Resolution
+- name: "duplicate"
+  color: "#cfd3d7"
+  description: "This issue or pull request already exists"
+
+- name: "invalid"
+  color: "#e4e669"
+  description: "This doesn't seem right"
+
+- name: "wontfix"
+  color: "#ffffff"
+  description: "This will not be worked on"
+
+# Release
+- name: "released"
+  color: "#8ddd84"
+  description: "Issue has been released"
+
+# Language
+- name: "lang:java"
+  color: "#ffa221"
+  description: "Pull requests that update Java code"
+
+- name: "lang:bpmn"
+  color: "#ffa221"
+  description: "Pull requests that update BPMN, DMN or form models"
+
+# Default labels Dependabot applies to security update PRs
+- name: "java"
+  color: "#ffa221"
+  description: "Pull requests that update Java code"
+
+# Dependencies
+- name: "dependencies"
+  color: "#0366d6"
+  description: "Changes that update a dependency"
+
+- name: "dependencies:maven"
+  color: "#0366d6"
+  description: "Updates of Maven dependencies"
+
+- name: "dependencies:gradle"
+  color: "#0366d6"
+  description: "Updates of Gradle dependencies"
+
+- name: "dependencies:github-action"
+  color: "#0366d6"
+  description: "Updates of GitHub actions"
+
+- name: "dependencies:docker"
+  color: "#0366d6"
+  description: "Updates of Docker and docker-compose images"
+
+# Integration
+- name: "integration:spring-boot"
+  color: "#ec6de6"
+  description: "Spring Boot dependencies"
+
+- name: "integration:operaton"
+  color: "#ec6de6"
+  description: "Operaton BPM dependencies"
+
+# Scope
+- name: "scope:build"
+  color: "#FEF1B4"
+  description: "Changes affecting the build, e.g. Maven/Gradle configuration, wrappers, shell scripts"
+
+- name: "scope:ci"
+  color: "#FEF1B4"
+  description: "Changes to CI/CD, GitHub Actions workflows and release automation"
+
+- name: "scope:tests"
+  color: "#FEF1B4"
+  description: "Changes to tests"
+
+- name: "scope:docker"
+  color: "#FEF1B4"
+  description: "Changes to Docker or docker-compose files"
+
+- name: "scope:core-examples"
+  color: "#C2E0C6"
+  description: "examples/core-examples: core BPMN/DMN concepts"
+
+- name: "scope:advanced-features"
+  color: "#C2E0C6"
+  description: "examples/advanced-features: engine extension and API examples"
+
+- name: "scope:platform-integration"
+  color: "#C2E0C6"
+  description: "examples/platform-integration: runtimes, distributions and integrations"
+
+- name: "scope:use-cases"
+  color: "#C2E0C6"
+  description: "examples/use-cases: business use-case examples"

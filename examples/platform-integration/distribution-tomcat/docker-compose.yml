@@ -14,7 +14,7 @@ services:
       retries: 5
 
   tomcat:
-    image: operaton/tomcat:2.1.1
+    image: operaton/tomcat:2.2.1
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/operaton
       DB_USERNAME: operaton
@@ -26,4 +26,4 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./target/distribution-tomcat-0.1.0-SNAPSHOT.war:/operaton/webapps/document-approval.war
+      - ./target/distribution-tomcat.war:/operaton/webapps/document-approval.war
