@@ -15,7 +15,7 @@ services:
       start_period: 5s
 
   wiremock:
-    image: wiremock/wiremock:3.5.4
+    image: wiremock/wiremock:3.13.2-3
     ports:
       - "8089:8080"
     volumes:

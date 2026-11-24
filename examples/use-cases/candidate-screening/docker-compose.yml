@@ -39,7 +39,7 @@ services:
     restart: "no"
 
   calendar-stub:
-    image: wiremock/wiremock:3.5.4
+    image: wiremock/wiremock:3.13.2-3
     container_name: candidate-screening-calendar
     ports:
       - "8090:8080"

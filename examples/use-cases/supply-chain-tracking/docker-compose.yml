@@ -15,7 +15,7 @@ services:
       retries: 10
 
   kafka:
-    image: apache/kafka:3.8.0
+    image: apache/kafka:3.9.2
     container_name: supply-chain-tracking-kafka
     ports:
       - "9092:9092"
