@@ -1,4 +1,4 @@
-FROM operaton/operaton:2.1.1
+FROM operaton/operaton:2.2.1
 ARG PLUGIN_VERSION=2.1.0
 
 # ADD from a URL creates the file as root:root 600, so switch to root first,
