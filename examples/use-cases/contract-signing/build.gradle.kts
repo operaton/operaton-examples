@@ -15,7 +15,7 @@ repositories {
 dependencyManagement {
     imports {
         mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.10")
-        mavenBom("org.operaton.bpm:operaton-bom:2.1.6")
+        mavenBom("org.operaton.bpm:operaton-bom:2.2.2")
         mavenBom("software.amazon.awssdk:bom:2.59.2")
     }
 }
