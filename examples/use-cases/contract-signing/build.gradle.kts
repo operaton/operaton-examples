@@ -1,7 +1,7 @@
 plugins {
     java
     id("org.springframework.boot") version "4.0.10"
-    id("io.spring.dependency-management") version "1.1.4"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "org.operaton.examples"
@@ -16,7 +16,7 @@ dependencyManagement {
     imports {
         mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.10")
         mavenBom("org.operaton.bpm:operaton-bom:2.1.6")
-        mavenBom("software.amazon.awssdk:bom:2.29.0")
+        mavenBom("software.amazon.awssdk:bom:2.59.2")
     }
 }
 
@@ -36,7 +36,7 @@ dependencies {
     implementation("software.amazon.awssdk:s3")
 
     // PDF Processing
-    implementation("org.apache.pdfbox:pdfbox:3.0.7")
+    implementation("org.apache.pdfbox:pdfbox:3.0.8")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -45,7 +45,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.awaitility:awaitility")
-    testImplementation("io.rest-assured:rest-assured:5.4.0")
+    testImplementation("io.rest-assured:rest-assured:5.5.7")
 }
 
 tasks.named<Test>("test") {
