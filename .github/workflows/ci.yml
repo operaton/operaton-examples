@@ -125,7 +125,24 @@ jobs:
             -Daether.connector.http.retryHandler.count=5
             -Daether.connector.http.retryHandler.interval=15000
             -Daether.connector.http.retryHandler.serviceUnavailable=429,500,502,503,504
-        run: ./mvnw -B -ntp verify
+        # Surefire/Failsafe resolve their test providers only at test time, so
+        # the warm cache cannot hold them. If the build fails on a Maven
+        # Central transfer error (e.g. HTTP 429), wait and retry with -U, which
+        # bypasses the cached resolution failure. Test failures fail at once.
+        run: |
+          set -o pipefail
+          for attempt in 1 2 3; do
+            flags=""; [ "$attempt" -gt 1 ] && flags="-U"
+            if ./mvnw -B -ntp $flags verify 2>&1 | tee "$RUNNER_TEMP/build.log"; then
+              exit 0
+            fi
+            if ! grep -q "Could not transfer artifact" "$RUNNER_TEMP/build.log"; then
+              exit 1
+            fi
+            echo "::warning::Maven Central transfer failure (attempt $attempt), retrying in 60 s"
+            sleep 60
+          done
+          exit 1
 
   build-gradle:
     needs: discover
