@@ -27,7 +27,7 @@ dependencies {
     testImplementation("io.rest-assured:rest-assured:5.5.7")
     testImplementation("org.assertj:assertj-core:3.27.7")
     testImplementation("org.awaitility:awaitility:4.3.0")
-    testImplementation("org.slf4j:slf4j-simple:2.0.18")
+    testImplementation("org.slf4j:slf4j-simple:2.0.20")
 }
 
 tasks.test {
