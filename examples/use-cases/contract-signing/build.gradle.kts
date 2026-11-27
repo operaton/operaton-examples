@@ -16,7 +16,7 @@ dependencyManagement {
     imports {
         mavenBom("org.springframework.boot:spring-boot-dependencies:4.2.0")
         mavenBom("org.operaton.bpm:operaton-bom:2.2.2")
-        mavenBom("software.amazon.awssdk:bom:2.59.4")
+        mavenBom("software.amazon.awssdk:bom:2.59.5")
     }
 }
 
